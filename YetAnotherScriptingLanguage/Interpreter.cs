@@ -27,10 +27,10 @@ namespace YetAnotherScriptingLanguage
                 switch (word.Value)
                 {
                     case ("If"): 
-                        Interpreter.Functions.Add("If", new IfProcess());
+                        Interpreter.Functions.Add("If", new IfProcess("",new TokensList(),0));
                         break;
                     case ("While"):
-                        Interpreter.Functions.Add("While", new WhileProcess());
+                        Interpreter.Functions.Add("While", new WhileProcess("", new TokensList(), 0));
                         break;
                     case ("Print"):
                         Interpreter.Functions.Add("Print", new PrintProcess());
@@ -45,7 +45,7 @@ namespace YetAnotherScriptingLanguage
                         Interpreter.Functions.Add("Variable", new VariableProcess());
                         break;
                     case ("For"):
-                        Interpreter.Functions.Add("For", new ForProcess());
+                        Interpreter.Functions.Add("For", new ForProcess("", new TokensList(), 0));
                         break;
                     case ("Import"):
                         Interpreter.Functions.Add("Import", new ImportProcess());

@@ -45,8 +45,19 @@ namespace YetAnotherScriptingLanguage
                             while (nextChar != '\'' && i + 1 < TranslationCode.Length)
                             {
                                 nextChar = TranslationCode[++i];
-                                currentWord.Append(nextChar); 
+                                currentWord.Append(nextChar);
                             }
+                        }
+                        else if (currentChar == '/' && nextChar == '/')
+                        {
+                            currentWord.Append(TranslationCode[++i]);
+                            Tokens.Add(new Token(currentWord.ToString()));
+                            currentWord.Clear();
+                            do
+                            {
+                                nextChar = TranslationCode[++i];
+                                currentWord.Append(nextChar);
+                            } while (nextChar != '\n');
                         }
                     }
                     Tokens.Add(new Token(currentWord.ToString()));

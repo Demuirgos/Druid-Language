@@ -18,6 +18,11 @@ namespace YetAnotherScriptingLanguage
         {
             index++;
         }
+        public static bool IsValid(TokensList expression)
+        {
+
+            return true;
+        }
         public static object Evaluate(TokensList expression)
         {
             throw new Exception("Not yet implemented");
@@ -34,12 +39,12 @@ namespace YetAnotherScriptingLanguage
 
     class Node
     {
-        public Node(object value, Action action)
+        public Node(variables.Variable value, Action action)
         {
             Value = value;
             Operation = action;
         }
         public Action Operation { get; }
-        public object Value { get; set; }
+        public variables.Variable Value { get; set; }
     }
 }

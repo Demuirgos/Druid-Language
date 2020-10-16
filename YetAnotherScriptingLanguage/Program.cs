@@ -10,6 +10,7 @@ namespace YetAnotherScriptingLanguage
                 "variable a:integer\n" +
                 "a := 23\n" +
                 "variable the_truth:word\n" +
+                "//TESTING COMMENTS\n" +
                 "the_truth:='23 is a prime'\n" +
                 "if ( a <> 2 ) then\n" +
                 "{\n" +

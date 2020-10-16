@@ -57,6 +57,9 @@
         <keyword key="Else"     map="Else"       Mode="All"/>
         <keyword key="Elif"     map="Elif"       Mode="All"/>
         <keyword key="While"    map="While"      Mode="All"/>
+        <keyword key="To"       map="To"         Mode="All"/>
+        <keyword key="From"     map="From"       Mode="All"/>
+        <keyword key="Do"       map="Do"         Mode="All"/>
         <keyword key="For"      map="For"        Mode="All"/>
         <keyword key="Set"      map="Set"        Mode="All"/>
         <keyword key="Print"    map="Print"      Mode="All"/>
@@ -85,8 +88,11 @@
         <keyword map="Else"     key="Sinon"      Mode="All"/>
         <keyword map="Elif"     key="Sinon_Si"   Mode="All"/>
         <keyword map="While"    key="Tant_que"   Mode="All"/>
+        <keyword key="A"        map="To"         Mode="All"/>
+        <keyword key="De"       map="From"       Mode="All"/>
         <keyword map="For"      key="Pour"       Mode="All"/>
         <keyword map="Set"      key="Affecter"   Mode="All"/>
+        <keyword map="Do"       key="Fait"       Mode="All"/>
         <keyword map="Print"    key="Ecrire"     Mode="All"/>
         <keyword map="Read"     key="Lire"       Mode="All"/>
         <keyword map="Function" key="Fonction"   Mode="All"/>
@@ -108,11 +114,14 @@
         <keyword key="Start"      map="Begin"      Mode="All"/>
         <keyword key="Ende"       map="End "       Mode="All"/>
         <keyword map="If"         key="Wenn"       Mode="All"/>
-        <keyword key="dann"       map="Then"       Mode="All"/>
+        <keyword key="Dann"       map="Then"       Mode="All"/>
         <keyword map="Else"       key="Sonst"      Mode="All"/>
         <keyword map="Elif"       key="Sonst_wenn" Mode="All"/>
         <keyword map="While"      key="Während"    Mode="All"/>
+        <keyword map="Do"         key="tun"        Mode="All"/>
         <keyword map="For"        key="für"        Mode="All"/>
+        <keyword key="Bis"        map="To"         Mode="All"/>
+        <keyword key="Von"        map="From"       Mode="All"/>
         <keyword map="Set"        key="Setzen"     Mode="All"/>
         <keyword map="Print"      key="Drucken"    Mode="All"/>
         <keyword map="Read"       key="Lesen"      Mode="All"/>
@@ -120,9 +129,9 @@
         <keyword map="Variable"   key="Variable"   Mode="All"/>
         <keyword key="Continue"   map="Fortsetzen" Mode="All"/>
         <keyword key="Geben"      map="Return"     Mode="All"/>
-        <keyword key="halt"       map="Break"      Mode="All"/>
+        <keyword key="Halt"       map="Break"      Mode="All"/>
        
-        <keyword key="einschließen" map="Import"   Mode="OOP"/>
+        <keyword key="Einschließen" map="Import"   Mode="OOP"/>
         <keyword key="Typ"        map="Type"       Mode="OOP"/>
         <keyword map="Function"   key="Method"     Mode="OOP"/>
       </lang>
