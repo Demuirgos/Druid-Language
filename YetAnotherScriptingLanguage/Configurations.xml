@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings>
+  <Current>
+    <configuration value="Default"/>
+  </Current>
+  <Default>
+    <language Name="Eng"          />
+    <Mode     Name="Both"         />
+  </Default>
+  <Custom>
+    <language Name="Eng"          />
+    <Mode     Name="Procedural"   />
+  </Custom>
+  <Modes>
+    <Mode     value="Procedural"  />
+    <Mode     value="ObjectBased" />
+    <Mode     value="Both"        />
+  </Modes>
+  <Localizations>
+    <lang Name="Slang">
+        <keyword key="bool"     map="Boolean"    Mode="All"/>
+        <keyword key="float"    map="Decimal"    Mode="All"/>
+        <keyword key="list"     map="Array"      Mode="All"/>
+        <keyword key="string"   map="Word"       Mode="All"/>
+
+        <keyword key="{"        map="Begin"      Mode="All"/>
+        <keyword key="}"        map="End"        Mode="All"/>
+        <keyword key="if"       map="If"         Mode="All"/>
+        <keyword key="Then"     map="Then"       Mode="All"/>
+        <keyword key="else"     map="Else"       Mode="All"/>
+        <keyword key="elif"     map="Elif"       Mode="All"/>
+        <keyword key="while"    map="While"      Mode="All"/>
+        <keyword key="for"      map="For"        Mode="All"/>
+        <keyword key="set"      map="Set"        Mode="All"/>
+        <keyword key="print"    map="Print"      Mode="All"/>
+        <keyword key="read"     map="Read"       Mode="All"/>
+        <keyword key="def"      map="Function"   Mode="All"/>
+        <keyword key="var"      map="Variable"   Mode="All"/>
+        <keyword key="continue" map="Continue"   Mode="All"/>
+        <keyword key="break"    map="Break"      Mode="All"/>
+        <keyword key="return"   map="Return"     Mode="All"/>
+
+        <keyword key="include"  map="Import"     Mode="OOP"/>
+        <keyword key="class"    map="Type"       Mode="OOP"/>
+        <keyword key="member"   map="Method"     Mode="OOP"/>
+      </lang>
+      <lang Name="Eng">
+        <keyword key="Boolean"  map="Boolean"    Mode="All"/>
+        <keyword key="Decimal"  map="Decimal"    Mode="All"/>
+        <keyword map="Array"    key="Array"      Mode="All"/>
+        <keyword key="Word"     map="Word"       Mode="All"/>
+
+        <keyword key="Begin"    map="Begin"      Mode="All"/>
+        <keyword key="End"      map="End"        Mode="All"/>
+        <keyword key="If"       map="If"         Mode="All"/>
+        <keyword key="Then"     map="Then"       Mode="All"/>
+        <keyword key="Else"     map="Else"       Mode="All"/>
+        <keyword key="Elif"     map="Elif"       Mode="All"/>
+        <keyword key="While"    map="While"      Mode="All"/>
+        <keyword key="For"      map="For"        Mode="All"/>
+        <keyword key="Set"      map="Set"        Mode="All"/>
+        <keyword key="Print"    map="Print"      Mode="All"/>
+        <keyword key="Read"     map="Read"       Mode="All"/>
+        <keyword key="Function" map="Function"   Mode="All"/>
+        <keyword key="Variable" map="Variable"   Mode="All"/>
+        <keyword key="Continue" map="Continue"   Mode="All"/>
+        <keyword key="Break"    map="Break"      Mode="All"/>
+        <keyword key="Return"   map="Return"     Mode="All"/>
+
+        <keyword key="Include"  map="Import"     Mode="OOP"/>
+        <keyword key="Type"     map="Type"       Mode="OOP"/>
+        <keyword key="Class"    map="Type"       Mode="OOP"/>
+        <keyword key="Function" map="Method"     Mode="OOP"/>
+      </lang> 
+      <lang Name="Fr">
+        <keyword map="Boolean"  key="Booleén"    Mode="All"/>
+        <keyword map="Decimal"  key="Reél"       Mode="All"/>
+        <keyword map="Word"     key="Mot"        Mode="All"/>
+        <keyword map="Array"    key="Tableau"    Mode="All"/>
+        
+        <keyword key="Debut"    map="Begin"      Mode="All"/>
+        <keyword key="Fin"      map="End"        Mode="All"/>
+        <keyword map="If"       key="Si"         Mode="All"/>
+        <keyword key="Donc"     map="Then"       Mode="All"/>
+        <keyword map="Else"     key="Sinon"      Mode="All"/>
+        <keyword map="Elif"     key="Sinon_Si"   Mode="All"/>
+        <keyword map="While"    key="Tant_que"   Mode="All"/>
+        <keyword map="For"      key="Pour"       Mode="All"/>
+        <keyword map="Set"      key="Affecter"   Mode="All"/>
+        <keyword map="Print"    key="Ecrire"     Mode="All"/>
+        <keyword map="Read"     key="Lire"       Mode="All"/>
+        <keyword map="Function" key="Fonction"   Mode="All"/>
+        <keyword map="Variable" key="Variable"   Mode="All"/>
+        <keyword key="Continue" map="Continue"   Mode="All"/>
+        <keyword key="Arret"    map="Break"      Mode="All"/>
+        <keyword key="Retourne" map="Return"     Mode="All"/>
+
+        <keyword key="Inclure"  map="Import"     Mode="OOP"/>
+        <keyword map="Type"     key="Type"       Mode="OOP"/>
+        <keyword map="Function" key="Methode"    Mode="OOP"/>
+      </lang>
+      <lang Name="Gr">
+        <keyword map="Boolean"    key="Boolescher" Mode="All"/>
+        <keyword map="Decimal"    key="Dezimal"    Mode="All"/>
+        <keyword map="Word"       key="Wort"       Mode="All"/>
+        <keyword map="Array"      key="Table"      Mode="All"/>
+      
+        <keyword key="Start"      map="Begin"      Mode="All"/>
+        <keyword key="Ende"       map="End "       Mode="All"/>
+        <keyword map="If"         key="Wenn"       Mode="All"/>
+        <keyword key="dann"       map="Then"       Mode="All"/>
+        <keyword map="Else"       key="Sonst"      Mode="All"/>
+        <keyword map="Elif"       key="Sonst_wenn" Mode="All"/>
+        <keyword map="While"      key="Während"    Mode="All"/>
+        <keyword map="For"        key="für"        Mode="All"/>
+        <keyword map="Set"        key="Setzen"     Mode="All"/>
+        <keyword map="Print"      key="Drucken"    Mode="All"/>
+        <keyword map="Read"       key="Lesen"      Mode="All"/>
+        <keyword map="Function"   key="Funktion"   Mode="All"/>
+        <keyword map="Variable"   key="Variable"   Mode="All"/>
+        <keyword key="Continue"   map="Fortsetzen" Mode="All"/>
+        <keyword key="Geben"      map="Return"     Mode="All"/>
+        <keyword key="halt"       map="Break"      Mode="All"/>
+       
+        <keyword key="einschließen" map="Import"   Mode="OOP"/>
+        <keyword key="Typ"        map="Type"       Mode="OOP"/>
+        <keyword map="Function"   key="Method"     Mode="OOP"/>
+      </lang>
+  </Localizations>
+  <symbols>
+    <symbol map="START_ARG"     key="("          Mode="All"/>
+    <symbol map="END_ARG"       key=")"          Mode="All"/>
+    <symbol map="START_ARRAY"   key="["          Mode="All"/>
+    <symbol map="END_ARRAY"     key="]"          Mode="All"/>
+    <symbol map="END_LINE"      key="\n"         Mode="All"/>
+    <symbol map="NEXT_ARG"      key=","          Mode="All"/>
+    <symbol map="QUOTE"         key="'"          Mode="All"/>
+    <symbol map="IDEN"          key=":"          Mode="All"/>
+    <symbol map="SPACE"         key=" "          Mode="All"/>
+    <symbol map="START_Block"   key="{"          Mode="All"/>
+    <symbol map="END_Block"     key="}"          Mode="All"/>
+    <symbol map="END_STATEMENT" key=";"          Mode="All"/>
+    <symbol map="COMMENT"       key="//"         Mode="All"/>
+    <symbol map="EMPTY"         key="\0"         Mode="All"/>
+  </symbols>
+  <operators>
+    <symbol map="ASSIGNMENT"    key=":="         Mode="All"/>
+    <symbol map="AND"           key="&amp;"      Mode="All"/>
+    <symbol map="OR"            key="|"          Mode="All"/>
+    <symbol map="NOT"           key="!"          Mode="All"/>
+    <symbol map="EQUAL"         key="="          Mode="All"/>
+    <symbol map="DIFF"          key="&lt;&gt;"   Mode="All"/>
+    <symbol map="LESS"          key="&lt;"       Mode="All"/>
+    <symbol map="GREATER"       key="&gt;"       Mode="All"/>
+    <symbol map="MOD"           key="%"          Mode="All"/>
+    <symbol map="ACCESS"        key="->"         Mode="OOP"/>
+  </operators>
+</Settings>
