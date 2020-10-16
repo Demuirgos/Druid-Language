@@ -55,7 +55,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("",null,"");
+            return new variables.Variable("",null,variables.type.Invalid);
         }
     }
 
@@ -67,7 +67,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
@@ -79,7 +79,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
@@ -88,7 +88,7 @@ namespace YetAnotherScriptingLanguage
         public ImportProcess(string name = "Import") : base(name) { }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
@@ -97,7 +97,7 @@ namespace YetAnotherScriptingLanguage
         public ClassProcess(string name = "Class") : base(name) { }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("",null,"");
+            return new variables.Variable("",null, variables.type.Invalid);
         }
     }
 
@@ -106,25 +106,7 @@ namespace YetAnotherScriptingLanguage
         public FunctionProcess(string name = "Function") : base(name) { }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("",null,"");
-        }
-    }
-
-    class PrintProcess : Function
-    {
-        public PrintProcess(string name = "Print") : base(name) { }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
-        {
-            return new variables.Variable("",null,"");
-        }
-    }
-
-    class ReadProcess : Function
-    {
-        public ReadProcess(string name = "Read") : base(name) { }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
-        {
-            return new variables.Variable("",null,"");
+            return new variables.Variable("",null, variables.type.Invalid);
         }
     }
 
@@ -133,7 +115,7 @@ namespace YetAnotherScriptingLanguage
         public ReturnProcess(string name = "Return") : base(name) { }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
@@ -142,11 +124,40 @@ namespace YetAnotherScriptingLanguage
         public VariableProcess(string name = "Variable") : base(name) { }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
-    class MathProcess     : Function
+    class ArgumentedProcess : Function
+    {
+        public List<variables.Variable> Arguments { get; set; }
+        public ArgumentedProcess(string name = "Print") : base(name) { }
+        public void getArgs()
+        {
+
+        }
+    }
+
+    class PrintProcess : ArgumentedProcess
+    {
+        public PrintProcess(string name = "Print") : base(name) { }
+        protected override variables.Variable Evaluate(TokensList data, int idx)
+        {
+            return new variables.Variable("",null, variables.type.Invalid);
+        }
+    }
+
+    class ReadProcess : ArgumentedProcess
+    {
+        public ReadProcess(string name = "Read") : base(name) { }
+        protected override variables.Variable Evaluate(TokensList data, int idx)
+        {
+            return new variables.Variable("",null, variables.type.Invalid);
+        }
+    }
+
+
+    class MathProcess     : ArgumentedProcess
     {
         static Dictionary<string, double> Canstants;
         static Dictionary<string, Func<double, double>> UnaryFunctions;
@@ -181,7 +192,16 @@ namespace YetAnotherScriptingLanguage
 
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("", null, "");
+            int argsCount = this.Arguments.Count;
+            if(argsCount == 1)
+            {
+                return new variables.Variable("",UnaryFunctions[this.Name](Convert.ToDouble(Arguments[0].Value)), variables.type.Decimal);
+            }
+            else if(argsCount == 2)
+            {
+                return new variables.Variable("", DualFunctions[this.Name](Convert.ToDouble(Arguments[0].Value), Convert.ToDouble(Arguments[1].Value)), variables.type.Decimal) ;
+            }
+            throw new Exception("Argument Mismatch");
         }
     }
 }

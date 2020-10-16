@@ -8,21 +8,21 @@ namespace YetAnotherScriptingLanguage
     {
         public Action(String action)
         {
-            Operation = action;
+            Operator = action;
         }
-        public String Operation { get;}
+        public String Operator { get;}
         public Boolean isValidAction {
-            get => this.Operation == "*"  || this.Operation == "/"  || 
-                   this.Operation == "+"  || this.Operation == "-"  ||
-                   this.Operation == "|"  || this.Operation == "&"  ||
-                   this.Operation == "<"  || this.Operation == ">"  ||
-                   this.Operation == "<>" || this.Operation == "="  ||
-                   this.Operation == ":=" || this.Operation == "^"  ;
+            get => this.Operator == "*"  || this.Operator == "/"  || 
+                   this.Operator == "+"  || this.Operator == "-"  ||
+                   this.Operator == "|"  || this.Operator == "&"  ||
+                   this.Operator == "<"  || this.Operator == ">"  ||
+                   this.Operator == "<>" || this.Operator == "="  ||
+                   this.Operator == ":=" || this.Operator == "^"  ;
         }
         public Int16 Priority
         {
             get {
-                switch (this.Operation)
+                switch (this.Operator)
                 {
                     case "^" : return 10; 
                     case "*" :  
