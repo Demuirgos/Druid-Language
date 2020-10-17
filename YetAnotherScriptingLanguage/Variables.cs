@@ -11,6 +11,7 @@ namespace YetAnotherScriptingLanguage
             Word,
             Decimal,
             Boolean,
+            Void,
             Invalid
         }
         class Variables<T>

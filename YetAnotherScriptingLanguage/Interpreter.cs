@@ -11,6 +11,8 @@ namespace YetAnotherScriptingLanguage
         private Parser main;
         private static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         private static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
+        public TokensList tokens { get; set; }
+        public int index = 0; 
         public Interpreter(string script)
         {
             _script = script;
@@ -18,6 +20,7 @@ namespace YetAnotherScriptingLanguage
         }
         public void Initialize()
         {
+            Local = new TranslationUnit(_script);
             main = new Parser(Local.Tokens);
         }
         public void SetUp(KeyWords dictionary)
@@ -27,10 +30,10 @@ namespace YetAnotherScriptingLanguage
                 switch (word.Value)
                 {
                     case ("If"): 
-                        Interpreter.Functions.Add("If", new IfProcess("",new TokensList(),0));
+                        Interpreter.Functions.Add("If", new IfProcess());
                         break;
                     case ("While"):
-                        Interpreter.Functions.Add("While", new WhileProcess("", new TokensList(), 0));
+                        Interpreter.Functions.Add("While", new WhileProcess());
                         break;
                     case ("Print"):
                         Interpreter.Functions.Add("Print", new PrintProcess());
@@ -45,7 +48,7 @@ namespace YetAnotherScriptingLanguage
                         Interpreter.Functions.Add("Variable", new VariableProcess());
                         break;
                     case ("For"):
-                        Interpreter.Functions.Add("For", new ForProcess("", new TokensList(), 0));
+                        Interpreter.Functions.Add("For", new ForProcess());
                         break;
                     case ("Import"):
                         Interpreter.Functions.Add("Import", new ImportProcess());

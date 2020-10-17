@@ -6,6 +6,11 @@ namespace YetAnotherScriptingLanguage
 {
     class Function
     {
+        public enum type
+        {
+            procedure,
+            function
+        }
         public Function()
         {
             Implimentation = this;
@@ -23,21 +28,22 @@ namespace YetAnotherScriptingLanguage
             }
         }
         protected virtual variables.Variable Evaluate(TokensList data,int idx) => throw new Exception("Not Implemented");
+        protected virtual void Process(TokensList data, int idx) => throw new Exception("Not Implemented");
+        public type Type { get; set; }
         public Function Implimentation { get; set; }
         public String Name { get; set; }
-        public TokensList tokens { get; set; }
-        public int index ;
+        public TokensList Body { get; set; }
+        public List<variables.type> Signature { get; set; }
     }
 
     class ConditionalProcess : Function 
     {
         private TokensList condition;
         public Token delimiter { get; set; }
-        internal ConditionalProcess(string name,TokensList list, int idx) : base(name) {
-            tokens = list;
-            index = idx;
+        internal ConditionalProcess(string name) : base(name) {
+            Type = type.procedure;
         }
-        private void ConditionToken() {
+        private void ConditionToken(TokensList tokens, int index) {
             condition = new TokensList();
             while(tokens[index].IsKeyword != delimiter.Word)
             {
@@ -49,79 +55,102 @@ namespace YetAnotherScriptingLanguage
 
     class IfProcess         : ConditionalProcess
     {
-        public IfProcess(string name, TokensList tokens, int idx) : base(name, tokens, idx) {
-            Name = "If";
+        public IfProcess(string name  = "If") : base(name)
+        {
             delimiter = new Token("Then");
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override void Process(TokensList data, int idx)
         {
-            return new variables.Variable("",null,variables.type.Invalid);
+            
         }
     }
 
     class WhileProcess      : ConditionalProcess
     {
-        public WhileProcess(string name , TokensList tokens, int idx) : base(name, tokens,idx) {
-            Name = "While";
+        public WhileProcess(string name = "While") : base(name)
+        {
             delimiter = new Token("Do");
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override void Process(TokensList data, int idx)
         {
-            return new variables.Variable("", null, variables.type.Invalid);
+             
         }
     }
 
     class ForProcess        : WhileProcess
     {
-        public ForProcess(string name, TokensList tokens, int idx) : base(name, tokens, idx)
+        public ForProcess(string name = "For") : base(name)
         {
-            Name = "For";
+            Type = type.procedure;
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override void Process(TokensList data, int idx)
         {
-            return new variables.Variable("", null, variables.type.Invalid);
+            
         }
     }
 
     class ImportProcess     : Function
     {
-        public ImportProcess(string name = "Import") : base(name) { }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        public ImportProcess(string name = "Import") : base(name)
         {
-            return new variables.Variable("", null, variables.type.Invalid);
+            Type = type.procedure;
+        }
+        protected override void Process(TokensList data, int idx)
+        {
+
         }
     }
 
     class ClassProcess : Function
     {
-        public ClassProcess(string name = "Class") : base(name) { }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        public ClassProcess(string name = "Class") : base(name)
         {
-            return new variables.Variable("",null, variables.type.Invalid);
+            Type = type.procedure;
+        }
+        protected override void Process(TokensList data, int idx)
+        {
+
         }
     }
 
     class FunctionProcess : Function
     {
-        public FunctionProcess(string name = "Function") : base(name) { }
+        public FunctionProcess(string name = "Function") : base(name)
+        { 
+            Type = type.function;
+        }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
             return new variables.Variable("",null, variables.type.Invalid);
         }
     }
 
+    class SpacedProcess : Function
+    {
+        public SpacedProcess(string name) : base(name)
+        { 
+            Type = type.function;
+        }
+    }
+
     class ReturnProcess : Function
     {
-        public ReturnProcess(string name = "Return") : base(name) { }
+        public ReturnProcess(string name = "Return") : base(name)
+        {
+            Type = type.function;
+        }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
             return new variables.Variable("", null, variables.type.Invalid);
         }
     }
 
-    class VariableProcess : Function
+    class VariableProcess : SpacedProcess
     {
-        public VariableProcess(string name = "Variable") : base(name) { }
+        public VariableProcess(string name = "Variable") : base(name)
+        {
+            Type = type.function;
+        }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
             return new variables.Variable("", null, variables.type.Invalid);
@@ -130,9 +159,9 @@ namespace YetAnotherScriptingLanguage
 
     class ArgumentedProcess : Function
     {
+        public ArgumentedProcess(string name) : base(name) { }
         public List<variables.Variable> Arguments { get; set; }
-        public ArgumentedProcess(string name = "Print") : base(name) { }
-        public void getArgs()
+        public void getArgs(TokensList tokens,int index)
         {
 
         }
@@ -140,33 +169,39 @@ namespace YetAnotherScriptingLanguage
 
     class PrintProcess : ArgumentedProcess
     {
-        public PrintProcess(string name = "Print") : base(name) { }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        public PrintProcess(string name = "Print") : base(name)
         {
-            return new variables.Variable("",null, variables.type.Invalid);
+            Type = type.procedure;
+        }
+        protected override void Process(TokensList data, int idx)
+        {
+            foreach (var arg in Arguments)
+                Console.Write(arg.Value);
         }
     }
 
     class ReadProcess : ArgumentedProcess
     {
-        public ReadProcess(string name = "Read") : base(name) { }
+        public ReadProcess(string name = "Read") : base(name)
+        {
+            Type = type.function;
+        }
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
-            return new variables.Variable("",null, variables.type.Invalid);
+            Console.Write(Arguments[0].Value);
+            return new variables.Variable("", Console.ReadLine(), variables.type.Word);
         }
     }
 
 
     class MathProcess     : ArgumentedProcess
     {
-        static Dictionary<string, double> Canstants;
-        static Dictionary<string, Func<double, double>> UnaryFunctions;
-        static Dictionary<string, Func<double, double, double>> DualFunctions;
-
-        public MathProcess(string name) : base(name) {
-            Canstants = new Dictionary<string, double>();
-            UnaryFunctions = new Dictionary<string, Func<double, double>>();
-            DualFunctions = new Dictionary<string, Func<double, double, double>>();
+        static Dictionary<string, double> Canstants = new Dictionary<string, double>();
+        static Dictionary<string, Func<double, double>> UnaryFunctions = new Dictionary<string, Func<double, double>>();
+        static Dictionary<string, Func<double, double, double>> DualFunctions = new Dictionary<string, Func<double, double, double>>();
+        static Random rnd = new Random();
+        public MathProcess(string name) : base(name)
+        {
             SetUpCanstants(); SetUpUnaries(); SetUpDuals();
         }
 
@@ -174,6 +209,7 @@ namespace YetAnotherScriptingLanguage
         {
             DualFunctions.Add("pow", Math.Pow); DualFunctions.Add("max", Math.Max); DualFunctions.Add("min", Math.Min);
             DualFunctions.Add("Log_b", Math.Log); DualFunctions.Add("round", (double x,double n) => Math.Floor(x * Math.Pow(10, n) + 0.5) / Math.Pow(10, n));
+            DualFunctions.Add("rand", (double x, double n) => { return rnd.NextDouble() + rnd.Next((int)x,(int)n); });
         }
 
         private void SetUpUnaries()
@@ -193,7 +229,11 @@ namespace YetAnotherScriptingLanguage
         protected override variables.Variable Evaluate(TokensList data, int idx)
         {
             int argsCount = this.Arguments.Count;
-            if(argsCount == 1)
+            if(argsCount == 0)
+            {
+                return new variables.Variable("", Canstants[this.Name], variables.type.Decimal);
+            }
+            else if(argsCount == 1)
             {
                 return new variables.Variable("",UnaryFunctions[this.Name](Convert.ToDouble(Arguments[0].Value)), variables.type.Decimal);
             }

@@ -36,12 +36,14 @@
         <keyword key="read"     map="Read"       Mode="All"/>
         <keyword key="def"      map="Function"   Mode="All"/>
         <keyword key="var"      map="Variable"   Mode="All"/>
+        <keyword key=":"        map="OfType"     Mode="All"/>
         <keyword key="continue" map="Continue"   Mode="All"/>
         <keyword key="break"    map="Break"      Mode="All"/>
         <keyword key="return"   map="Return"     Mode="All"/>
 
         <keyword key="include"  map="Import"     Mode="OOP"/>
         <keyword key="class"    map="Type"       Mode="OOP"/>
+        <keyword key="New"      map="Make"       Mode="OOP"/>
         <keyword key="member"   map="Method"     Mode="OOP"/>
       </lang>
       <lang Name="Eng">
@@ -66,11 +68,13 @@
         <keyword key="Read"     map="Read"       Mode="All"/>
         <keyword key="Function" map="Function"   Mode="All"/>
         <keyword key="Variable" map="Variable"   Mode="All"/>
+        <keyword key="As"       map="OfType"     Mode="All"/>
         <keyword key="Continue" map="Continue"   Mode="All"/>
         <keyword key="Break"    map="Break"      Mode="All"/>
         <keyword key="Return"   map="Return"     Mode="All"/>
-
-        <keyword key="Include"  map="Import"     Mode="OOP"/>
+        <keyword key="Include"  map="Import"     Mode="All"/>
+        
+        <keyword key="Create"   map="Make"       Mode="OOP"/>
         <keyword key="Type"     map="Type"       Mode="OOP"/>
         <keyword key="Class"    map="Type"       Mode="OOP"/>
         <keyword key="Function" map="Method"     Mode="OOP"/>
@@ -100,8 +104,9 @@
         <keyword key="Continue" map="Continue"   Mode="All"/>
         <keyword key="Arret"    map="Break"      Mode="All"/>
         <keyword key="Retourne" map="Return"     Mode="All"/>
-
-        <keyword key="Inclure"  map="Import"     Mode="OOP"/>
+        <keyword key="Inclure"  map="Import"     Mode="All"/>
+        
+        <keyword key="Crée"     map="Make"       Mode="OOP"/>
         <keyword map="Type"     key="Type"       Mode="OOP"/>
         <keyword map="Function" key="Methode"    Mode="OOP"/>
       </lang>
@@ -127,11 +132,13 @@
         <keyword map="Read"       key="Lesen"      Mode="All"/>
         <keyword map="Function"   key="Funktion"   Mode="All"/>
         <keyword map="Variable"   key="Variable"   Mode="All"/>
+        <keyword key="Comme"      map="OfType"     Mode="All"/>
         <keyword key="Continue"   map="Fortsetzen" Mode="All"/>
         <keyword key="Geben"      map="Return"     Mode="All"/>
         <keyword key="Halt"       map="Break"      Mode="All"/>
-       
-        <keyword key="Einschließen" map="Import"   Mode="OOP"/>
+        <keyword key="Einschließen" map="Import"   Mode="All"/>
+        
+        <keyword key="Machen"     map="Make"       Mode="OOP"/>
         <keyword key="Typ"        map="Type"       Mode="OOP"/>
         <keyword map="Function"   key="Method"     Mode="OOP"/>
       </lang>

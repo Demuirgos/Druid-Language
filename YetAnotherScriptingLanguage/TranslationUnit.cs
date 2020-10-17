@@ -26,6 +26,6 @@ namespace YetAnotherScriptingLanguage
         public String Code { get; set; }
         private static Stack<Block> levels = new Stack<Block>();
         public static Stack<Block> ExecutionStack => levels;
-        public Block CurrentBlock => levels.Peek();
+        public static Block CurrentBlock => levels.Peek();
     }
 }
