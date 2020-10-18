@@ -17,7 +17,8 @@ namespace YetAnotherScriptingLanguage
                    this.Operator == "|"  || this.Operator == "&"  ||
                    this.Operator == "<"  || this.Operator == ">"  ||
                    this.Operator == "<>" || this.Operator == "="  ||
-                   this.Operator == ":=" || this.Operator == "^"  ;
+                   this.Operator == ":=" || this.Operator == "^"  ||
+                   this.Operator == "%";
         }
         public Int16 Priority
         {

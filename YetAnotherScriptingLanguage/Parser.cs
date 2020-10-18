@@ -43,6 +43,27 @@ namespace YetAnotherScriptingLanguage
                     case "-":
                         left.Value -= right.Value;
                         break;
+                    case "%":
+                        left.Value %= right.Value;
+                        break;
+                    case "<":
+                        left.Value = new variables.Variable(left.Value < right.Value, variables.type.Boolean);
+                        break;
+                    case ">":
+                        left.Value = new variables.Variable(left.Value > right.Value, variables.type.Boolean);
+                        break;
+                    case "EQUAL":
+                        left.Value = new variables.Variable(left.Value == right.Value,variables.type.Boolean);
+                        break;
+                    case "Diff":
+                        left.Value = new variables.Variable(left.Value != right.Value, variables.type.Boolean);
+                        break;
+                    case "And":
+                        left.Value = new variables.Variable(left.Value & right.Value, variables.type.Boolean);
+                        break;
+                    case "Or":
+                        left.Value = new variables.Variable(left.Value | right.Value, variables.type.Boolean);
+                        break;
                 }
                 left.Operation = right.Operation;
             };

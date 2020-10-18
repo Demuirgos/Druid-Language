@@ -170,6 +170,44 @@ namespace YetAnotherScriptingLanguage
                 throw new Exception("Operation Undefined >(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
 
+            public static bool operator &(Variable left, Variable right)
+            {
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Boolean:
+                            return (bool)left.Value && (bool)right.Value;
+                    }
+                throw new Exception("Operation Undefined &(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
+
+            public static bool operator |(Variable left, Variable right)
+            {
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Boolean:
+                            return (bool)left.Value || (bool)right.Value;
+                    }
+                throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
+
+            public static variables.Variable operator %(Variable left, Variable right)
+            {
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Decimal:
+                            double lhs = (double)left.Value;
+                            double rhs = (double)right.Value;
+                            if (lhs == Math.Truncate(lhs) && rhs==Math.Truncate(rhs))
+                                return new Variable((int)left.Value % (int)right.Value,type.Decimal);
+                            else
+                                throw new Exception("Operation % Takes ( integer , integer )");
+                    }
+                throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
+
             public override type Type { get; set; }
         }
         class Array<T>

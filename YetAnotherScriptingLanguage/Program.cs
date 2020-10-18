@@ -7,9 +7,9 @@ namespace YetAnotherScriptingLanguage
         static void Main(string[] args)
         {
             TranslationUnit unit = new TranslationUnit(
-                "variable a:integer\n" +
+                "variable a as integer\n" +
                 "a := 23*(15+16)\n" +
-                "variable the_truth:word\n" +
+                "variable the_truth as word\n" +
                 "//TESTING COMMENTS\n" +
                 "the_truth:='23 is a prime'\n" +
                 "if ( a <> 2 ) then\n" +
@@ -18,7 +18,7 @@ namespace YetAnotherScriptingLanguage
                 "}\n");
             foreach (var token in unit.Tokens)
             {
-                if(token.Word!= "\n" && token.Word!=" ")
+                if(token.IsKeyword!= "END_STATEMENT" && token.IsKeyword!= "SPACE")
                     Console.WriteLine(token.Word);
             }
         }

@@ -82,7 +82,6 @@
         <keyword key="Create"   map="Make"       Mode="OOP"/>
         <keyword key="Type"     map="Type"       Mode="OOP"/>
         <keyword key="Class"    map="Type"       Mode="OOP"/>
-        <keyword key="Function" map="Method"     Mode="OOP"/>
       </lang> 
       <lang Name="Fr">
         <keyword map="Boolean"  key="Booleén"    Mode="All"/>
@@ -116,7 +115,6 @@
         
         <keyword key="Crée"     map="Make"       Mode="OOP"/>
         <keyword map="Type"     key="Type"       Mode="OOP"/>
-        <keyword map="Function" key="Methode"    Mode="OOP"/>
       </lang>
       <lang Name="Gr">
         <keyword map="Boolean"    key="Boolescher" Mode="All"/>
@@ -151,7 +149,6 @@
         
         <keyword key="Machen"     map="Make"       Mode="OOP"/>
         <keyword key="Typ"        map="Type"       Mode="OOP"/>
-        <keyword map="Function"   key="Method"     Mode="OOP"/>
       </lang>
   </Localizations>
   <symbols>
@@ -159,24 +156,20 @@
     <symbol map="END_ARG"       key=")"          Mode="All"/>
     <symbol map="START_ARRAY"   key="["          Mode="All"/>
     <symbol map="END_ARRAY"     key="]"          Mode="All"/>
-    <symbol map="END_LINE"      key="\n"         Mode="All"/>
     <symbol map="NEXT_ARG"      key=","          Mode="All"/>
     <symbol map="QUOTE"         key="'"          Mode="All"/>
-    <symbol map="IDEN"          key=":"          Mode="All"/>
     <symbol map="SPACE"         key=" "          Mode="All"/>
     <symbol map="START_Block"   key="{"          Mode="All"/>
     <symbol map="END_Block"     key="}"          Mode="All"/>
-    <symbol map="END_STATEMENT" key=";"          Mode="All"/>
+    <symbol map="END_STATEMENT" key="&#10;"      Mode="All"/>
+    <symbol map="END_STATEMENT" key="&#13;"      Mode="All"/>
     <symbol map="COMMENT"       key="//"         Mode="All"/>
     <symbol map="EMPTY"         key="\0"         Mode="All"/>
   </symbols>
-  <operators>
+  <operators isOverloadable="False">
     <symbol map="ASSIGNMENT"    key=":="         Mode="All"/>
     <symbol map="EQUAL"         key="="          Mode="All"/>
     <symbol map="DIFF"          key="&lt;&gt;"   Mode="All"/>
-    <symbol map="LESS"          key="&lt;"       Mode="All"/>
-    <symbol map="GREATER"       key="&gt;"       Mode="All"/>
-    <symbol map="MOD"           key="%"          Mode="All"/>
     <symbol map="ACCESS"        key="->"         Mode="OOP"/>
   </operators>
 </Settings>

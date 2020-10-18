@@ -11,6 +11,15 @@ namespace YetAnotherScriptingLanguage
         private Parser main;
         private static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         private static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
+        private static KeyWords keywords;
+        public static KeyWords Keywords { 
+            get
+            {
+                if(keywords==null)
+                    keywords = new KeyWords();
+                return keywords;
+            }
+        }
         public TokensList tokens { get; set; }
         public int index = 0; 
         public Interpreter(string script)
@@ -22,6 +31,7 @@ namespace YetAnotherScriptingLanguage
         {
             Local = new TranslationUnit(_script);
             main = new Parser(Local.Tokens);
+            keywords = new KeyWords();
         }
         public void SetUp(KeyWords dictionary)
         {
