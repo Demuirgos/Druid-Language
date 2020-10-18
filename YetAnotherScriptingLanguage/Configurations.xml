@@ -22,7 +22,9 @@
         <keyword key="float"    map="Decimal"    Mode="All"/>
         <keyword key="list"     map="Array"      Mode="All"/>
         <keyword key="string"   map="Word"       Mode="All"/>
-
+        <keyword map="AND"      key="&amp;"      Mode="All"/>
+        <keyword map="OR"       key="|"          Mode="All"/>
+        <keyword map="NOT"      key="!"          Mode="All"/>
         <keyword key="{"        map="Begin"      Mode="All"/>
         <keyword key="}"        map="End"        Mode="All"/>
         <keyword key="if"       map="If"         Mode="All"/>
@@ -52,6 +54,9 @@
         <keyword map="Array"    key="Array"      Mode="All"/>
         <keyword key="Word"     map="Word"       Mode="All"/>
 
+        <keyword map="AND"      key="And"        Mode="All"/>
+        <keyword map="OR"       key="Or"         Mode="All"/>
+        <keyword map="NOT"      key="Not"        Mode="All"/>
         <keyword key="Begin"    map="Begin"      Mode="All"/>
         <keyword key="End"      map="End"        Mode="All"/>
         <keyword key="If"       map="If"         Mode="All"/>
@@ -84,7 +89,10 @@
         <keyword map="Decimal"  key="Reél"       Mode="All"/>
         <keyword map="Word"     key="Mot"        Mode="All"/>
         <keyword map="Array"    key="Tableau"    Mode="All"/>
-        
+
+        <keyword map="AND"      key="Et"         Mode="All"/>
+        <keyword map="OR"       key="Ou"         Mode="All"/>
+        <keyword map="NOT"      key="Non"        Mode="All"/>
         <keyword key="Debut"    map="Begin"      Mode="All"/>
         <keyword key="Fin"      map="End"        Mode="All"/>
         <keyword map="If"       key="Si"         Mode="All"/>
@@ -115,7 +123,10 @@
         <keyword map="Decimal"    key="Dezimal"    Mode="All"/>
         <keyword map="Word"       key="Wort"       Mode="All"/>
         <keyword map="Array"      key="Table"      Mode="All"/>
-      
+
+        <keyword map="AND"        key="Und"        Mode="All"/>
+        <keyword map="OR"         key="Oder"       Mode="All"/>
+        <keyword map="Not"        key="Nicht"      Mode="All"/>
         <keyword key="Start"      map="Begin"      Mode="All"/>
         <keyword key="Ende"       map="End "       Mode="All"/>
         <keyword map="If"         key="Wenn"       Mode="All"/>
@@ -161,9 +172,6 @@
   </symbols>
   <operators>
     <symbol map="ASSIGNMENT"    key=":="         Mode="All"/>
-    <symbol map="AND"           key="&amp;"      Mode="All"/>
-    <symbol map="OR"            key="|"          Mode="All"/>
-    <symbol map="NOT"           key="!"          Mode="All"/>
     <symbol map="EQUAL"         key="="          Mode="All"/>
     <symbol map="DIFF"          key="&lt;&gt;"   Mode="All"/>
     <symbol map="LESS"          key="&lt;"       Mode="All"/>

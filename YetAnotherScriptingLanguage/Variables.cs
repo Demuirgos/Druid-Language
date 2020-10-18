@@ -17,7 +17,7 @@ namespace YetAnotherScriptingLanguage
         class Variables<T>
         {
             T typeRef;
-            public Variables(string name, T value)
+            public Variables(T value, string name=null )
             {
                 Value = value;
                 Name = name;
@@ -41,7 +41,11 @@ namespace YetAnotherScriptingLanguage
         }
         class Variable : Variables<object>
         {
-            public Variable(string name, object value,type varType) : base(name, value) {
+            public Variable(object value, type varType) : base(value)
+            {
+                Type = varType;
+            }
+            public Variable(string name ,object value,type varType) : base(value,name) {
                 Type = varType;
             }
 
@@ -53,9 +57,9 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable("NameLess", (double)left.Value + (double)right.Value, right.Type);
+                            return new Variable((double)left.Value + (double)right.Value, right.Type);
                         case type.Word:
-                            return new Variable("NameLess", (string)left.Value + (string)right.Value, right.Type);
+                            return new Variable((string)left.Value + (string)right.Value, right.Type);
                     }
 
                 }
@@ -70,7 +74,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable("NameLess", (double)left.Value * (double)right.Value, right.Type);
+                            return new Variable((double)left.Value * (double)right.Value, right.Type);
                     }
 
                 }
@@ -88,7 +92,7 @@ namespace YetAnotherScriptingLanguage
                             if((double)right.Value == 0)
                                 throw new Exception("Invalid Operation : Dividing by ZERO");
                             else 
-                                return new Variable("NameLess", (double)left.Value * (double)right.Value, right.Type);
+                                return new Variable((double)left.Value * (double)right.Value, right.Type);
                     }
 
                 }
@@ -103,7 +107,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable("NameLess", Math.Pow((double)left.Value, (double)right.Value), right.Type);
+                            return new Variable(Math.Pow((double)left.Value, (double)right.Value), right.Type);
                     }
 
                 }
@@ -118,11 +122,52 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable("NameLess", (double)left.Value - (double)right.Value, right.Type);
+                            return new Variable((double)left.Value - (double)right.Value, right.Type);
                     }
 
                 }
                 throw new Exception("Operation Undefined -(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
+
+            public static bool operator ==(Variable left, Variable right)
+            {
+                return left.Type == right.Type && left.Value == right.Value;
+            }
+
+            public static bool operator !=(Variable left, Variable right)
+            {
+                return left.Type != right.Type || left.Value != right.Value;
+            }
+
+            public static bool operator <(Variable left, Variable right)
+            {
+                if(left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Word:
+                            var leftOperand = ((string)left.Value).ToCharArray();
+                            var rightOperand = ((string)right.Value).ToCharArray();
+                            return rightOperand.Length == 1 && leftOperand.Length == 1 && leftOperand[0] < rightOperand[0];
+                        case type.Decimal:
+                            return (double)left.Value < (double)right.Value;
+                    }
+                throw new Exception("Operation Undefined <(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
+
+            public static bool operator >(Variable left, Variable right)
+            {
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Word:
+                            var leftOperand = ((string)left.Value).ToCharArray();
+                            var rightOperand = ((string)right.Value).ToCharArray();
+                            return rightOperand.Length == 1 && leftOperand.Length == 1 && leftOperand[0] > rightOperand[0];
+
+                        case type.Decimal:
+                            return (double)left.Value > (double)right.Value;
+                    }
+                throw new Exception("Operation Undefined >(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
 
             public override type Type { get; set; }

@@ -24,16 +24,28 @@ namespace YetAnotherScriptingLanguage
         public variables.Variable this[TokensList s,int idx]{
             get
             {
-                return Implimentation.Evaluate(s, idx);
+                return Implimentation.Evaluate(s,ref idx);
             }
         }
-        protected virtual variables.Variable Evaluate(TokensList data,int idx) => throw new Exception("Not Implemented");
-        protected virtual void Process(TokensList data, int idx) => throw new Exception("Not Implemented");
+        protected virtual variables.Variable Evaluate(TokensList data,ref int idx) => throw new Exception("Not Implemented");
+        protected virtual void Process(TokensList data,ref int idx) => throw new Exception("Not Implemented");
         public type Type { get; set; }
         public Function Implimentation { get; set; }
         public String Name { get; set; }
         public TokensList Body { get; set; }
-        public List<variables.type> Signature { get; set; }
+    }
+
+    class IdentityProcedure : Function
+    {
+        internal IdentityProcedure() : base()
+        {
+            Type = type.function;
+        }
+
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
+        {
+            throw new Exception("Not yet implemented");
+        }
     }
 
     class ConditionalProcess : Function 
@@ -43,7 +55,7 @@ namespace YetAnotherScriptingLanguage
         internal ConditionalProcess(string name) : base(name) {
             Type = type.procedure;
         }
-        private void ConditionToken(TokensList tokens, int index) {
+        private void ConditionToken(TokensList tokens,ref int index) {
             condition = new TokensList();
             while(tokens[index].IsKeyword != delimiter.Word)
             {
@@ -59,7 +71,7 @@ namespace YetAnotherScriptingLanguage
         {
             delimiter = new Token("Then");
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
             
         }
@@ -71,7 +83,7 @@ namespace YetAnotherScriptingLanguage
         {
             delimiter = new Token("Do");
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
              
         }
@@ -83,7 +95,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
             
         }
@@ -95,7 +107,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
 
         }
@@ -107,7 +119,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
 
         }
@@ -119,10 +131,11 @@ namespace YetAnotherScriptingLanguage
         { 
             Type = type.function;
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             return new variables.Variable("",null, variables.type.Invalid);
         }
+        public List<variables.type> Signature { get; set; }
     }
 
     class SpacedProcess : Function
@@ -133,13 +146,13 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class ReturnProcess : Function
+    class ReturnProcess : SpacedProcess
     {
         public ReturnProcess(string name = "Return") : base(name)
         {
             Type = type.function;
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             return new variables.Variable("", null, variables.type.Invalid);
         }
@@ -151,7 +164,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.function;
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             return new variables.Variable("", null, variables.type.Invalid);
         }
@@ -173,7 +186,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
         }
-        protected override void Process(TokensList data, int idx)
+        protected override void Process(TokensList data,ref int idx)
         {
             foreach (var arg in Arguments)
                 Console.Write(arg.Value);
@@ -186,7 +199,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.function;
         }
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             Console.Write(Arguments[0].Value);
             return new variables.Variable("", Console.ReadLine(), variables.type.Word);
@@ -226,7 +239,7 @@ namespace YetAnotherScriptingLanguage
             Canstants.Add("pi", Math.PI); Canstants.Add("PI", Math.PI);
         }
 
-        protected override variables.Variable Evaluate(TokensList data, int idx)
+        protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             int argsCount = this.Arguments.Count;
             if(argsCount == 0)

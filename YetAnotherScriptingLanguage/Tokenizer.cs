@@ -59,6 +59,17 @@ namespace YetAnotherScriptingLanguage
                                 currentWord.Append(nextChar);
                             } while (nextChar != '\n');
                         }
+                        else if (currentChar == '(')
+                        {
+                            Tokens.Add(new Token(currentWord.ToString()));
+                            currentWord.Clear();
+                            do
+                            {
+                                currentChar = TranslationCode[++i];
+                                nextChar = TranslationCode[i+1];
+                                currentWord.Append(currentChar);
+                            } while (nextChar != ')');
+                        }
                     }
                     Tokens.Add(new Token(currentWord.ToString()));
                     currentWord.Clear();
@@ -78,6 +89,7 @@ namespace YetAnotherScriptingLanguage
         {
             Word = word;
         }
+        public bool IsFunction { get; set; }
         public String Word { get; }
         public String IsKeyword {
             get => Dictionary[Word];
