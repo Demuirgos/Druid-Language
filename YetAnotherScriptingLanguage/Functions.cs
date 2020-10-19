@@ -62,7 +62,7 @@ namespace YetAnotherScriptingLanguage
                 condition.Add(tokens[index]);
             }
         }
-        public bool Condition => (bool)Parser.Evaluate(condition);
+        public bool Condition => (bool)Parser.Evaluate(Parser.Parse(condition));
     }
 
     class IfProcess         : ConditionalProcess

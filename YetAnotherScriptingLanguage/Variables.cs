@@ -26,21 +26,7 @@ namespace YetAnotherScriptingLanguage
             }
             public object Value { get; set; }
             public String Name { get; set; }
-            public virtual Variable.type Type
-            {
-                get
-                {
-                    if (Type == Variable.type.function) return type.function;
-                    switch (Value.GetType().Name)
-                    {
-                        case "Double": return Variable.type.Decimal;
-                        case "Boolean": return Variable.type.Boolean;
-                        case "String": return Variable.type.Word;
-                        default: return Variable.type.Invalid;
-                    }
-                }
-                set { }
-            }
+            public virtual Variable.type Type { get; set; }
 
 
             public static Variable operator +(Variable left, Variable right)
@@ -51,7 +37,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable((double)left.Value + (double)right.Value, right.Type);
+                            return new Variable(Convert.ToDouble(left.Value) + Convert.ToDouble(right.Value), right.Type);
                         case type.Word:
                             return new Variable((string)left.Value + (string)right.Value, right.Type);
                     }
@@ -68,7 +54,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable((double)left.Value * (double)right.Value, right.Type);
+                            return new Variable(Convert.ToDouble(left.Value) * Convert.ToDouble(right.Value), right.Type);
                     }
 
                 }
@@ -83,10 +69,10 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            if((double)right.Value == 0)
+                            if(Convert.ToDouble(right.Value) == 0.0)
                                 throw new Exception("Invalid Operation : Dividing by ZERO");
                             else 
-                                return new Variable((double)left.Value * (double)right.Value, right.Type);
+                                return new Variable(Convert.ToDouble(left.Value) / Convert.ToDouble(right.Value), right.Type);
                     }
 
                 }
@@ -101,7 +87,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable(Math.Pow((double)left.Value, (double)right.Value), right.Type);
+                            return new Variable(Math.Pow(Convert.ToDouble(left.Value) ,Convert.ToDouble(right.Value)), right.Type);
                     }
 
                 }
@@ -116,7 +102,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            return new Variable((double)left.Value - (double)right.Value, right.Type);
+                            return new Variable(Convert.ToDouble(left.Value) - Convert.ToDouble(right.Value), right.Type);
                     }
 
                 }
@@ -130,7 +116,7 @@ namespace YetAnotherScriptingLanguage
 
             public static bool operator !=(Variable left, Variable right)
             {
-                return left.Type != right.Type || left.Value != right.Value;
+                return !(left==right);
             }
 
             public static bool operator <(Variable left, Variable right)
@@ -195,7 +181,7 @@ namespace YetAnotherScriptingLanguage
                             double lhs = (double)left.Value;
                             double rhs = (double)right.Value;
                             if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
-                                return new Variable((int)left.Value % (int)right.Value,type.Decimal);
+                                return new Variable(Convert.ToInt32(left.Value) % Convert.ToInt32(right.Value), type.Decimal);
                             else
                                 throw new Exception("Operation % Takes ( integer , integer )");
                     }

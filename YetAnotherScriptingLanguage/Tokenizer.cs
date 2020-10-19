@@ -11,10 +11,9 @@ namespace YetAnotherScriptingLanguage
         public static TokensList Tokenize(TranslationUnit code)
         {
             var Tokens = new TokensList();
-            char[] Separators = ("'<>=+-*/%&|^\t (){}[]:,!\n\r\0" + Environment.NewLine).ToCharArray();
             Func<char[], char, bool> contains = (char[] chars, char key) =>
             {
-                foreach (char c in chars)
+                foreach (var c in chars)
                 {
                     if (c == key) return true;
                 }
@@ -26,7 +25,7 @@ namespace YetAnotherScriptingLanguage
             for (var i = 0;i< TranslationCode.Length; i++)
             {
                 var currentChar = TranslationCode[i];
-                if(i == TranslationCode.Length-1 || contains(Separators,currentChar))
+                if(i == TranslationCode.Length-1 || contains(Tokenizer.Separators,currentChar))
                 {
                     if(currentWord.Length != 0)
                     {
@@ -64,13 +63,26 @@ namespace YetAnotherScriptingLanguage
                         else if (currentChar == '(')
                         {
                             isHigh = true;
+                            int balance = 1;
                             do
                             {
                                 nextChar = TranslationCode[++i];
                                 currentWord.Append(nextChar);
-                            } while (nextChar != ')');
+                                if (nextChar == '(') 
+                                    balance++;
+                                if (nextChar == ')') 
+                                    balance--;
+                            } while (balance > 0);
                             currentWord.Remove(0, 1);
                             currentWord.Remove(currentWord.Length-1, 1);
+                        }
+                        else if(currentChar == '\r' && nextChar == '\n' || currentChar=='\n')
+                        {
+                            if(currentChar == '\r' && nextChar == '\n')
+                            {
+                                i++;
+                                currentWord.Append(nextChar);
+                            }
                         }
                     }
                     Tokens.Add(new Token(currentWord.ToString(),isHigh));
@@ -84,6 +96,7 @@ namespace YetAnotherScriptingLanguage
             }
             return Tokens;
         }
+        public static char[] Separators => ("'<>=+-*/%&|^\t (){}[]:,!\0" + Environment.NewLine).ToCharArray();
     }
     class Token
     {
@@ -96,13 +109,18 @@ namespace YetAnotherScriptingLanguage
             function
         }
 
-        static private KeyWords Dictionary = new KeyWords();
-        
         public Token(String word, bool isHigh = false)
         {
             Word = word;
             IsFunction = isHigh;
         }
+
+        public TokensList Spread()
+        {
+            return (new TranslationUnit(this.Word)).Tokens;
+        }
+        
+        static private KeyWords Dictionary = new KeyWords();
         public bool IsFunction { get; set; }
         public String Word { get; }
         public Token.type Type {

@@ -4,22 +4,35 @@ namespace YetAnotherScriptingLanguage
 {
     class Program
     {
-        static void Main(string[] args)
+        static void tokenizingtest()
         {
             TranslationUnit unit = new TranslationUnit(
-                "variable a as integer\n" +
-                "a := 23*(15+16)\n" +
-                "variable the_truth as word\n" +
-                "//TESTING COMMENTS\n" +
-                "the_truth:='23 is a prime'\n" +
-                "if ( a <> 2 ) then\n" +
-                "{\n" +
-                "a = 23*3\n" +
-                "}\n");
+                "variable a as integer" + Environment.NewLine +
+                "a := 23*(15+16)" + Environment.NewLine +
+                "variable the_truth as word" + Environment.NewLine +
+                "//TESTING COMMENTS" + Environment.NewLine +
+                "the_truth:='23 is a prime'" + Environment.NewLine +
+                "if ( a <> 2 ) then" + Environment.NewLine +
+                "{" + Environment.NewLine +
+                "a = 23*3" + Environment.NewLine +
+                "}");
+            Console.WriteLine("Tokenzing process test : ");
             foreach (var token in unit.Tokens)
             {
-                if(token.IsKeyword!= "END_STATEMENT" && token.IsKeyword!= "SPACE")
-                    Console.WriteLine(token.Word);
+                var str = Environment.NewLine;
+                foreach (var word in token.Spread())
+                    if (word.Word != Environment.NewLine && word.Word != " ")
+                        Console.WriteLine(word.Word);
+            }
+        }
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.WriteLine("Evaluating simple Math test : ");
+                TranslationUnit tes = new TranslationUnit(Console.ReadLine());
+                var res = Parser.Evaluate(Parser.Parse(tes.Tokens));
+                Console.WriteLine(tes.Code + " = " + res);
             }
         }
     }
