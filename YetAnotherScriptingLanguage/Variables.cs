@@ -6,48 +6,42 @@ namespace YetAnotherScriptingLanguage
 {
     namespace variables
     {
-        public enum type
+        
+        public class Variable
         {
-            Word,
-            Decimal,
-            Boolean,
-            Void,
-            Invalid
-        }
-        class Variables<T>
-        {
-            T typeRef;
-            public Variables(T value, string name=null )
+            public enum type
+            {
+                Word,
+                Decimal,
+                Boolean,
+                Void,
+                function,
+                Invalid
+            }
+            public Variable(object value, type varType, string name=null )
             {
                 Value = value;
                 Name = name;
+                Type = varType;
             }
             public object Value { get; set; }
             public String Name { get; set; }
-            public virtual type Type
+            public virtual Variable.type Type
             {
                 get
                 {
+                    if (Type == Variable.type.function) return type.function;
                     switch (Value.GetType().Name)
                     {
-                        case "Double": return type.Decimal;
-                        case "Boolean": return type.Boolean;
-                        case "String": return type.Word;
-                        default: return type.Invalid;
+                        case "Double": return Variable.type.Decimal;
+                        case "Boolean": return Variable.type.Boolean;
+                        case "String": return Variable.type.Word;
+                        default: return Variable.type.Invalid;
                     }
                 }
                 set { }
             }
-        }
-        class Variable : Variables<object>
-        {
-            public Variable(object value, type varType) : base(value)
-            {
-                Type = varType;
-            }
-            public Variable(string name ,object value,type varType) : base(value,name) {
-                Type = varType;
-            }
+
 
             public static Variable operator +(Variable left, Variable right)
             {
@@ -200,23 +194,22 @@ namespace YetAnotherScriptingLanguage
                         case type.Decimal:
                             double lhs = (double)left.Value;
                             double rhs = (double)right.Value;
-                            if (lhs == Math.Truncate(lhs) && rhs==Math.Truncate(rhs))
+                            if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
                                 return new Variable((int)left.Value % (int)right.Value,type.Decimal);
                             else
                                 throw new Exception("Operation % Takes ( integer , integer )");
                     }
-                throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined %(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
 
-            public override type Type { get; set; }
         }
         class Array<T>
         {
             public Array(int len = 0){
-                elements = new List<Variables<T>>(len);
+                elements = new List<Variable>(len);
             }
-            public List<Variables<T>> elements;
-            public IList<Variables<T>> Elements => elements;
+            public List<Variable> elements;
+            public IList<Variable> Elements => elements;
         }
     }
 }

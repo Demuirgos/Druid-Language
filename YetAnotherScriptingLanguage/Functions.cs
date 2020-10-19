@@ -133,9 +133,9 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
-            return new variables.Variable("",null, variables.type.Invalid);
+            return new variables.Variable(null, variables.Variable.type.Invalid);
         }
-        public List<variables.type> Signature { get; set; }
+        public List<variables.Variable.type> Signature { get; set; }
     }
 
     class SpacedProcess : Function
@@ -154,7 +154,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
-            return new variables.Variable("", null, variables.type.Invalid);
+            return new variables.Variable(null, variables.Variable.type.Invalid);
         }
     }
 
@@ -166,7 +166,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
-            return new variables.Variable("", null, variables.type.Invalid);
+            return new variables.Variable(null, variables.Variable.type.Invalid);
         }
     }
 
@@ -202,7 +202,7 @@ namespace YetAnotherScriptingLanguage
         protected override variables.Variable Evaluate(TokensList data,ref int idx)
         {
             Console.Write(Arguments[0].Value);
-            return new variables.Variable("", Console.ReadLine(), variables.type.Word);
+            return new variables.Variable(Console.ReadLine(), variables.Variable.type.Word);
         }
     }
 
@@ -244,15 +244,15 @@ namespace YetAnotherScriptingLanguage
             int argsCount = this.Arguments.Count;
             if(argsCount == 0)
             {
-                return new variables.Variable("", Canstants[this.Name], variables.type.Decimal);
+                return new variables.Variable(Canstants[this.Name], variables.Variable.type.Decimal);
             }
             else if(argsCount == 1)
             {
-                return new variables.Variable("",UnaryFunctions[this.Name](Convert.ToDouble(Arguments[0].Value)), variables.type.Decimal);
+                return new variables.Variable(UnaryFunctions[this.Name](Convert.ToDouble(Arguments[0].Value)), variables.Variable.type.Decimal);
             }
             else if(argsCount == 2)
             {
-                return new variables.Variable("", DualFunctions[this.Name](Convert.ToDouble(Arguments[0].Value), Convert.ToDouble(Arguments[1].Value)), variables.type.Decimal) ;
+                return new variables.Variable(DualFunctions[this.Name](Convert.ToDouble(Arguments[0].Value), Convert.ToDouble(Arguments[1].Value)), variables.Variable.type.Decimal) ;
             }
             throw new Exception("Argument Mismatch");
         }

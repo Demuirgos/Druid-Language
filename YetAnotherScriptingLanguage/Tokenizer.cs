@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -21,6 +22,7 @@ namespace YetAnotherScriptingLanguage
             };
             StringBuilder currentWord = new StringBuilder();
             string TranslationCode = code.Code + Environment.NewLine;
+            bool isHigh = false;
             for (var i = 0;i< TranslationCode.Length; i++)
             {
                 var currentChar = TranslationCode[i];
@@ -61,18 +63,19 @@ namespace YetAnotherScriptingLanguage
                         }
                         else if (currentChar == '(')
                         {
-                            Tokens.Add(new Token(currentWord.ToString()));
-                            currentWord.Clear();
+                            isHigh = true;
                             do
                             {
-                                currentChar = TranslationCode[++i];
-                                nextChar = TranslationCode[i+1];
-                                currentWord.Append(currentChar);
+                                nextChar = TranslationCode[++i];
+                                currentWord.Append(nextChar);
                             } while (nextChar != ')');
+                            currentWord.Remove(0, 1);
+                            currentWord.Remove(currentWord.Length-1, 1);
                         }
                     }
-                    Tokens.Add(new Token(currentWord.ToString()));
+                    Tokens.Add(new Token(currentWord.ToString(),isHigh));
                     currentWord.Clear();
+                    isHigh = false;
                 }
                 else
                 {
@@ -84,13 +87,41 @@ namespace YetAnotherScriptingLanguage
     }
     class Token
     {
+        public enum type
+        {
+            keyword,
+            variable,
+            constant,
+            operation,
+            function
+        }
+
         static private KeyWords Dictionary = new KeyWords();
-        public Token(String word)
+        
+        public Token(String word, bool isHigh = false)
         {
             Word = word;
+            IsFunction = isHigh;
         }
         public bool IsFunction { get; set; }
         public String Word { get; }
+        public Token.type Type {
+            get
+            {
+                if (Regex.Match(this.Word, "[0-9]+([.][0-9]+)?").Success)
+                {
+                    return Token.type.constant;
+                }
+                else if (Interpreter.Keywords.ContainsKey(this.Word))
+                {
+                    return Token.type.keyword;
+                }
+                else
+                {
+                    return Token.type.function;
+                }
+            }
+        }
         public String IsKeyword {
             get => Dictionary[Word];
         }

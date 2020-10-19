@@ -14,15 +14,35 @@ namespace YetAnotherScriptingLanguage
             index = 0;
             _tokens = tokens;
         }
-        public void Parse() 
+
+        public LinkedList<Node> Parse(TokensList expression)
         {
-            index++;
+            var Tree = new LinkedList<Node>();
+            for(int i = 0 ; i < expression.Count ; i++)
+            {
+                if (i % 2 == 0)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+            return Tree;
         }
+
+        public Node Parse()
+        {
+            throw new Exception("Not Implemented Yet");
+        }
+
         public static bool IsValid(TokensList expression)
         {
 
             return true;
         }
+
         public static object Evaluate(TokensList expression)
         {
             Action<Node,Node> Merge =  (Node left, Node right) => {
@@ -47,22 +67,22 @@ namespace YetAnotherScriptingLanguage
                         left.Value %= right.Value;
                         break;
                     case "<":
-                        left.Value = new variables.Variable(left.Value < right.Value, variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value < right.Value, variables.Variable.type.Boolean);
                         break;
                     case ">":
-                        left.Value = new variables.Variable(left.Value > right.Value, variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value > right.Value, variables.Variable.type.Boolean);
                         break;
                     case "EQUAL":
-                        left.Value = new variables.Variable(left.Value == right.Value,variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value == right.Value, variables.Variable.type.Boolean);
                         break;
                     case "Diff":
-                        left.Value = new variables.Variable(left.Value != right.Value, variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value != right.Value, variables.Variable.type.Boolean);
                         break;
                     case "And":
-                        left.Value = new variables.Variable(left.Value & right.Value, variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value & right.Value, variables.Variable.type.Boolean);
                         break;
                     case "Or":
-                        left.Value = new variables.Variable(left.Value | right.Value, variables.type.Boolean);
+                        left.Value = new variables.Variable(left.Value | right.Value, variables.Variable.type.Boolean);
                         break;
                 }
                 left.Operation = right.Operation;
@@ -81,11 +101,20 @@ namespace YetAnotherScriptingLanguage
 
     class Node
     {
+        public Node()
+        {
+            Value = null;
+            Operation = null;
+            isRoot = true;
+        }
+
         public Node(variables.Variable value, Action action)
         {
             Value = value;
             Operation = action;
         }
+
+        public bool isRoot { get; set; }
         public Action Operation { get; set; }
         public variables.Variable Value { get; set; }
     }
