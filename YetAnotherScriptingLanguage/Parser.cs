@@ -28,8 +28,11 @@ namespace YetAnotherScriptingLanguage
                 variables.Variable v = null;
                 if (expression[i].Type == Token.type.constant && !expression[i].IsFunction)
                     v = new variables.Variable(expression[i].Word, variables.Variable.type.Decimal);
-                else if(expression[i].Type == Token.type.constant && expression[i].IsFunction)
-                    v = new variables.Variable(Parser.Evaluate(Parser.Parse(expression[i].Spread())),variables.Variable.type.Decimal);
+                else if (expression[i].Type == Token.type.constant && expression[i].IsFunction)
+                {
+                    var temp = (variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread()));
+                    v = new variables.Variable(temp.Value, temp.Type);
+                }
                 var o = new Action(expression[i+1].Word);
                 var node = new Node(v, o);
                 Tree.AddLast(node);
@@ -83,10 +86,10 @@ namespace YetAnotherScriptingLanguage
                     case "Diff":
                         left.Value = new variables.Variable(left.Value != right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "And":
+                    case "&":
                         left.Value = new variables.Variable(left.Value & right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "Or":
+                    case "|":
                         left.Value = new variables.Variable(left.Value | right.Value, variables.Variable.type.Boolean);
                         break;
                 }
@@ -109,7 +112,7 @@ namespace YetAnotherScriptingLanguage
             }
             else
             {
-                return expression.First.Value.Value.Value;
+                return expression.First.Value.Value;
             }
             throw new Exception("not yet made");
         }

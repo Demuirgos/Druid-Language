@@ -125,11 +125,11 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Word:
-                            var leftOperand = ((string)left.Value).ToCharArray();
-                            var rightOperand = ((string)right.Value).ToCharArray();
-                            return rightOperand.Length == 1 && leftOperand.Length == 1 && leftOperand[0] < rightOperand[0];
+                            var leftOperand = Convert.ToString(left.Value);
+                            var rightOperand = Convert.ToString(right.Value);
+                            return String.Compare(leftOperand, rightOperand) < 0;
                         case type.Decimal:
-                            return (double)left.Value < (double)right.Value;
+                            return Convert.ToDouble(left.Value) < Convert.ToDouble(right.Value);
                     }
                 throw new Exception("Operation Undefined <(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
@@ -140,12 +140,11 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Word:
-                            var leftOperand = ((string)left.Value).ToCharArray();
-                            var rightOperand = ((string)right.Value).ToCharArray();
-                            return rightOperand.Length == 1 && leftOperand.Length == 1 && leftOperand[0] > rightOperand[0];
-
+                            var leftOperand = Convert.ToString(left.Value);
+                            var rightOperand = Convert.ToString(right.Value);
+                            return String.Compare(leftOperand, rightOperand) > 0;
                         case type.Decimal:
-                            return (double)left.Value > (double)right.Value;
+                            return Convert.ToDouble(left.Value) > Convert.ToDouble(right.Value);
                     }
                 throw new Exception("Operation Undefined >(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
@@ -156,7 +155,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Boolean:
-                            return (bool)left.Value && (bool)right.Value;
+                            return Convert.ToBoolean(left.Value) && Convert.ToBoolean(right.Value);
                     }
                 throw new Exception("Operation Undefined &(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
@@ -167,7 +166,7 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Boolean:
-                            return (bool)left.Value || (bool)right.Value;
+                            return Convert.ToBoolean(left.Value) || Convert.ToBoolean(right.Value);
                     }
                 throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
@@ -178,8 +177,8 @@ namespace YetAnotherScriptingLanguage
                     switch (left.Type)
                     {
                         case type.Decimal:
-                            double lhs = (double)left.Value;
-                            double rhs = (double)right.Value;
+                            double lhs = Convert.ToDouble(left.Value);
+                            double rhs = Convert.ToDouble(right.Value);
                             if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
                                 return new Variable(Convert.ToInt32(left.Value) % Convert.ToInt32(right.Value), type.Decimal);
                             else

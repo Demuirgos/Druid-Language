@@ -62,7 +62,6 @@
         <keyword key="If"       map="If"         Mode="All"/>
         <keyword key="Then"     map="Then"       Mode="All"/>
         <keyword key="Else"     map="Else"       Mode="All"/>
-        <keyword key="Elif"     map="Elif"       Mode="All"/>
         <keyword key="While"    map="While"      Mode="All"/>
         <keyword key="To"       map="To"         Mode="All"/>
         <keyword key="From"     map="From"       Mode="All"/>
@@ -97,7 +96,6 @@
         <keyword map="If"       key="Si"         Mode="All"/>
         <keyword key="Donc"     map="Then"       Mode="All"/>
         <keyword map="Else"     key="Sinon"      Mode="All"/>
-        <keyword map="Elif"     key="Sinon_Si"   Mode="All"/>
         <keyword map="While"    key="Tant_que"   Mode="All"/>
         <keyword key="A"        map="To"         Mode="All"/>
         <keyword key="De"       map="From"       Mode="All"/>
@@ -130,7 +128,6 @@
         <keyword map="If"         key="Wenn"       Mode="All"/>
         <keyword key="Dann"       map="Then"       Mode="All"/>
         <keyword map="Else"       key="Sonst"      Mode="All"/>
-        <keyword map="Elif"       key="Sonst_wenn" Mode="All"/>
         <keyword map="While"      key="Während"    Mode="All"/>
         <keyword map="Do"         key="tun"        Mode="All"/>
         <keyword map="For"        key="für"        Mode="All"/>

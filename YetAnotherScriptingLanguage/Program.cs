@@ -25,14 +25,25 @@ namespace YetAnotherScriptingLanguage
                         Console.WriteLine(word.Word);
             }
         }
-        static void Main(string[] args)
+        static void MathEvalTest()
         {
             while (true)
             {
                 Console.WriteLine("Evaluating simple Math test : ");
                 TranslationUnit tes = new TranslationUnit(Console.ReadLine());
-                var res = Parser.Evaluate(Parser.Parse(tes.Tokens));
-                Console.WriteLine(tes.Code + " = " + res);
+                var res = (variables.Variable)Parser.Evaluate(Parser.Parse(tes.Tokens));
+                Console.WriteLine(tes.Code + " = " + res.Value);
+            }
+        }
+        static void Main(string[] args)
+        {
+            try
+            {
+                MathEvalTest();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
     }

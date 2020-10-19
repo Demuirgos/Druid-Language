@@ -35,7 +35,9 @@ namespace YetAnotherScriptingLanguage
                     case ">" :
                     case "=" :
                     case "<>": return 7;
-                    case ":=": return 6;
+                    case "|" :
+                    case "&" : return 6;
+                    case ":=": return 5;
                     default  : return 0;
                 }
             }
