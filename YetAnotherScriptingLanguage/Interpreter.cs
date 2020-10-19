@@ -9,8 +9,8 @@ namespace YetAnotherScriptingLanguage
         private string _script;
         private TranslationUnit Local;
         private Parser main;
-        private static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
-        private static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
+        public static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
+        public static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
         private static KeyWords keywords;
         public static KeyWords Keywords { 
             get

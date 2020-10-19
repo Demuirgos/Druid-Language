@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -48,6 +47,8 @@ namespace YetAnotherScriptingLanguage
                                 nextChar = TranslationCode[++i];
                                 currentWord.Append(nextChar);
                             }
+                            currentWord.Remove(0, 1);
+                            currentWord.Remove(currentWord.Length-1, 1);
                         }
                         else if (currentChar == '/' && nextChar == '/')
                         {
@@ -126,17 +127,17 @@ namespace YetAnotherScriptingLanguage
         public Token.type Type {
             get
             {
-                if (Regex.Match(this.Word, "[0-9]+([.][0-9]+)?").Success)
-                {
-                    return Token.type.constant;
-                }
-                else if (Interpreter.Keywords.ContainsKey(this.Word))
+                if (Interpreter.Keywords.ContainsKey(this.Word))
                 {
                     return Token.type.keyword;
                 }
-                else
+                else if(Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
                 {
                     return Token.type.function;
+                }
+                else
+                {
+                    return Token.type.constant;
                 }
             }
         }

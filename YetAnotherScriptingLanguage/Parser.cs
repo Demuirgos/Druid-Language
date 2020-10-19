@@ -27,11 +27,12 @@ namespace YetAnotherScriptingLanguage
             {
                 variables.Variable v = null;
                 if (expression[i].Type == Token.type.constant && !expression[i].IsFunction)
-                    v = new variables.Variable(expression[i].Word, variables.Variable.type.Decimal);
+                {
+                    v = new variables.Variable(expression[i].Word);
+                }
                 else if (expression[i].Type == Token.type.constant && expression[i].IsFunction)
                 {
-                    var temp = (variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread()));
-                    v = new variables.Variable(temp.Value, temp.Type);
+                    v = new variables.Variable((variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread())));
                 }
                 var o = new Action(expression[i+1].Word);
                 var node = new Node(v, o);
@@ -80,10 +81,10 @@ namespace YetAnotherScriptingLanguage
                     case ">":
                         left.Value = new variables.Variable(left.Value > right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "EQUAL":
+                    case "=":
                         left.Value = new variables.Variable(left.Value == right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "Diff":
+                    case "<>":
                         left.Value = new variables.Variable(left.Value != right.Value, variables.Variable.type.Boolean);
                         break;
                     case "&":

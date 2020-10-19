@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -24,6 +25,21 @@ namespace YetAnotherScriptingLanguage
                 Name = name;
                 Type = varType;
             }
+
+            public Variable(object value, string name = null)
+            {
+                Value = value;
+                Name = name;
+                Type = Regex.Match(Convert.ToString(value), "[0-9]+([.][0-9]+)?").Success ? variables.Variable.type.Decimal : variables.Variable.type.Word;
+            }
+
+            public Variable(Variable t)
+            {
+                this.Value = t.Value;
+                this.Type = t.Type;
+                this.Name = t.Name;
+            }
+
             public object Value { get; set; }
             public String Name { get; set; }
             public virtual Variable.type Type { get; set; }
@@ -111,7 +127,29 @@ namespace YetAnotherScriptingLanguage
 
             public static bool operator ==(Variable left, Variable right)
             {
-                return left.Type == right.Type && left.Value == right.Value;
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Decimal:
+                            {
+                                double lhs = Convert.ToDouble(left.Value);
+                                double rhs = Convert.ToDouble(right.Value);
+                                return lhs == rhs;
+                            }
+                        case type.Word:
+                            {
+                                string lhs = Convert.ToString(left.Value);
+                                string rhs = Convert.ToString(right.Value);
+                                return String.Compare(lhs, rhs) == 0;
+                            }
+                        case type.Boolean:
+                            {
+                                bool lhs = Convert.ToBoolean(left.Value);
+                                bool rhs = Convert.ToBoolean(right.Value);
+                                return lhs == rhs;
+                            }
+                    }
+                return false;
             }
 
             public static bool operator !=(Variable left, Variable right)
