@@ -6,22 +6,45 @@ namespace YetAnotherScriptingLanguage
 {
     class Interpreter
     {
+        public class Block
+        {
+            public Block(string name = null)
+            {
+                Name = name;
+            }
+            public Dictionary<string, Function> Variables { get; set; }
+            public string Name { get; set; }
+        }
+        private Parser main;
+
         private string _script;
         private TranslationUnit Local;
-        private Parser main;
         public static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         public static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
+
         private static KeyWords keywords;
         public static KeyWords Keywords { 
             get
             {
-                if(keywords==null)
+                if (keywords == null)
+                {
                     keywords = new KeyWords();
+                }
                 return keywords;
             }
         }
+
         public TokensList tokens { get; set; }
-        public int index = 0; 
+        public int index = 0;
+
+        private static Stack<Block> levels = new Stack<Block>();
+        public static Stack<Block> ExecutionStack => levels;
+        public static Block CurrentBlock => levels.Peek();
+
+        public static POST.GET Get = new POST.GET();
+        public static POST.SET Set = new POST.SET();
+        public static POST.POP Pop = new POST.POP();
+
         public Interpreter(string script)
         {
             _script = script;
@@ -29,13 +52,16 @@ namespace YetAnotherScriptingLanguage
         }
         public void Initialize()
         {
+            SetUp();
             Local = new TranslationUnit(_script);
             main = new Parser(Local.Tokens);
-            keywords = new KeyWords();
         }
-        public void SetUp(KeyWords dictionary)
+        public void SetUp()
         {
-            foreach(var word in dictionary)
+            MathProcess.SetupFunctions();
+            ConstantsMap.SetUpCanstants();
+            keywords = new KeyWords();
+            foreach (var word in keywords)
             {
                 switch (word.Value)
                 {
@@ -69,6 +95,77 @@ namespace YetAnotherScriptingLanguage
                     case ("Function"):
                         Interpreter.Functions.Add("Function", new FunctionProcess());
                         break;
+                }
+            }
+            foreach (var maps in MathProcess.DualFunctions.Keys)
+            {
+                Interpreter.Functions.Add(maps, new MathProcess(maps));
+            }
+            foreach (var maps in MathProcess.UnaryFunctions.Keys)
+            {
+                Interpreter.Functions.Add(maps, new MathProcess(maps));
+            }
+            foreach (var csts in ConstantsMap.Canstants.Keys)
+            {
+                Interpreter.Functions.Add(csts, new ConstantsMap(csts));
+            }
+        }
+    }
+    namespace POST
+    {
+        class GET
+        {
+            internal GET() { }
+            public Function this[string token]
+            {
+                get
+                {
+                    if ( Interpreter.ExecutionStack.Count>0 && Interpreter.CurrentBlock.Variables.ContainsKey(token)) return Interpreter.CurrentBlock.Variables[token];
+                    if (Interpreter.Functions.ContainsKey(token)) return Interpreter.Functions[token];
+                    throw new Exception("Method undefined");
+                }
+            }
+        }
+
+        class  SET
+        {
+            internal SET() { }
+            public Function  this[string token]
+            {
+                set
+                {
+                    value.Name = token;
+                    if (Interpreter.ExecutionStack.Count > 0)
+                    {
+                        Interpreter.Functions[token] = value;
+                    }
+                    else
+                    {
+                        Interpreter.Set.Insert(new Interpreter.Block());
+                        Interpreter.CurrentBlock.Variables[token] = value;
+                    }
+                }
+            }
+
+            public void Insert(Interpreter.Block block)
+            {
+                Interpreter.ExecutionStack.Push(block);
+            }
+        }
+
+        class POP
+        {
+            internal POP() { }
+            public bool this[string token]
+            {
+                get
+                {
+                    bool found = Interpreter.CurrentBlock.Variables.ContainsKey(token);
+                    if (found)
+                    {
+                        Interpreter.CurrentBlock.Variables.Remove(token);
+                    }
+                    return found;
                 }
             }
         }

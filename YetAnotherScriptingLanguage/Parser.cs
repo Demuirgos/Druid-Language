@@ -26,13 +26,21 @@ namespace YetAnotherScriptingLanguage
             for(int i = 0 ; i < expression.Count ; i+=2)
             {
                 variables.Variable v = null;
-                if (expression[i].Type == Token.type.constant && !expression[i].IsFunction)
+                if (expression[i].Type == Token.type.constant)
                 {
-                    v = new variables.Variable(expression[i].Word);
+                    if (expression[i].IsMathEvaluation)
+                    {
+                        v = new variables.Variable((variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread())));
+                    }
+                    else
+                    {
+                        v = new variables.Variable(expression[i].Word);
+                    }
                 }
-                else if (expression[i].Type == Token.type.constant && expression[i].IsFunction)
+                else if(expression[i].Type == Token.type.function)
                 {
-                    v = new variables.Variable((variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread())));
+                    Function foo = new Function(expression[i].IsKeyword);
+                    v = foo[expression[i,foo.Limiter]];
                 }
                 var o = new Action(expression[i+1].Word);
                 var node = new Node(v, o);
@@ -92,6 +100,9 @@ namespace YetAnotherScriptingLanguage
                         break;
                     case "|":
                         left.Value = new variables.Variable(left.Value | right.Value, variables.Variable.type.Boolean);
+                        break;
+                    case "!":
+                        left.Value = new variables.Variable(variables.Variable.xor(left.Value,right.Value), variables.Variable.type.Boolean);
                         break;
                 }
                 left.Operation = right.Operation;

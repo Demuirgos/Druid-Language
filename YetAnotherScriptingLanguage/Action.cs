@@ -18,7 +18,7 @@ namespace YetAnotherScriptingLanguage
                    this.Operator == "<"  || this.Operator == ">"  ||
                    this.Operator == "<>" || this.Operator == "="  ||
                    this.Operator == ":=" || this.Operator == "^"  ||
-                   this.Operator == "%";
+                   this.Operator == "%"  || this.Operator == "!"  ;
         }
         public Int16 Priority
         {
@@ -37,7 +37,8 @@ namespace YetAnotherScriptingLanguage
                     case "<>": return 7;
                     case "|" :
                     case "&" : return 6;
-                    case ":=": return 5;
+                    case "!" : return 5;
+                    case ":=": return 4;
                     default  : return 0;
                 }
             }

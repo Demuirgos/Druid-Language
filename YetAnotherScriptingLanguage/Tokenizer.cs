@@ -40,6 +40,10 @@ namespace YetAnotherScriptingLanguage
                             currentWord.Append(nextChar);
                             i++;
                         }
+                        else if(currentChar == '!')
+                        {
+                            Tokens.Add(new Token("True"));
+                        }
                         else if (currentChar == '\'')
                         {
                             while (nextChar != '\'' && i + 1 < TranslationCode.Length)
@@ -113,27 +117,37 @@ namespace YetAnotherScriptingLanguage
         public Token(String word, bool isHigh = false)
         {
             Word = word;
-            IsFunction = isHigh;
+            IsMathEvaluation = isHigh;
         }
 
         public TokensList Spread()
         {
             return (new TranslationUnit(this.Word)).Tokens;
         }
-        
+
+        public static bool operator ==(Token left, Token right)
+        {
+            return left.IsMathEvaluation == right.IsMathEvaluation && left.Word == right.Word;
+        }
+
+        public static bool operator !=(Token left, Token right)
+        {
+            return left.IsMathEvaluation != right.IsMathEvaluation || left.Word != right.Word;
+        }
+
         static private KeyWords Dictionary = new KeyWords();
-        public bool IsFunction { get; set; }
+        public bool IsMathEvaluation { get; set; }
         public String Word { get; }
         public Token.type Type {
             get
             {
-                if (Interpreter.Keywords.ContainsKey(this.Word))
-                {
-                    return Token.type.keyword;
-                }
-                else if(Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
+                if (Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
                 {
                     return Token.type.function;
+                }
+                else if (Interpreter.Keywords.ContainsKey(this.Word))
+                {
+                    return Token.type.keyword;
                 }
                 else
                 {
@@ -156,9 +170,55 @@ namespace YetAnotherScriptingLanguage
             set { mylist.Insert(index, value); }
         }
 
-        public void Add (Token token)
+        public TokensList this[int l,Token t]
         {
-            mylist.Add(token);
+            get {
+                if(t.Word == "Current")
+                {
+                    return this[l, l + 1];
+                }
+                var result = new TokensList();
+                for(int i = l; this[i] == t && i<this.Count; i++)
+                {
+                    result.Add(this[i]);
+                }
+                return result;
+            }
+        }
+
+        public TokensList this[int l,int r]
+        {
+            get {
+                var result = new TokensList();
+                for(int i = l; i < r; i++)
+                {
+                    result.Add(this[i]);
+                }
+                return result;
+            }
+            set
+            {
+                for (int i = l; i < r; i++)
+                {
+                    this.Remove(i);
+                }
+                for (int i = l, j = 0; i < r; i++, j++) {
+                    this.Add(value[j], i);
+                }
+            }
+        }
+
+        public void Add(Token token,int i=-1)
+        {
+            if (i == -1)
+                mylist.Add(token);
+            else
+                mylist.Insert(i,token) ;
+        }
+
+        public void Remove(int idx)
+        {
+            mylist.RemoveAt(idx);
         }
 
         public void Clear(Token token)

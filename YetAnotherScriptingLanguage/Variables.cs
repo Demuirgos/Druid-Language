@@ -19,6 +19,7 @@ namespace YetAnotherScriptingLanguage
                 function,
                 Invalid
             }
+
             public Variable(object value, type varType, string name=null )
             {
                 Value = value;
@@ -43,7 +44,6 @@ namespace YetAnotherScriptingLanguage
             public object Value { get; set; }
             public String Name { get; set; }
             public virtual Variable.type Type { get; set; }
-
 
             public static Variable operator +(Variable left, Variable right)
             {
@@ -124,6 +124,22 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined -(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
+            
+            public static Variable operator %(Variable left, Variable right)
+            {
+                if (left.Type == right.Type)
+                    switch (left.Type)
+                    {
+                        case type.Decimal:
+                            double lhs = Convert.ToDouble(left.Value);
+                            double rhs = Convert.ToDouble(right.Value);
+                            if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
+                                return new Variable(Convert.ToInt32(left.Value) % Convert.ToInt32(right.Value), type.Decimal);
+                            else
+                                throw new Exception("Operation % Takes ( integer , integer )");
+                    }
+                throw new Exception("Operation Undefined %(" + left.Type.ToString() + right.Type.ToString() + ")");
+            }
 
             public static bool operator ==(Variable left, Variable right)
             {
@@ -198,6 +214,26 @@ namespace YetAnotherScriptingLanguage
                 throw new Exception("Operation Undefined &(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
 
+            public static bool operator ~(Variable left)
+            {
+                    switch (left.Type)
+                    {
+                        case type.Boolean:
+                        return Convert.ToBoolean(left.Value) ^ true;
+                    }
+                throw new Exception("Operation Undefined ^(" + left.Type.ToString() + ")");
+            }
+
+            public static bool xor(Variable left , Variable right)
+            {
+                switch (right.Type)
+                {
+                    case type.Boolean:
+                        return Convert.ToBoolean(right.Value) ^ true;
+                }
+                throw new Exception("Operation Undefined !(" + left.Type.ToString() + ")");
+            }
+
             public static bool operator |(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
@@ -209,21 +245,6 @@ namespace YetAnotherScriptingLanguage
                 throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
             }
 
-            public static variables.Variable operator %(Variable left, Variable right)
-            {
-                if (left.Type == right.Type)
-                    switch (left.Type)
-                    {
-                        case type.Decimal:
-                            double lhs = Convert.ToDouble(left.Value);
-                            double rhs = Convert.ToDouble(right.Value);
-                            if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
-                                return new Variable(Convert.ToInt32(left.Value) % Convert.ToInt32(right.Value), type.Decimal);
-                            else
-                                throw new Exception("Operation % Takes ( integer , integer )");
-                    }
-                throw new Exception("Operation Undefined %(" + left.Type.ToString() + right.Type.ToString() + ")");
-            }
 
         }
         class Array<T>
