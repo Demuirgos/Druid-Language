@@ -23,7 +23,7 @@ namespace YetAnotherScriptingLanguage
         public static LinkedList<Node> Parse(TokensList expression)
         {
             var Tree = new LinkedList<Node>();
-            for(int i = 0 ; i < expression.Count ; i+=2)
+            for (int i = 0 ; i < expression.Count ; i += 2)
             {
                 variables.Variable v = null;
                 if (expression[i].Type == Token.type.constant)
@@ -37,12 +37,12 @@ namespace YetAnotherScriptingLanguage
                         v = new variables.Variable(expression[i].Word);
                     }
                 }
-                else if(expression[i].Type == Token.type.function)
+                else if (expression[i].Type == Token.type.function)
                 {
                     Function foo = new Function(expression[i].IsKeyword);
-                    v = foo[expression[i,foo.Limiter]];
+                    v = foo[expression[i, foo.Limiter]];
                 }
-                var o = new Action(expression[i+1].Word);
+                Action o = new Action(expression[i + 1].Word);
                 var node = new Node(v, o);
                 Tree.AddLast(node);
             }

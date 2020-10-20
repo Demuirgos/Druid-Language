@@ -111,6 +111,7 @@ namespace YetAnotherScriptingLanguage
             variable,
             constant,
             operation,
+            Separator,
             function
         }
 
@@ -141,7 +142,11 @@ namespace YetAnotherScriptingLanguage
         public Token.type Type {
             get
             {
-                if (Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
+                if(Word == "\r\n" || Word == "\r" || Word == "\t" || Word == "\n" || Word == " ")
+                {
+                    return type.Separator;
+                }
+                else if (Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
                 {
                     return Token.type.function;
                 }
