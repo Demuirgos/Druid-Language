@@ -162,6 +162,7 @@
     <symbol map="END_Block"     key="}"          Mode="All"/>
     <symbol map="END_STATEMENT" key="&#10;"      Mode="All"/>
     <symbol map="END_STATEMENT" key="&#13;"      Mode="All"/>
+    <symbol map="END_STATEMENT" key="&#13;&#10;" Mode="All"/>
     <symbol map="COMMENT"       key="//"         Mode="All"/>
     <symbol map="EMPTY"         key="\0"         Mode="All"/>
   </symbols>

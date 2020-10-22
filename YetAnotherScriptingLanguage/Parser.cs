@@ -8,7 +8,7 @@ namespace YetAnotherScriptingLanguage
     {
         class ProceedFlag
         {
-            public bool this[Node left, Node right] => left.Operation.Priority > right.Operation.Priority;
+            public bool this[Node left, Node right] => left.Operation.Priority > right.Operation.Priority || right == null;
         }
         public static bool Verbose { get; set; }
         private int index;
@@ -23,9 +23,11 @@ namespace YetAnotherScriptingLanguage
         public static LinkedList<Node> Parse(TokensList expression)
         {
             var Tree = new LinkedList<Node>();
-            for (int i = 0 ; i < expression.Count ; i += 2)
+            int i = 0;
+            while(i<expression.Count)
             {
                 variables.Variable v = null;
+                while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
                 if (expression[i].Type == Token.type.constant)
                 {
                     if (expression[i].IsMathEvaluation)
@@ -36,15 +38,36 @@ namespace YetAnotherScriptingLanguage
                     {
                         v = new variables.Variable(expression[i].Word);
                     }
+                    i++;
+                }
+                else if (expression[i].Type == Token.type.variable)
+                {
+                    
+                    v = (variables.Variable)Interpreter.Get[expression[i].Word];
+                    i++;
                 }
                 else if (expression[i].Type == Token.type.function)
                 {
                     Function foo = new Function(expression[i].IsKeyword);
-                    v = foo[expression[i, foo.Limiter]];
+                    var Body = expression[i, foo.Limiter];
+                    i += Body.Count;
+                    if (foo.Type == Function.type.function)
+                    {
+                        v = foo[Body];
+                    }
+                    else if(foo.Type == Function.type.procedure)
+                    {
+                        v = foo[Body];
+                        continue;
+                    }
                 }
-                Action o = new Action(expression[i + 1].Word);
+                while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
+                Action o = new Action("Skip");
+                if(i < expression.Count)
+                    o = new Action(expression[i].Word);
                 var node = new Node(v, o);
                 Tree.AddLast(node);
+                i++;
             }
             return Tree;
         }
@@ -104,13 +127,25 @@ namespace YetAnotherScriptingLanguage
                     case "!":
                         left.Value = new variables.Variable(variables.Variable.xor(left.Value,right.Value), variables.Variable.type.Boolean);
                         break;
+                    case ":=":
+                        ((variables.Variable)Interpreter.Get[left.Value.Name]).Value = right.Value.Value;
+                        break;
                 }
                 left.Operation = right.Operation;
                 return left;
             };
-            if (expression.Count != 1)
+            if (expression.Count == 1)
+            {
+                return expression.First.Value.Value;
+            }
+            else if (expression.Count > 1)
             {
                 var root = expression.First;
+                if(!root.Value.Operation.isValidAction)
+                {
+                    expression.RemoveFirst();
+                    return Evaluate(expression);
+                }
                 var next = root.Next;
                 while (!Proceed[root.Value, next.Value])
                 {
@@ -122,11 +157,7 @@ namespace YetAnotherScriptingLanguage
                 expression.Remove(next);
                 return Evaluate(expression);
             }
-            else
-            {
-                return expression.First.Value.Value;
-            }
-            throw new Exception("not yet made");
+            return null;
         }
     }
 

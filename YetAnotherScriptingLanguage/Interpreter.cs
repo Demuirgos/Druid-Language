@@ -6,13 +6,16 @@ namespace YetAnotherScriptingLanguage
 {
     class Interpreter
     {
+        public static bool Verbose { get; set; }
         public class Block
         {
             public Block(string name = null)
             {
                 Name = name;
+                variables = new Dictionary<string, Function>();
             }
-            public Dictionary<string, Function> Variables { get; set; }
+            public Dictionary<string, Function> variables { get; set; }
+            public Dictionary<string, Function> Variables => variables;
             public string Name { get; set; }
         }
         private Parser main;
@@ -110,6 +113,14 @@ namespace YetAnotherScriptingLanguage
                 Interpreter.Functions.Add(csts, new ConstantsMap(csts));
             }
         }
+
+        public static void logStacks()
+        {
+            foreach(var valuePair in Interpreter.CurrentBlock.Variables)
+            {
+                Console.WriteLine(valuePair.Key + " : " + valuePair.Value);
+            }
+        } 
     }
     namespace POST
     {
@@ -120,7 +131,20 @@ namespace YetAnotherScriptingLanguage
             {
                 get
                 {
-                    if ( Interpreter.ExecutionStack.Count>0 && Interpreter.CurrentBlock.Variables.ContainsKey(token)) return Interpreter.CurrentBlock.Variables[token];
+                    if (Interpreter.ExecutionStack.Count > 0)
+                    {
+                        if (Interpreter.CurrentBlock.Variables.ContainsKey(token))
+                            return Interpreter.CurrentBlock.Variables[token];
+                        else
+                        {
+                            var stacks = Interpreter.ExecutionStack.ToArray();
+                            foreach(var block in stacks)
+                            {
+                                if (block.Variables.ContainsKey(token))
+                                    return block.Variables[token];
+                            }
+                        }
+                    }
                     if (Interpreter.Functions.ContainsKey(token)) return Interpreter.Functions[token];
                     throw new Exception("Method undefined");
                 }
@@ -142,7 +166,7 @@ namespace YetAnotherScriptingLanguage
                     else
                     {
                         Interpreter.Set.Insert(new Interpreter.Block());
-                        Interpreter.CurrentBlock.Variables[token] = value;
+                        Interpreter.CurrentBlock.Variables.Add(token, value);
                     }
                 }
             }

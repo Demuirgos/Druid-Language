@@ -112,6 +112,7 @@ namespace YetAnotherScriptingLanguage
             constant,
             operation,
             Separator,
+            Ender,
             function
         }
 
@@ -128,12 +129,12 @@ namespace YetAnotherScriptingLanguage
 
         public static bool operator ==(Token left, Token right)
         {
-            return left.IsMathEvaluation == right.IsMathEvaluation && left.Word == right.Word;
+            return left.IsMathEvaluation == right.IsMathEvaluation && (left.Word == right.Word || left.IsKeyword==right.IsKeyword);
         }
 
         public static bool operator !=(Token left, Token right)
         {
-            return left.IsMathEvaluation != right.IsMathEvaluation || left.Word != right.Word;
+            return !(left == right);
         }
 
         static private KeyWords Dictionary = new KeyWords();
@@ -142,7 +143,11 @@ namespace YetAnotherScriptingLanguage
         public Token.type Type {
             get
             {
-                if(Word == "\r\n" || Word == "\r" || Word == "\t" || Word == "\n" || Word == " ")
+                if(Word == "\r\n" || Word == "\n")
+                {
+                    return type.Ender;
+                }
+                else if(Word == " " || Word == "\r" || Word == "\t")
                 {
                     return type.Separator;
                 }
@@ -153,6 +158,10 @@ namespace YetAnotherScriptingLanguage
                 else if (Interpreter.Keywords.ContainsKey(this.Word))
                 {
                     return Token.type.keyword;
+                }
+                else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.Word))
+                {
+                    return Token.type.variable;
                 }
                 else
                 {
@@ -169,23 +178,51 @@ namespace YetAnotherScriptingLanguage
         List<Token> mylist = new List<Token>();
         public int Count => mylist.Count;
 
+        public override string ToString()
+        {
+            string result = "";
+            foreach(var token in this.mylist)
+            {
+                result += token.Word + ", ";
+            }
+            return result;
+        }
+
         public Token this[int index]
         {
             get { return mylist[index]; }
             set { mylist.Insert(index, value); }
         }
 
+        public void Trim()
+        {
+            for(int i = 0; i < this.Count; i++)
+            {
+                if(this[i].Type == Token.type.Separator || this[i].Type == Token.type.Ender)
+                {
+                    this.Remove(i);
+                    i--;
+                }
+            }
+        }
+
         public TokensList this[int l,Token t]
         {
-            get {
-                if(t.Word == "Current")
+            get
+            {
+                if (t.Word == "Current")
+                {
+                    return this[l, l];
+                }
+                else if (t.Word == "Next")
                 {
                     return this[l, l + 1];
                 }
                 var result = new TokensList();
-                for(int i = l; this[i] == t && i<this.Count; i++)
+                for(int i = l; i<this.Count; i++)
                 {
                     result.Add(this[i]);
+                    if (this[i] == t) break;
                 }
                 return result;
             }
@@ -195,7 +232,7 @@ namespace YetAnotherScriptingLanguage
         {
             get {
                 var result = new TokensList();
-                for(int i = l; i < r; i++)
+                for(int i = l; i <= r; i++)
                 {
                     result.Add(this[i]);
                 }
@@ -226,7 +263,7 @@ namespace YetAnotherScriptingLanguage
             mylist.RemoveAt(idx);
         }
 
-        public void Clear(Token token)
+        public void Clear()
         {
             mylist.Clear();
         }

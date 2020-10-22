@@ -13,22 +13,27 @@ namespace YetAnotherScriptingLanguage
                 Console.WriteLine(token.Word);
             }
         }
-        static void MathEvalTest()
+        static void MathEvalTest(bool input = true,string val="")
         {
-            while (true)
+            do
             {
                 Console.WriteLine("Evaluating simple Math test : ");
-                TranslationUnit tes = new TranslationUnit(Console.ReadLine());
+                TranslationUnit tes = !input ? new TranslationUnit(val) : new TranslationUnit(Console.ReadLine());
                 var res = (variables.Variable)Parser.Evaluate(Parser.Parse(tes.Tokens));
                 Console.WriteLine(tes.Code + " => " + res.Value);
-            }
+            } while (true && input);
         }
         static void Main(string[] args)
         {
             var Interpreter = new Interpreter("");
+            Interpreter.Verbose = true;
             try
             {
-                MathEvalTest();
+                MathEvalTest(false,
+                    "Print('test',15)" + Environment.NewLine +
+                    "Variable n as Decimal" + Environment.NewLine +
+                    "n:=max(5,7)*3+2" + Environment.NewLine +
+                    "min(n,5)");
             }
             catch(Exception e)
             {

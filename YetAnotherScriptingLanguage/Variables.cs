@@ -8,7 +8,7 @@ namespace YetAnotherScriptingLanguage
     namespace variables
     {
         
-        public class Variable
+        class Variable : Function
         {
             public enum type
             {
@@ -59,7 +59,7 @@ namespace YetAnotherScriptingLanguage
                     }
 
                 }
-                throw new Exception("Operation Undefined +(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static Variable operator *(Variable left, Variable right)
@@ -74,7 +74,7 @@ namespace YetAnotherScriptingLanguage
                     }
 
                 }
-                throw new Exception("Operation Undefined +(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static Variable operator /(Variable left, Variable right)
@@ -92,7 +92,7 @@ namespace YetAnotherScriptingLanguage
                     }
 
                 }
-                throw new Exception("Operation Undefined +(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static Variable operator ^(Variable left, Variable right)
@@ -107,7 +107,7 @@ namespace YetAnotherScriptingLanguage
                     }
 
                 }
-                throw new Exception("Operation Undefined ^(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined ^(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static Variable operator -(Variable left, Variable right)
@@ -122,7 +122,7 @@ namespace YetAnotherScriptingLanguage
                     }
 
                 }
-                throw new Exception("Operation Undefined -(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined -(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
             
             public static Variable operator %(Variable left, Variable right)
@@ -136,9 +136,9 @@ namespace YetAnotherScriptingLanguage
                             if (lhs == Math.Truncate(lhs) && rhs == Math.Truncate(rhs))
                                 return new Variable(Convert.ToInt32(left.Value) % Convert.ToInt32(right.Value), type.Decimal);
                             else
-                                throw new Exception("Operation % Takes ( integer , integer )");
+                                throw new Exception("Operation % Takes ( integer" + ", " + "integer )");
                     }
-                throw new Exception("Operation Undefined %(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined %(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static bool operator ==(Variable left, Variable right)
@@ -185,7 +185,7 @@ namespace YetAnotherScriptingLanguage
                         case type.Decimal:
                             return Convert.ToDouble(left.Value) < Convert.ToDouble(right.Value);
                     }
-                throw new Exception("Operation Undefined <(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined <(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static bool operator >(Variable left, Variable right)
@@ -200,7 +200,7 @@ namespace YetAnotherScriptingLanguage
                         case type.Decimal:
                             return Convert.ToDouble(left.Value) > Convert.ToDouble(right.Value);
                     }
-                throw new Exception("Operation Undefined >(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined >(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static bool operator &(Variable left, Variable right)
@@ -211,7 +211,7 @@ namespace YetAnotherScriptingLanguage
                         case type.Boolean:
                             return Convert.ToBoolean(left.Value) && Convert.ToBoolean(right.Value);
                     }
-                throw new Exception("Operation Undefined &(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined &(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
             public static bool operator ~(Variable left)
@@ -242,7 +242,7 @@ namespace YetAnotherScriptingLanguage
                         case type.Boolean:
                             return Convert.ToBoolean(left.Value) || Convert.ToBoolean(right.Value);
                     }
-                throw new Exception("Operation Undefined |(" + left.Type.ToString() + right.Type.ToString() + ")");
+                throw new Exception("Operation Undefined |(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
 
 
