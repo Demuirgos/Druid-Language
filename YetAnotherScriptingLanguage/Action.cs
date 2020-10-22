@@ -27,10 +27,10 @@ namespace YetAnotherScriptingLanguage
                 {
                     case "^" : return 10;
                     case "%" : return 9;
-                    case "/" : return 8;
-                    case "*" : return 7;
-                    case "-" : return 6;
-                    case "+" : return 5;
+                    case "/" : 
+                    case "*" : return 8;
+                    case "-" : 
+                    case "+" : return 7;
                     case "<" :
                     case ">" :
                     case "=" :

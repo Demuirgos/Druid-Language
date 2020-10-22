@@ -8,7 +8,7 @@ namespace YetAnotherScriptingLanguage
     {
         class ProceedFlag
         {
-            public bool this[Node left, Node right] => left.Operation.Priority > right.Operation.Priority || right == null;
+            public bool this[Node left, Node right] => left.Operation.Priority >= right.Operation.Priority || right == null;
         }
         public static bool Verbose { get; set; }
         private int index;

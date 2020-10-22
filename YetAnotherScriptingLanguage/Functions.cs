@@ -291,9 +291,9 @@ namespace YetAnotherScriptingLanguage
 
         public static void SetUpCanstants()
         {
-            Canstants.Add("e", Math.E); Canstants.Add("E", Math.E);
-            Canstants.Add("pi", Math.PI); Canstants.Add("PI", Math.PI);
-            Canstants.Add("False", 0); Canstants.Add("True", 1);
+            Canstants.Add("e", Math.E);     Canstants.Add("E", Math.E);
+            Canstants.Add("pi", Math.PI);   Canstants.Add("PI", Math.PI);
+            Canstants.Add("False", 0);      Canstants.Add("True", 1);
         }
 
         protected override variables.Variable Evaluate(TokensList data)
@@ -341,18 +341,21 @@ namespace YetAnotherScriptingLanguage
 
         private static void SetUpDuals()
         {
-            DualFunctions.Add("pow", Math.Pow); DualFunctions.Add("max", Math.Max); DualFunctions.Add("min", Math.Min); 
-            DualFunctions.Add("Log_b", Math.Log); DualFunctions.Add("round", (double x,double n) => Math.Floor(x * Math.Pow(10, n) + 0.5) / Math.Pow(10, n));
+            DualFunctions.Add("pow", Math.Pow);     DualFunctions.Add("max", Math.Max); 
+            DualFunctions.Add("min", Math.Min);     DualFunctions.Add("Log_b", Math.Log); 
+            DualFunctions.Add("round", (double x,double n) => Math.Floor(x * Math.Pow(10, n) + 0.5) / Math.Pow(10, n));
             DualFunctions.Add("rand", (double x, double n) => { return rnd.NextDouble() + rnd.Next((int)x,(int)n); });
         }
 
         private static void SetUpUnaries()
         {
-            UnaryFunctions.Add("sin", Math.Sin); UnaryFunctions.Add("cos", Math.Cos); UnaryFunctions.Add("tan", Math.Tan);
-            UnaryFunctions.Add("asin", Math.Asin); UnaryFunctions.Add("acos", Math.Acos); UnaryFunctions.Add("atan", Math.Atan);
-            UnaryFunctions.Add("exp", Math.Exp); UnaryFunctions.Add("log", Math.Log); UnaryFunctions.Add("sqrt", Math.Sqrt);
-            UnaryFunctions.Add("abs", Math.Abs); UnaryFunctions.Add("floor", Math.Floor); UnaryFunctions.Add("ceil", Math.Ceiling);
-            UnaryFunctions.Add("neg", (double d) => -d);
+            UnaryFunctions.Add("sin", Math.Sin);        UnaryFunctions.Add("cos", Math.Cos);    
+            UnaryFunctions.Add("tan", Math.Tan);        UnaryFunctions.Add("atan", Math.Atan);
+            UnaryFunctions.Add("asin", Math.Asin);      UnaryFunctions.Add("acos", Math.Acos);  
+            UnaryFunctions.Add("exp", Math.Exp);        UnaryFunctions.Add("log", Math.Log);    
+            UnaryFunctions.Add("abs", Math.Abs);        UnaryFunctions.Add("floor", Math.Floor);
+            UnaryFunctions.Add("sqrt", Math.Sqrt);      UnaryFunctions.Add("ceil", Math.Ceiling);
+            UnaryFunctions.Add("-", (double d) => -d);  UnaryFunctions.Add("+", (double d) => d);
         }
 
 

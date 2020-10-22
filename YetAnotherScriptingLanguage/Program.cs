@@ -29,7 +29,7 @@ namespace YetAnotherScriptingLanguage
             Interpreter.Verbose = true;
             try
             {
-                MathEvalTest(false,
+                MathEvalTest(true,
                     "Print('test',15)" + Environment.NewLine +
                     "Variable n as Decimal" + Environment.NewLine +
                     "n:=max(5,7)*3+2" + Environment.NewLine +
