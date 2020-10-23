@@ -240,6 +240,9 @@ namespace YetAnotherScriptingLanguage
 
     class PrintProcess : ArgumentedProcess
     {
+
+        public delegate void PrintInvoked(PrintProcess sender,List<variables.Variable> Arguments);
+        public event PrintInvoked PrintHandler;
         public PrintProcess(string name = "Print") : base(name)
         {
             Type = type.procedure;
@@ -269,21 +272,45 @@ namespace YetAnotherScriptingLanguage
         protected override void Process(TokensList data)
         {
             getArgs(data);
-            for (int i = 0; i < this.Arguments.Count; i++)
-                Console.Write(Arguments[i].Value + (i < Arguments.Count - 1 ? " " : Environment.NewLine));
+            PrintHandler(this,Arguments);
+            
         }
     }
 
     class ReadProcess : ArgumentedProcess
     {
+
+        public delegate variables.Variable ReadInvoked(ReadProcess sender, variables.Variable Argument);
+        public event ReadInvoked ReadHandler; 
         public ReadProcess(string name = "Read") : base(name)
         {
+            Type = type.function;
             Limiter = new Token("END_STATEMENT");
         }
+
+        protected override void getArgs(TokensList tokens)
+        {
+            Arguments.Clear();
+            var args = tokens[1].Spread();
+            args.Trim(true);
+            if (args.Count > 1) throw new Exception("Argument Count Missmatch, Read takes 1 argument");
+            else
+            {
+                if (args.Count == 0)
+                {
+                    Arguments.Add(new variables.Variable(""));
+                }
+                else
+                {
+                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                }
+            }
+        }
+
         protected override variables.Variable Evaluate(TokensList data)
         {
-            Console.Write(Arguments[0].Value);
-            return new variables.Variable(Console.ReadLine(), variables.Variable.type.Word);
+            getArgs(data);
+            return ReadHandler(this,Arguments[0]);
         }
     }
 
@@ -405,7 +432,10 @@ namespace YetAnotherScriptingLanguage
             //Variable n as integer (Decima | Boolean | Word | Array?)
             //Variable n as array of Word
             getArgs(data); ;
-            ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value = Arguments[1].Value;
+            var var = ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]);
+            if (var.Type != Arguments[1].Type)
+                throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
+            var.Value = Arguments[1].Value;
         }
     }
 }

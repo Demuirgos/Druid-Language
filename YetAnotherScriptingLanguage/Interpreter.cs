@@ -115,6 +115,22 @@ namespace YetAnotherScriptingLanguage
             {
                 Interpreter.Functions.Add(csts, new ConstantsMap(csts));
             }
+
+            //setup printRead behaviour
+            ((PrintProcess)Interpreter.Functions["Print"]).PrintHandler += Interpreter_PrintHandler1;
+            ((ReadProcess)Interpreter.Functions["Read"]).ReadHandler += Interpreter_ReadHandler;
+        }
+
+        private variables.Variable Interpreter_ReadHandler(ReadProcess sender, variables.Variable Argument)
+        {
+            Console.Write(sender.Arguments[0].Value + (sender.Arguments[0].Value == ""?"":" "));
+            return new variables.Variable(Console.ReadLine());
+        }
+
+        private void Interpreter_PrintHandler1(PrintProcess sender, List<variables.Variable> Arguments)
+        {
+            for (int i = 0; i < sender.Arguments.Count; i++)
+                Console.Write(sender.Arguments[i].Value + (i < sender.Arguments.Count - 1 ? " " : Environment.NewLine));
         }
 
         public static void logStacks()
