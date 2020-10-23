@@ -21,6 +21,7 @@ namespace YetAnotherScriptingLanguage
             StringBuilder currentWord = new StringBuilder();
             string TranslationCode = code.Code + Environment.NewLine;
             bool isHigh = false;
+            bool isString = false;
             for (var i = 0;i< TranslationCode.Length; i++)
             {
                 var currentChar = TranslationCode[i];
@@ -53,6 +54,7 @@ namespace YetAnotherScriptingLanguage
                             }
                             currentWord.Remove(0, 1);
                             currentWord.Remove(currentWord.Length-1, 1);
+                            isString = true;
                         }
                         else if (currentChar == '/' && nextChar == '/')
                         {
@@ -90,15 +92,17 @@ namespace YetAnotherScriptingLanguage
                             }
                         }
                     }
-                    Tokens.Add(new Token(currentWord.ToString(),isHigh));
+                    Tokens.Add(new Token(currentWord.ToString(),isHigh,isString));
                     currentWord.Clear();
                     isHigh = false;
+                    isString = false;
                 }
                 else
                 {
                     currentWord.Append(currentChar);
                 }
             }
+            Tokens.Trim(false);
             return Tokens;
         }
         public static char[] Separators => ("'<>=+-*/%&|^\t (){}[]:,!\0" + Environment.NewLine).ToCharArray();
@@ -116,9 +120,10 @@ namespace YetAnotherScriptingLanguage
             function
         }
 
-        public Token(String word, bool isHigh = false)
+        public Token(String word, bool isHigh = false, bool _isString = false)
         {
             Word = word;
+            isString = _isString;
             IsMathEvaluation = isHigh;
         }
 
@@ -140,9 +145,11 @@ namespace YetAnotherScriptingLanguage
         static private KeyWords Dictionary = new KeyWords();
         public bool IsMathEvaluation { get; set; }
         public String Word { get; }
+        private bool isString { get; set; }
         public Token.type Type {
             get
             {
+                if (isString) return type.constant;
                 if(Word == "\r\n" || Word == "\n")
                 {
                     return type.Ender;
@@ -194,11 +201,11 @@ namespace YetAnotherScriptingLanguage
             set { mylist.Insert(index, value); }
         }
 
-        public void Trim()
+        public void Trim(bool EndersToo = true)
         {
             for(int i = 0; i < this.Count; i++)
             {
-                if(this[i].Type == Token.type.Separator || this[i].Type == Token.type.Ender)
+                if(this[i].Type == Token.type.Separator || (this[i].Type == Token.type.Ender && EndersToo))
                 {
                     this.Remove(i);
                     i--;
@@ -217,6 +224,10 @@ namespace YetAnotherScriptingLanguage
                 else if (t.Word == "Next")
                 {
                     return this[l, l + 1];
+                }
+                else if (t.Word == "Previous")
+                {
+                    return this[l - 1, new Token("END_STATEMENT")];
                 }
                 var result = new TokensList();
                 for(int i = l; i<this.Count; i++)

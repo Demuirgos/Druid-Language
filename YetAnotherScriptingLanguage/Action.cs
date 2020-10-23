@@ -25,20 +25,20 @@ namespace YetAnotherScriptingLanguage
             get {
                 switch (this.Operator)
                 {
-                    case "^" : return 10;
-                    case "%" : return 9;
+                    case "^" : return 15;
+                    case "%" : return 14;
                     case "/" : 
-                    case "*" : return 8;
+                    case "*" : return 13;
                     case "-" : 
-                    case "+" : return 7;
+                    case "+" : return 12;
                     case "<" :
                     case ">" :
                     case "=" :
-                    case "<>": return 4;
-                    case "!" : return 3;
+                    case "<>": return 11;
+                    case "!" : return 10;
                     case "|":
-                    case "&" : return 2;
-                    case ":=": return 1;
+                    case "&" : return 9;
+                    case ":=": return 8;
                     default  : return 0;
                 }
             }

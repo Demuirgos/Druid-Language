@@ -42,7 +42,6 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if (expression[i].Type == Token.type.variable)
                 {
-                    
                     v = (variables.Variable)Interpreter.Get[expression[i].Word];
                     i++;
                 }
@@ -63,8 +62,18 @@ namespace YetAnotherScriptingLanguage
                 }
                 while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
                 Action o = new Action("Skip");
-                if(i < expression.Count)
+                if (i < expression.Count)
+                {
                     o = new Action(expression[i].Word);
+                    if (o.Operator == ":=")
+                    {
+                        Function foo = new Function(expression[i].IsKeyword);
+                        var Body = expression[i, foo.Limiter];
+                        i += Body.Count - 1;
+                        v = foo[Body];
+                        continue;
+                    }
+                }
                 var node = new Node(v, o);
                 Tree.AddLast(node);
                 i++;
@@ -126,9 +135,6 @@ namespace YetAnotherScriptingLanguage
                         break;
                     case "!":
                         left.Value = new variables.Variable(variables.Variable.xor(left.Value,right.Value), variables.Variable.type.Boolean);
-                        break;
-                    case ":=":
-                        ((variables.Variable)Interpreter.Get[left.Value.Name]).Value = right.Value.Value;
                         break;
                 }
                 left.Operation = right.Operation;

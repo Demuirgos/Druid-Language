@@ -98,6 +98,9 @@ namespace YetAnotherScriptingLanguage
                     case ("Function"):
                         Interpreter.Functions.Add("Function", new FunctionProcess());
                         break;
+                    case ("ASSIGNMENT"):
+                        Interpreter.Functions.Add("ASSIGNMENT", new SetProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
@@ -159,15 +162,11 @@ namespace YetAnotherScriptingLanguage
                 set
                 {
                     value.Name = token;
-                    if (Interpreter.ExecutionStack.Count > 0)
-                    {
-                        Interpreter.Functions[token] = value;
-                    }
-                    else
+                    if (Interpreter.ExecutionStack.Count == 0)
                     {
                         Interpreter.Set.Insert(new Interpreter.Block());
-                        Interpreter.CurrentBlock.Variables.Add(token, value);
                     }
+                    Interpreter.CurrentBlock.Variables.Add(token, value);
                 }
             }
 

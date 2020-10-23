@@ -20,7 +20,6 @@ namespace YetAnotherScriptingLanguage
                 Console.WriteLine("Evaluating simple Math test : ");
                 TranslationUnit tes = !input ? new TranslationUnit(val) : new TranslationUnit(Console.ReadLine());
                 var res = (variables.Variable)Parser.Evaluate(Parser.Parse(tes.Tokens));
-                Console.WriteLine(tes.Code + " => " + res.Value);
             } while (true && input);
         }
         static void Main(string[] args)
@@ -29,17 +28,26 @@ namespace YetAnotherScriptingLanguage
             Interpreter.Verbose = true;
             try
             {
-                MathEvalTest(true,
-                    "Print('test',15)" + Environment.NewLine +
+                MathEvalTest(false,
                     "Variable n as Decimal" + Environment.NewLine +
-                    "n:=max(5,7)*3+2" + Environment.NewLine +
-                    "min(n,5)");
+                    "Variable m as Decimal" + Environment.NewLine +
+                    "Variable k as Decimal" + Environment.NewLine +
+                    "n := 1+2+3+4" + Environment.NewLine +
+                    "m := 1*2*3*4" + Environment.NewLine +
+                    "k := m-n" + Environment.NewLine +
+                    "Print('factorial(m) != sum(1,m) coz (k=m-n) =>',k,'<>',0)" + Environment.NewLine + 
+                    "n := 1+2+3" + Environment.NewLine +
+                    "m := 1*2*3" + Environment.NewLine +
+                    "k := m-n" + Environment.NewLine +
+                    "Print('but factorial(3) != sum(1,3) coz (k=m-n) =>',k,'==',0)" + Environment.NewLine
+                    );
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
             }
+            Console.Read();
         }
     }
 }

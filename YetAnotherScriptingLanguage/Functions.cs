@@ -29,14 +29,14 @@ namespace YetAnotherScriptingLanguage
                 Implimentation = this;
             }
         }
-        public variables.Variable this[TokensList s]{
+        public variables.Variable this[TokensList s] {
             get
             {
                 if (this.Type == type.function)
                     return Implimentation.Evaluate(s);
                 else
                     Implimentation.Process(s);
-                return new variables.Variable(null,varType: variables.Variable.type.Invalid);
+                return new variables.Variable(null, varType: variables.Variable.type.Invalid);
             }
         }
         protected virtual variables.Variable Evaluate(TokensList data) => throw new Exception("Not Implemented");
@@ -81,7 +81,7 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class ConditionalProcess: Function 
+    class ConditionalProcess : Function
     {
         private TokensList condition;
         public Token delimiter { get; set; }
@@ -89,9 +89,9 @@ namespace YetAnotherScriptingLanguage
             Type = type.procedure;
             Limiter = new Token("End");
         }
-        private void ConditionToken(TokensList tokens,ref int index) {
+        private void ConditionToken(TokensList tokens, ref int index) {
             condition = new TokensList();
-            while(tokens[index].IsKeyword != delimiter.Word)
+            while (tokens[index].IsKeyword != delimiter.Word)
             {
                 condition.Add(tokens[index]);
             }
@@ -99,19 +99,19 @@ namespace YetAnotherScriptingLanguage
         public bool Condition => (bool)Parser.Evaluate(Parser.Parse(condition));
     }
 
-    class IfProcess         : ConditionalProcess
+    class IfProcess : ConditionalProcess
     {
-        public IfProcess(string name  = "If") : base(name)
+        public IfProcess(string name = "If") : base(name)
         {
             delimiter = new Token("Then");
         }
         protected override void Process(TokensList data)
         {
-            
+
         }
     }
 
-    class WhileProcess      : ConditionalProcess
+    class WhileProcess : ConditionalProcess
     {
         public WhileProcess(string name = "While") : base(name)
         {
@@ -119,11 +119,11 @@ namespace YetAnotherScriptingLanguage
         }
         protected override void Process(TokensList data)
         {
-             
+
         }
     }
 
-    class ForProcess        : WhileProcess
+    class ForProcess : WhileProcess
     {
         public ForProcess(string name = "For") : base(name)
         {
@@ -131,11 +131,11 @@ namespace YetAnotherScriptingLanguage
         }
         protected override void Process(TokensList data)
         {
-            
+
         }
     }
 
-    class ImportProcess     : Function
+    class ImportProcess : Function
     {
         public ImportProcess(string name = "Import") : base(name)
         {
@@ -148,7 +148,7 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class ClassProcess      : Function
+    class ClassProcess : Function
     {
         public ClassProcess(string name = "Class") : base(name)
         {
@@ -160,10 +160,10 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class FunctionProcess   : Function
+    class FunctionProcess : Function
     {
         public FunctionProcess(string name = "Function") : base(name)
-        { 
+        {
             Type = type.function;
             Limiter = new Token("END");
         }
@@ -174,16 +174,16 @@ namespace YetAnotherScriptingLanguage
         public List<variables.Variable.type> Signature { get; set; }
     }
 
-    class SpacedProcess     : Function
+    class SpacedProcess : Function
     {
         public SpacedProcess(string name) : base(name)
-        { 
+        {
             Type = type.function;
             Limiter = new Token("END_STATEMENT");
         }
     }
 
-    class ReturnProcess     : SpacedProcess
+    class ReturnProcess : SpacedProcess
     {
         public ReturnProcess(string name = "Return") : base(name)
         {
@@ -195,7 +195,7 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class VariableProcess   : SpacedProcess
+    class VariableProcess : SpacedProcess
     {
         public VariableProcess(string name = "Variable") : base(name)
         {
@@ -210,7 +210,7 @@ namespace YetAnotherScriptingLanguage
             if (data.Count != 4 || data.Count != 6)
                 new Exception("Syntax error Variable Declared Incorrectly");
             var name = data[1].Word;
-            var type = data[3].Word=="Decimal"?variables.Variable.type.Decimal: data[3].Word == "Boolean" ? variables.Variable.type.Boolean: data[3].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            var type = data[3].Word == "Decimal" ? variables.Variable.type.Decimal : data[3].Word == "Boolean" ? variables.Variable.type.Boolean : data[3].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
             object defaultVal = null;
             switch (type)
             {
@@ -231,14 +231,14 @@ namespace YetAnotherScriptingLanguage
 
     class ArgumentedProcess : Function
     {
-        public ArgumentedProcess(string name) : base(name) { 
+        public ArgumentedProcess(string name) : base(name) {
         }
         private List<variables.Variable> arguments = new List<variables.Variable>();
         public List<variables.Variable> Arguments => arguments;
         protected virtual void getArgs(TokensList tokens) => throw new Exception("Not yet Implimented");
     }
 
-    class PrintProcess      : ArgumentedProcess
+    class PrintProcess : ArgumentedProcess
     {
         public PrintProcess(string name = "Print") : base(name)
         {
@@ -251,22 +251,30 @@ namespace YetAnotherScriptingLanguage
             Arguments.Clear();
             var args = tokens[1].Spread();
             args.Trim();
-            foreach(var arg in args)
+            TokensList curr = new TokensList();
+            for(int i = 0; i < args.Count; i++) 
             {
-                if(arg.IsKeyword != "NEXT_ARG")
-                Arguments.Add(new variables.Variable(arg.Word));
+                if (args[i].IsKeyword != "NEXT_ARG")
+                {
+                    curr.Add(args[i]);
+                }
+                if(args[i].IsKeyword=="NEXT_ARG" || i == args.Count - 1)
+                {
+                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(curr)));
+                    curr.Clear();
+                }
             }
         }
 
         protected override void Process(TokensList data)
         {
             getArgs(data);
-            for(int i=0;i<this.Arguments.Count;i++)
-                Console.Write(Arguments[i].Value + (i<Arguments.Count - 1 ? " " : Environment.NewLine));
+            for (int i = 0; i < this.Arguments.Count; i++)
+                Console.Write(Arguments[i].Value + (i < Arguments.Count - 1 ? " " : Environment.NewLine));
         }
     }
 
-    class ReadProcess       : ArgumentedProcess
+    class ReadProcess : ArgumentedProcess
     {
         public ReadProcess(string name = "Read") : base(name)
         {
@@ -279,10 +287,9 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class ConstantsMap      :Function
+    class ConstantsMap : Function
     {
         public static Dictionary<string, double> Canstants = new Dictionary<string, double>();
-        
         public ConstantsMap(string name) : base(name)
         {
             Type = type.function;
@@ -291,20 +298,20 @@ namespace YetAnotherScriptingLanguage
 
         public static void SetUpCanstants()
         {
-            Canstants.Add("e", Math.E);     Canstants.Add("E", Math.E);
-            Canstants.Add("pi", Math.PI);   Canstants.Add("PI", Math.PI);
-            Canstants.Add("False", 0);      Canstants.Add("True", 1);
+            Canstants.Add("e", Math.E); Canstants.Add("E", Math.E);
+            Canstants.Add("pi", Math.PI); Canstants.Add("PI", Math.PI);
+            Canstants.Add("False", 0); Canstants.Add("True", 1);
         }
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            if(Name!="False" && Name!="True")
+            if (Name != "False" && Name != "True")
                 return new variables.Variable(Canstants[this.Name], variables.Variable.type.Decimal);
             return new variables.Variable(Canstants[this.Name], variables.Variable.type.Boolean);
         }
     }
 
-    class MathProcess       : ArgumentedProcess
+    class MathProcess : ArgumentedProcess
     {
         public static Dictionary<string, Func<double, double>> UnaryFunctions = new Dictionary<string, Func<double, double>>();
         public static Dictionary<string, Func<double, double, double>> DualFunctions = new Dictionary<string, Func<double, double, double>>();
@@ -320,7 +327,7 @@ namespace YetAnotherScriptingLanguage
             Arguments.Clear();
             TokensList args = tokens[1].Spread();
             TokensList currentArg = new TokensList();
-            for(int i = 0; i < args.Count; i++)
+            for (int i = 0; i < args.Count; i++)
             {
                 currentArg.Add(args[i]);
                 if (args[i].IsKeyword == "NEXT_ARG" || i == args.Count - 1)
@@ -341,21 +348,21 @@ namespace YetAnotherScriptingLanguage
 
         private static void SetUpDuals()
         {
-            DualFunctions.Add("pow", Math.Pow);     DualFunctions.Add("max", Math.Max); 
-            DualFunctions.Add("min", Math.Min);     DualFunctions.Add("Log_b", Math.Log); 
-            DualFunctions.Add("round", (double x,double n) => Math.Floor(x * Math.Pow(10, n) + 0.5) / Math.Pow(10, n));
-            DualFunctions.Add("rand", (double x, double n) => { return rnd.NextDouble() + rnd.Next((int)x,(int)n); });
+            DualFunctions.Add("pow", Math.Pow); DualFunctions.Add("max", Math.Max);
+            DualFunctions.Add("min", Math.Min); DualFunctions.Add("log_b", Math.Log);
+            DualFunctions.Add("round", (double x, double n) => Math.Floor(x * Math.Pow(10, n) + 0.5) / Math.Pow(10, n));
+            DualFunctions.Add("rand", (double x, double n) => { return rnd.NextDouble() + rnd.Next((int)x, (int)n); });
         }
 
         private static void SetUpUnaries()
         {
-            UnaryFunctions.Add("sin", Math.Sin);        UnaryFunctions.Add("cos", Math.Cos);    
-            UnaryFunctions.Add("tan", Math.Tan);        UnaryFunctions.Add("atan", Math.Atan);
-            UnaryFunctions.Add("asin", Math.Asin);      UnaryFunctions.Add("acos", Math.Acos);  
-            UnaryFunctions.Add("exp", Math.Exp);        UnaryFunctions.Add("log", Math.Log);    
-            UnaryFunctions.Add("abs", Math.Abs);        UnaryFunctions.Add("floor", Math.Floor);
-            UnaryFunctions.Add("sqrt", Math.Sqrt);      UnaryFunctions.Add("ceil", Math.Ceiling);
-            UnaryFunctions.Add("-", (double d) => -d);  UnaryFunctions.Add("+", (double d) => d);
+            UnaryFunctions.Add("sin", Math.Sin); UnaryFunctions.Add("cos", Math.Cos);
+            UnaryFunctions.Add("tan", Math.Tan); UnaryFunctions.Add("atan", Math.Atan);
+            UnaryFunctions.Add("asin", Math.Asin); UnaryFunctions.Add("acos", Math.Acos);
+            UnaryFunctions.Add("exp", Math.Exp); UnaryFunctions.Add("log", Math.Log);
+            UnaryFunctions.Add("abs", Math.Abs); UnaryFunctions.Add("floor", Math.Floor);
+            UnaryFunctions.Add("sqrt", Math.Sqrt); UnaryFunctions.Add("ceil", Math.Ceiling);
+            UnaryFunctions.Add("-", (double d) => -d); UnaryFunctions.Add("+", (double d) => d);
         }
 
 
@@ -363,16 +370,42 @@ namespace YetAnotherScriptingLanguage
         {
             getArgs(data);
             int argsCount = this.Arguments.Count;
-            
-            if(argsCount == 1)
+
+            if (argsCount == 1)
             {
                 return new variables.Variable(UnaryFunctions[this.Name](Convert.ToDouble(Arguments[0].Value)), variables.Variable.type.Decimal);
             }
-            else if(argsCount == 2)
+            else if (argsCount == 2)
             {
-                return new variables.Variable(DualFunctions[this.Name](Convert.ToDouble(Arguments[0].Value), Convert.ToDouble(Arguments[1].Value)), variables.Variable.type.Decimal) ;
+                return new variables.Variable(DualFunctions[this.Name](Convert.ToDouble(Arguments[0].Value), Convert.ToDouble(Arguments[1].Value)), variables.Variable.type.Decimal);
             }
             throw new Exception("Argument Mismatch");
+        }
+    }
+
+    class SetProcess : ArgumentedProcess
+    {
+        public SetProcess(string name=":=") : base(name)
+        {
+            this.Type = type.procedure;
+            Limiter = new Token("Previous");
+        }
+
+        protected override void getArgs(TokensList tokens)
+        {
+            Arguments.Clear();
+            Token varName = tokens[0];
+            var argVal = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[2, tokens.Count - 1]));
+            Arguments.Add(new variables.Variable(varName.Word));
+            Arguments.Add(argVal);
+        }
+
+        protected override void Process(TokensList data)
+        {
+            //Variable n as integer (Decima | Boolean | Word | Array?)
+            //Variable n as array of Word
+            getArgs(data); ;
+            ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value = Arguments[1].Value;
         }
     }
 }
