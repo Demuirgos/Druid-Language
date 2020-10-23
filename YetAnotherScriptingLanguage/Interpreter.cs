@@ -46,7 +46,8 @@ namespace YetAnotherScriptingLanguage
 
         public static POST.GET Get = new POST.GET();
         public static POST.SET Set = new POST.SET();
-        public static POST.POP Pop = new POST.POP();
+        public static POST.POP Pop = new POST.POP(); 
+        public static POST.PEEK Peek = new POST.PEEK(); 
 
         public Interpreter(string script)
         {
@@ -205,6 +206,18 @@ namespace YetAnotherScriptingLanguage
                         Interpreter.CurrentBlock.Variables.Remove(token);
                     }
                     return found;
+                }
+            }
+        }
+
+        class PEEK
+        {
+            internal PEEK() { }
+            public bool this[string token]
+            {
+                get
+                {
+                    return (Interpreter.ExecutionStack.Count>0 && Interpreter.CurrentBlock.Variables.ContainsKey(token)) || Interpreter.Functions.ContainsKey(token);
                 }
             }
         }

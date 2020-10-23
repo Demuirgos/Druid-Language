@@ -86,40 +86,75 @@ namespace YetAnotherScriptingLanguage
         private TokensList condition;
         public Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
-            Type = type.procedure;
             Limiter = new Token("End");
         }
-        private void ConditionToken(TokensList tokens, ref int index) {
-            condition = new TokensList();
-            while (tokens[index].IsKeyword != delimiter.Word)
-            {
-                condition.Add(tokens[index]);
-            }
+
+        public void ConditionToken(TokensList tokens) {
+            condition = tokens[0, new Token("Begin")].Remove().Remove(0);
         }
-        public bool Condition => (bool)Parser.Evaluate(Parser.Parse(condition));
+
+        public bool Condition => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(condition))).Value);
     }
 
     class IfProcess : ConditionalProcess
     {
+        private TokensList IfBlock; 
+        private TokensList ElseBlock;
+
         public IfProcess(string name = "If") : base(name)
         {
-            delimiter = new Token("Then");
+            Type = type.procedure;
+            delimiter = new Token("End");
         }
+
+        public void GetIfBlock(TokensList tokens)
+        {
+            IfBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+        }
+
+        public void GetElseBlock(TokensList tokens)
+        {
+            IfBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim();
+        }
+        //extract ifblock
+        //extract else block if exists
         protected override void Process(TokensList data)
         {
-
+            ConditionToken(data);
+            GetIfBlock(data);
+            if (this.Condition)
+            {
+                Parser.Evaluate(Parser.Parse(IfBlock));
+            }
+            else
+            {
+                Console.WriteLine("Not Hmmm");
+            }
         }
     }
 
     class WhileProcess : ConditionalProcess
     {
+        private TokensList WhileBlock;
         public WhileProcess(string name = "While") : base(name)
         {
+            Type = type.procedure;
             delimiter = new Token("Do");
         }
+
+        public void GetWhileBlock(TokensList tokens)
+        {
+            WhileBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+        }
+
         protected override void Process(TokensList data)
         {
-
+            ConditionToken(data);
+            GetWhileBlock(data);
+            while (this.Condition)
+            {
+                Parser.Evaluate(Parser.Parse(WhileBlock));
+            }
         }
     }
 
@@ -225,7 +260,10 @@ namespace YetAnotherScriptingLanguage
                     break;
             }
             var v = new variables.Variable(defaultVal, type, name);
-            Interpreter.Set[name] = v;
+            if (!Interpreter.Peek[name])
+                Interpreter.Set[name] = v;
+            else
+                throw new Exception("A variable with the name : " + name + " Already exists in Stack");
         }
     }
 
@@ -389,6 +427,16 @@ namespace YetAnotherScriptingLanguage
             UnaryFunctions.Add("exp", Math.Exp); UnaryFunctions.Add("log", Math.Log);
             UnaryFunctions.Add("abs", Math.Abs); UnaryFunctions.Add("floor", Math.Floor);
             UnaryFunctions.Add("sqrt", Math.Sqrt); UnaryFunctions.Add("ceil", Math.Ceiling);
+            UnaryFunctions.Add("fact", (double d) =>
+            {
+                if (d != Math.Truncate(d)) throw new Exception("Factorial Function Takes an Integer input");
+                double result = 1;
+                for(int i = 1; i <= Math.Floor(d); i++)
+                {
+                    result *= i;
+                }
+                return result;
+            });
             UnaryFunctions.Add("-", (double d) => -d); UnaryFunctions.Add("+", (double d) => d);
         }
 

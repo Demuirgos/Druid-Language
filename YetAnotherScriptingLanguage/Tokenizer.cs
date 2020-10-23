@@ -201,7 +201,7 @@ namespace YetAnotherScriptingLanguage
             set { mylist.Insert(index, value); }
         }
 
-        public void Trim(bool EndersToo = true)
+        public TokensList Trim(bool EndersToo = true)
         {
             for(int i = 0; i < this.Count; i++)
             {
@@ -211,8 +211,18 @@ namespace YetAnotherScriptingLanguage
                     i--;
                 }
             }
+            return this;
         }
-
+        public TokensList this[int l,Token left, Token limit]
+        {
+            get
+            {
+                var result = new TokensList();
+                int i = l;
+                for (; i < this.Count && this[i] != left; i++) ;
+                return this[i, limit];
+            }
+        }
         public TokensList this[int l,Token t]
         {
             get
@@ -230,10 +240,28 @@ namespace YetAnotherScriptingLanguage
                     return this[l - 1, new Token("END_STATEMENT")];
                 }
                 var result = new TokensList();
-                for(int i = l; i<this.Count; i++)
+                Dictionary<String, String> opposites = new Dictionary<String, String>
+                {
+                    ["End"] = "Begin",
+                    ["Else"] = "If"
+                };
+                int balanced = 0;
+                for (int i = l; i<this.Count; i++)
                 {
                     result.Add(this[i]);
-                    if (this[i] == t) break;
+                    if (opposites.ContainsKey(t.IsKeyword))
+                    {
+                        if (this[i].IsKeyword == opposites[t.IsKeyword]) 
+                            balanced++;
+                        if (this[i] == t) 
+                            balanced--;
+                        if (this[i] == t && balanced == 0) 
+                            break;
+                    }
+                    else
+                    {
+                        if (this[i] == t) break;
+                    }
                 }
                 return result;
             }
@@ -269,9 +297,12 @@ namespace YetAnotherScriptingLanguage
                 mylist.Insert(i,token) ;
         }
 
-        public void Remove(int idx)
+        public TokensList Remove(int idx = -1)
         {
-            mylist.RemoveAt(idx);
+            if (idx == -1) mylist.RemoveAt(this.Count - 1);
+            else 
+                mylist.RemoveAt(idx);
+            return this;
         }
 
         public void Clear()

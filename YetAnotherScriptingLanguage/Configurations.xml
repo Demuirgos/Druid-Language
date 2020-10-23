@@ -59,19 +59,23 @@
         <keyword map="False"    key="False"      Mode="All"/>
         <keyword map="True"     key="True"       Mode="All"/>
         <keyword map="NOT"      key="Not"        Mode="All"/>
+        
         <keyword key="Begin"    map="Begin"      Mode="All"/>
+        <keyword key="Then"     map="Begin"      Mode="All"/>
+        <keyword key="Else"     map="Else"       Mode="All"/>
         <keyword key="End"      map="End"        Mode="All"/>
         <keyword key="If"       map="If"         Mode="All"/>
-        <keyword key="Then"     map="Then"       Mode="All"/>
-        <keyword key="Else"     map="Else"       Mode="All"/>
         <keyword key="While"    map="While"      Mode="All"/>
         <keyword key="To"       map="To"         Mode="All"/>
         <keyword key="From"     map="From"       Mode="All"/>
-        <keyword key="Do"       map="Do"         Mode="All"/>
+        <keyword key="Do"       map="Begin"         Mode="All"/>
         <keyword key="For"      map="For"        Mode="All"/>
+        
         <keyword key="Set"      map="Set"        Mode="All"/>
+        
         <keyword key="Print"    map="Print"      Mode="All"/>
         <keyword key="Read"     map="Read"       Mode="All"/>
+        
         <keyword key="Function" map="Function"   Mode="All"/>
         <keyword key="Variable" map="Variable"   Mode="All"/>
         <keyword key="As"       map="OfType"     Mode="All"/>
@@ -89,21 +93,24 @@
         <keyword map="Decimal"  key="Reél"       Mode="All"/>
         <keyword map="Word"     key="Mot"        Mode="All"/>
         <keyword map="Array"    key="Tableau"    Mode="All"/>
-
+        <!--opposite of : 
+            <Begin = End>
+            <If = Else>
+            -->
         <keyword map="AND"      key="Et"         Mode="All"/>
         <keyword map="OR"       key="Ou"         Mode="All"/>
         <keyword map="NOT"      key="Non"        Mode="All"/>
         <keyword key="Debut"    map="Begin"      Mode="All"/>
         <keyword key="Fin"      map="End"        Mode="All"/>
         <keyword map="If"       key="Si"         Mode="All"/>
-        <keyword key="Donc"     map="Then"       Mode="All"/>
+        <keyword key="Donc"     map="Begin"      Mode="All"/>
         <keyword map="Else"     key="Sinon"      Mode="All"/>
         <keyword map="While"    key="Tant_que"   Mode="All"/>
         <keyword key="A"        map="To"         Mode="All"/>
         <keyword key="De"       map="From"       Mode="All"/>
         <keyword map="For"      key="Pour"       Mode="All"/>
         <keyword map="Set"      key="Affecter"   Mode="All"/>
-        <keyword map="Do"       key="Fait"       Mode="All"/>
+        <keyword map="Begin"    key="Fait"       Mode="All"/>
         <keyword map="Print"    key="Ecrire"     Mode="All"/>
         <keyword map="Read"     key="Lire"       Mode="All"/>
         <keyword map="Function" key="Fonction"   Mode="All"/>

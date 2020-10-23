@@ -19,7 +19,8 @@ namespace YetAnotherScriptingLanguage
             {
                 Console.WriteLine("Evaluating simple Math test : ");
                 TranslationUnit tes = !input ? new TranslationUnit(val) : new TranslationUnit(Console.ReadLine());
-                var res = (variables.Variable)Parser.Evaluate(Parser.Parse(tes.Tokens));
+                var res = (variables.Variable) Parser.Evaluate(Parser.Parse(tes.Tokens));
+                Console.Write(val + " => " + res.Value);
             } while (true && input);
         }
         static void BasicSCriptTest(bool input = true, string val = "")
@@ -37,21 +38,20 @@ namespace YetAnotherScriptingLanguage
             Interpreter.Verbose = true;
             try
             {
-                BasicSCriptTest(false,
+                String code =
                     "Variable n as Decimal" + Environment.NewLine +
-                    "Variable m as Decimal" + Environment.NewLine +
+                    "Variable i as Decimal" + Environment.NewLine +
                     "Variable k as Decimal" + Environment.NewLine +
-                    "n := 1+2+3+4" + Environment.NewLine +
-                    "m := 1*2*3*4" + Environment.NewLine +
-                    "k := Read('please enter the value of K :')" + Environment.NewLine +
-                    "Print('val of k is :',k)" + Environment.NewLine +
-                    "k := n-m" + Environment.NewLine +
-                    "Print('factorial(m) != sum(1,m) coz (k=m-n) =>',k,'<>',0)" + Environment.NewLine + 
-                    "n := 1+2+3" + Environment.NewLine +
-                    "m := 1*2*3" + Environment.NewLine +
-                    "k := m-n" + Environment.NewLine +
-                    "Print('but factorial(3) != sum(1,3) coz (k=m-n) =>',k,'==',0)" + Environment.NewLine
-                    );
+                    "k := Read('Enter the number to calculate the Factorial : ')" + Environment.NewLine +
+                    "n := 1" + Environment.NewLine +
+                    "i := 1" + Environment.NewLine +
+                    "While i < k + 1 Do" + Environment.NewLine +
+                    "n := n * i" + Environment.NewLine +
+                    "i := i + 1" + Environment.NewLine +
+                    "End" + Environment.NewLine +
+                    "Print('factorial of :',k,' is ',n)" + Environment.NewLine;
+                BasicSCriptTest(false, code);
+                MathEvalTest(false,"fact(6)");
             }
             catch(Exception e)
             {
