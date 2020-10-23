@@ -67,6 +67,38 @@ namespace YetAnotherScriptingLanguage
                                 currentWord.Append(nextChar);
                             } while (nextChar != '\n');
                         }
+                        else if (currentChar == '{')
+                        {
+                            isHigh = true;
+                            int balance = 1;
+                            do
+                            {
+                                nextChar = TranslationCode[++i];
+                                currentWord.Append(nextChar);
+                                if (nextChar == '{')
+                                    balance++;
+                                if (nextChar == '}')
+                                    balance--;
+                            } while (balance > 0);
+                            currentWord.Remove(0, 1);
+                            currentWord.Remove(currentWord.Length - 1, 1);
+                        }
+                        else if (currentChar == '[')
+                        {
+                            isHigh = true;
+                            int balance = 1;
+                            do
+                            {
+                                nextChar = TranslationCode[++i];
+                                currentWord.Append(nextChar);
+                                if (nextChar == '[')
+                                    balance++;
+                                if (nextChar == ']')
+                                    balance--;
+                            } while (balance > 0);
+                            currentWord.Remove(0, 1);
+                            currentWord.Remove(currentWord.Length - 1, 1);
+                        }
                         else if (currentChar == '(')
                         {
                             isHigh = true;

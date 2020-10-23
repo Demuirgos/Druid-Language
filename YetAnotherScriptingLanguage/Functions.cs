@@ -83,22 +83,23 @@ namespace YetAnotherScriptingLanguage
 
     class ConditionalProcess : Function
     {
-        private TokensList condition;
+        public TokensList condition;
+        public TokensList Block;
         public Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
             Limiter = new Token("End");
         }
 
-        public void ConditionToken(TokensList tokens) {
+        public virtual void ConditionToken(TokensList tokens) {
             condition = tokens[0, new Token("Begin")].Remove().Remove(0);
         }
+        public virtual void BlockToken(TokensList tokens) => throw new Exception("Not yet Implemented");
 
         public bool Condition => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(condition))).Value);
     }
 
     class IfProcess : ConditionalProcess
     {
-        private TokensList IfBlock; 
         private TokensList ElseBlock;
 
         public IfProcess(string name = "If") : base(name)
@@ -107,66 +108,102 @@ namespace YetAnotherScriptingLanguage
             delimiter = new Token("End");
         }
 
-        public void GetIfBlock(TokensList tokens)
+        public override void BlockToken(TokensList tokens)
         {
-            IfBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
         }
 
         public void GetElseBlock(TokensList tokens)
         {
-            IfBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim();
+            ElseBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim();
         }
         //extract ifblock
         //extract else block if exists
         protected override void Process(TokensList data)
         {
             ConditionToken(data);
-            GetIfBlock(data);
+            BlockToken(data);
             if (this.Condition)
             {
-                Parser.Evaluate(Parser.Parse(IfBlock));
+                Parser.Evaluate(Parser.Parse(Block));
             }
             else
             {
-                Console.WriteLine("Not Hmmm");
+                Parser.Evaluate(Parser.Parse(ElseBlock));
             }
         }
     }
 
     class WhileProcess : ConditionalProcess
     {
-        private TokensList WhileBlock;
         public WhileProcess(string name = "While") : base(name)
         {
             Type = type.procedure;
             delimiter = new Token("Do");
         }
 
-        public void GetWhileBlock(TokensList tokens)
+        public override void BlockToken(TokensList tokens)
         {
-            WhileBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
         }
 
         protected override void Process(TokensList data)
         {
             ConditionToken(data);
-            GetWhileBlock(data);
+            BlockToken(data);
             while (this.Condition)
             {
-                Parser.Evaluate(Parser.Parse(WhileBlock));
+                Parser.Evaluate(Parser.Parse(Block));
             }
         }
     }
 
     class ForProcess : WhileProcess
     {
+        private variables.Variable step;
+        private string indexer;
         public ForProcess(string name = "For") : base(name)
         {
             Type = type.procedure;
+            delimiter = new Token("END_STATEMENT");
         }
+
+        public override void ConditionToken(TokensList tokens)
+        {
+            //for i from l to r (by s)? do
+            var Indexer = tokens[1];
+            indexer = Indexer.Word;
+            bool stepAvailable = tokens.Count == 9;
+            var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("From"), new Token("To")].Remove().Remove(0).Trim(false)));
+            var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("To"), stepAvailable?new Token("By"): new Token("Do")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
+            step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("By"),  new Token("Do")].Remove().Remove(0).Trim(false)));
+            if (leftLim.Type != variables.Variable.type.Decimal || rightLim.Type != variables.Variable.type.Decimal || step.Type != variables.Variable.type.Decimal)
+            {
+                throw new Exception("Upper and Lower limits must be numbers!");
+            }
+            Interpreter.Set[Indexer.Word] = leftLim;
+            condition = new TokensList();
+            condition.Add(Indexer);
+            condition.Add(new Token("<"));
+            condition.Add(new Token(rightLim.Value.ToString()));
+        }
+
+        public override void BlockToken(TokensList tokens)
+        {
+            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+        }
+
         protected override void Process(TokensList data)
         {
-
+            ConditionToken(data);
+            BlockToken(data);
+            while (this.Condition)
+            {
+                Parser.Evaluate(Parser.Parse(Block));
+                var arg = ((variables.Variable)Interpreter.Get[indexer]);
+                var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[indexer]).Value) + Convert.ToDecimal(step.Value);
+                arg.Value = val;
+            }
         }
     }
 

@@ -50,8 +50,18 @@ namespace YetAnotherScriptingLanguage
                     "i := i + 1" + Environment.NewLine +
                     "End" + Environment.NewLine +
                     "Print('factorial of :',k,' is ',n)" + Environment.NewLine;
-                BasicSCriptTest(false, code);
-                MathEvalTest(false,"fact(6)");
+                String code2 =
+                    "Variable n as Decimal" + Environment.NewLine +
+                    "n := 1" + Environment.NewLine +
+                    "For i From 1 To 6 Do" + Environment.NewLine +
+                    "n := n * i" + Environment.NewLine +
+                    "End" + Environment.NewLine +
+                    "Variable k as Word" + Environment.NewLine +
+                    "Variable sum as Word" + Environment.NewLine +
+                    "k := 'test'" + Environment.NewLine +
+                    "sum := k + 'edge'" + Environment.NewLine +
+                    "Print(sum,k,n)" + Environment.NewLine;
+                BasicSCriptTest(false, code2);
             }
             catch(Exception e)
             {
