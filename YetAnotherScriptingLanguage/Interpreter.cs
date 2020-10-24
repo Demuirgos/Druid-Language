@@ -137,9 +137,10 @@ namespace YetAnotherScriptingLanguage
 
         public static void logStacks()
         {
-            foreach(var valuePair in Interpreter.CurrentBlock.Variables)
+            foreach(var stack in Interpreter.ExecutionStack)
             {
-                Console.WriteLine(valuePair.Key + " : " + valuePair.Value);
+                foreach(var variable in stack.Variables)
+                    Console.WriteLine(variable.Key + " : " + ((variables.Variable)variable.Value).Type.ToString());
             }
         } 
     }
@@ -156,18 +157,9 @@ namespace YetAnotherScriptingLanguage
                     {
                         if (Interpreter.CurrentBlock.Variables.ContainsKey(token))
                             return Interpreter.CurrentBlock.Variables[token];
-                        else
-                        {
-                            var stacks = Interpreter.ExecutionStack.ToArray();
-                            foreach(var block in stacks)
-                            {
-                                if (block.Variables.ContainsKey(token))
-                                    return block.Variables[token];
-                            }
-                        }
                     }
                     if (Interpreter.Functions.ContainsKey(token)) return Interpreter.Functions[token];
-                    throw new Exception("Method undefined");
+                    throw new Exception(token + " Method undefined");
                 }
             }
         }

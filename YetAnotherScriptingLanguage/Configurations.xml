@@ -79,8 +79,8 @@
         <keyword key="Function" map="Function"   Mode="All"/>
         <keyword key="Variable" map="Variable"   Mode="All"/>
         <keyword key="As"       map="OfType"     Mode="All"/>
-        <keyword key="Continue" map="Continue"   Mode="All"/>
-        <keyword key="Break"    map="Break"      Mode="All"/>
+        <keyword key="Continue" map="Skip"       Mode="All"/>
+        <keyword key="Break"    map="Exit"       Mode="All"/>
         <keyword key="Return"   map="Return"     Mode="All"/>
         <keyword key="Include"  map="Import"     Mode="All"/>
         

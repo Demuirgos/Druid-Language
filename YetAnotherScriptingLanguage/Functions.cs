@@ -32,11 +32,12 @@ namespace YetAnotherScriptingLanguage
         public variables.Variable this[TokensList s] {
             get
             {
+                variables.Variable v = new variables.Variable(null, varType: variables.Variable.type.Invalid);
                 if (this.Type == type.function)
-                    return Implimentation.Evaluate(s);
+                    v = Implimentation.Evaluate(s);
                 else
                     Implimentation.Process(s);
-                return new variables.Variable(null, varType: variables.Variable.type.Invalid);
+                return v;
             }
         }
         protected virtual variables.Variable Evaluate(TokensList data) => throw new Exception("Not Implemented");
@@ -82,35 +83,29 @@ namespace YetAnotherScriptingLanguage
 
     class ConditionalProcess : Function
     {
-        public TokensList condition;
-        public TokensList Block;
-        public Token delimiter { get; set; }
+        public virtual Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
             Limiter = new Token("End");
         }
+        
+        public virtual Tuple<TokensList, TokensList, TokensList> BlockExtraction(TokensList tokens) => throw new Exception("Not yet Implemented");
 
-        public virtual void ConditionToken(TokensList tokens) {
-            condition = tokens[0, new Token("Begin")].Remove().Remove(0);
-        }
-        public virtual void BlockToken(TokensList tokens) => throw new Exception("Not yet Implemented");
+        public bool this[TokensList l] => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(l))).Value);
 
-        public bool Condition => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(condition))).Value);
     }
 
     class IfProcess : ConditionalProcess
     {
-        private TokensList ElseBlock;
-
         public IfProcess(string name = "If") : base(name)
         {
             Type = type.procedure;
             delimiter = new Token("End");
         }
 
-        public override void BlockToken(TokensList tokens)
+        public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
         {
             int i = 1;
-            //fix index
+            var condition = tokens[0, new Token("Begin")].Remove().Remove(0);
             for (; i < tokens.Count; i++)
             {
                 if (tokens[i].IsKeyword == "If")
@@ -122,23 +117,23 @@ namespace YetAnotherScriptingLanguage
                     break;
                 }
             }
-            ElseBlock = i == tokens.Count ? new TokensList() : tokens[i, new Token("End")].Remove(0).Trim(false);
-            Block = tokens[condition.Count+2,i-1].Trim(false);
+            var ElseBlock = i == tokens.Count ? new TokensList() : tokens[i, new Token("End")].Remove(0).Trim(false);
+            var Block = tokens[condition.Count+2,i-1].Trim(false);
+            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, ElseBlock);
         }
 
         //extract ifblock
         //extract else block if exists
         protected override void Process(TokensList data)
         {
-            ConditionToken(data);
-            BlockToken(data);
-            if (this.Condition)
+            var Blocks = BlockExtraction(data);
+            if (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Block));
+                Parser.Evaluate(Parser.Parse(Blocks.Item2));
             }
             else
             {
-                Parser.Evaluate(Parser.Parse(ElseBlock));
+                Parser.Evaluate(Parser.Parse(Blocks.Item3));
             }
         }
     }
@@ -151,18 +146,19 @@ namespace YetAnotherScriptingLanguage
             delimiter = new Token("Do");
         }
 
-        public override void BlockToken(TokensList tokens)
+        public Tuple<TokensList, TokensList, TokensList> BlockToken(TokensList tokens)
         {
-            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            var condition = tokens[0, new Token("Begin")].Remove().Remove(0);
+            var Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
         }
 
         protected override void Process(TokensList data)
         {
-            ConditionToken(data);
-            BlockToken(data);
-            while (this.Condition)
+            var Blocks = BlockToken(data);
+            while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Block));
+                Parser.Evaluate(Parser.Parse(Blocks.Item2));
             }
         }
     }
@@ -177,12 +173,12 @@ namespace YetAnotherScriptingLanguage
             delimiter = new Token("END_STATEMENT");
         }
 
-        public override void ConditionToken(TokensList tokens)
+        public TokensList ConditionToken(TokensList tokens)
         {
             //for i from l to r (by s)? do
             var Indexer = tokens[1];
             indexer = Indexer.Word;
-            bool stepAvailable = tokens.Count == 9;
+            bool stepAvailable = tokens[0, new Token("Do")].Count == 9;
             var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("From"), new Token("To")].Remove().Remove(0).Trim(false)));
             var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("To"), stepAvailable?new Token("By"): new Token("Do")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
             step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("By"),  new Token("Do")].Remove().Remove(0).Trim(false)));
@@ -191,24 +187,26 @@ namespace YetAnotherScriptingLanguage
                 throw new Exception("Upper and Lower limits must be numbers!");
             }
             Interpreter.Set[Indexer.Word] = leftLim;
-            condition = new TokensList();
+            var condition = new TokensList();
             condition.Add(Indexer);
             condition.Add(new Token("<"));
             condition.Add(new Token(rightLim.Value.ToString()));
+            return condition;
         }
 
-        public override void BlockToken(TokensList tokens)
+        public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
         {
-            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            var condition = ConditionToken(tokens);
+            var Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
         }
 
         protected override void Process(TokensList data)
         {
-            ConditionToken(data);
-            BlockToken(data);
-            while (this.Condition)
+            var Blocks = BlockExtraction(data);
+            while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Block));
+                Parser.Evaluate(Parser.Parse(Blocks.Item2));
                 var arg = ((variables.Variable)Interpreter.Get[indexer]);
                 var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[indexer]).Value) + Convert.ToDecimal(step.Value);
                 arg.Value = val;
@@ -335,7 +333,13 @@ namespace YetAnotherScriptingLanguage
             protected override variables.Variable Evaluate(TokensList data)
             {
                 ArgumentBlockPreProcess(data);
-                throw new Exception("Argument Mismatch");
+                variables.Variable r = (variables.Variable)Parser.Evaluate(Parser.Parse(this.Body));
+                if (r.Type != this.Signature.Value)
+                    throw new Exception("The function " + this.Name + " returns a : " + this.Signature.Value.ToString());
+                r.Type = this.Signature.Value;
+                variables.Variable result = new variables.Variable(r);
+                Interpreter.ExecutionStack.Pop();
+                return result;
             }
 
         }
@@ -399,28 +403,22 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class SpacedProcess : Function
-    {
-        public SpacedProcess(string name) : base(name)
-        {
-            Type = type.function;
-            Limiter = new Token("END_STATEMENT");
-        }
-    }
-
-    class ReturnProcess : SpacedProcess
+    class ReturnProcess : Function
     {
         public ReturnProcess(string name = "Return") : base(name)
         {
-            Type = type.function;
+            this.Type = type.function;
+            Limiter = new Token("END_STATEMENT");
         }
+
         protected override variables.Variable Evaluate(TokensList data)
         {
-            return new variables.Variable(null, variables.Variable.type.Invalid);
+            var PostReturn = data[1, this.Limiter];
+            return (variables.Variable)Parser.Evaluate(Parser.Parse(PostReturn));
         }
     }
 
-    class VariableProcess : SpacedProcess
+    class VariableProcess : Function
     {
         public VariableProcess(string name = "Variable") : base(name)
         {

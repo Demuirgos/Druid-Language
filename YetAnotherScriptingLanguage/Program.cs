@@ -60,37 +60,43 @@ namespace YetAnotherScriptingLanguage
                     "Else" + Environment.NewLine +
                     "Print(n,' is neither divisible by 2 or 3')" + Environment.NewLine +
                     "End" + Environment.NewLine;
-                String code4=
+                String code3=
                     "Variable n as Decimal" + Environment.NewLine +
                     "n := 22" + Environment.NewLine +
                     "If n%2<>0 Then" + Environment.NewLine +
                     "Print(n,' is not divisible by 2')" + Environment.NewLine +
                     "End" + Environment.NewLine;
-                String code3 =
-                    "Function isPrime(n as Decimal)" + Environment.NewLine +
-                    "Begin" + Environment.NewLine +
-                        "Variable value as Boolean" + Environment.NewLine +
-                        "value:=True" + Environment.NewLine +
-                        "For i From 2 To floor(sqrt(n)) Do" + Environment.NewLine +
-                            "If n%i=0 Then" + Environment.NewLine +
-                                "value:=False" + Environment.NewLine +
-                            "End" + Environment.NewLine +
-                        "End" + Environment.NewLine +
-                        "If value=True Then" + Environment.NewLine +
-                            "Print(n,'Is Prime')" + Environment.NewLine +
-                        "Else" + Environment.NewLine +
-                            "Print(n,'Is not prime')" + Environment.NewLine +
-                        "End" + Environment.NewLine +
-                    "End" + Environment.NewLine +
-                    "Function Check(n as Decimal,m as Decimal)" + Environment.NewLine +
-                    "Begin" + Environment.NewLine +
-                        "isPrime(n)" + Environment.NewLine +
-                        "isPrime(m)" + Environment.NewLine +
-                    "End" + Environment.NewLine +
-                    "Check(22,23)" + Environment.NewLine;
-                BasicSCriptTest(false, code3);
+                String code4 =
+                    "Function isPrime(n as Decimal) as Boolean"     + Environment.NewLine +
+                    "Begin"                                         + Environment.NewLine +
+                    "   Variable value as Boolean"                  + Environment.NewLine +
+                    "   value:=True"                                + Environment.NewLine +
+                    "   If n%2=0 Then"                              + Environment.NewLine +
+                    "       value := n=2"                           + Environment.NewLine +
+                    "   Else"                                       + Environment.NewLine +
+                    "       For i From 3 To ceil(sqrt(n)) By 2 Do"  + Environment.NewLine +
+                    "          If n%i=0 Then"                       + Environment.NewLine +
+                    "              value:=false"                    + Environment.NewLine +
+                    "          End"                                 + Environment.NewLine +
+                    "       End"                                    + Environment.NewLine +
+                    "   End"                                        + Environment.NewLine +
+                    "   Return value"                               + Environment.NewLine +
+                    "End"                                           + Environment.NewLine +
+                    "Variable i as Decimal"                         + Environment.NewLine +
+                    "i := 2"                                        + Environment.NewLine +
+                    "If isPrime(i) Then"                            + Environment.NewLine +
+                    "   Print(i,'is prime')"                        + Environment.NewLine +
+                    "Else" + Environment.NewLine +
+                    "   Print(i,'is not prime')" + Environment.NewLine +
+                    "End" + Environment.NewLine;
+                BasicSCriptTest(false, code4);
+
+                // add deep return / exit / skip
+                // add arrays 
+                // add type defs
+                // add IDE
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);

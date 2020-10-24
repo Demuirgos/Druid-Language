@@ -149,6 +149,8 @@ namespace YetAnotherScriptingLanguage
             constant,
             operation,
             Separator,
+            Skip,
+            Exit,
             Ender,
             function
         }
@@ -197,6 +199,10 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if (Interpreter.Keywords.ContainsKey(this.Word))
                 {
+                    if (Interpreter.Keywords[this.Word] == "Exit")
+                        return type.Exit;
+                    if (Interpreter.Keywords[this.Word] == "Skip")
+                        return type.Exit;
                     return Token.type.keyword;
                 }
                 else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.Word))

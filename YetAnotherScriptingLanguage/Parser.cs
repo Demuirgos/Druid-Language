@@ -45,6 +45,10 @@ namespace YetAnotherScriptingLanguage
                     v = (variables.Variable)Interpreter.Get[expression[i].Word];
                     i++;
                 }
+                else if(expression[i].Type == Token.type.Skip)
+                {
+                    i = expression.Count;
+                }
                 else if (expression[i].Type == Token.type.function)
                 {
                     Function foo = new Function(expression[i].IsKeyword);
@@ -53,6 +57,12 @@ namespace YetAnotherScriptingLanguage
                     if (foo.Type == Function.type.function)
                     {
                         v = foo[Body];
+                        if (foo.Name == "Return")
+                        {
+                            Tree.Clear();
+                            Tree.AddFirst(new Node(v, new Action("Skip")));
+                            return Tree;
+                        }
                     }
                     else if(foo.Type == Function.type.procedure)
                     {
