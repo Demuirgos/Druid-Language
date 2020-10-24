@@ -38,7 +38,7 @@ namespace YetAnotherScriptingLanguage
             Interpreter.Verbose = true;
             try
             {
-                String code =
+                String code1 =
                     "Variable n as Decimal" + Environment.NewLine +
                     "Variable i as Decimal" + Environment.NewLine +
                     "Variable k as Decimal" + Environment.NewLine +
@@ -52,15 +52,14 @@ namespace YetAnotherScriptingLanguage
                     "Print('factorial of :',k,' is ',n)" + Environment.NewLine;
                 String code2 =
                     "Variable n as Decimal" + Environment.NewLine +
-                    "n := 1" + Environment.NewLine +
-                    "For i From 1 To 6 Do" + Environment.NewLine +
-                    "n := n * i" + Environment.NewLine +
-                    "End" + Environment.NewLine +
-                    "Variable k as Word" + Environment.NewLine +
-                    "Variable sum as Word" + Environment.NewLine +
-                    "k := 'test'" + Environment.NewLine +
-                    "sum := k + 'edge'" + Environment.NewLine +
-                    "Print(sum,k,n)" + Environment.NewLine;
+                    "n := 23" + Environment.NewLine +
+                    "If n%2=0 Then" + Environment.NewLine +
+                    "Print(n,' is divisible by 2')" + Environment.NewLine +
+                    "Else If n%3=0 Then" + Environment.NewLine +
+                    "Print(n,' is divisible by 3')" + Environment.NewLine +
+                    "Else" + Environment.NewLine +
+                    "Print(n,' is neither divisible by 2 or 3')" + Environment.NewLine +
+                    "End" + Environment.NewLine;
                 BasicSCriptTest(false, code2);
             }
             catch(Exception e)

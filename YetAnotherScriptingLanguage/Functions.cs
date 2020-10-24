@@ -110,13 +110,23 @@ namespace YetAnotherScriptingLanguage
 
         public override void BlockToken(TokensList tokens)
         {
-            Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            int i = 1;
+            //fix index
+            for (; i < tokens.Count; i++)
+            {
+                if (tokens[i].IsKeyword == "If")
+                {
+                    i += tokens[i, new Token("End")].Count;
+                }
+                if (tokens[i].IsKeyword == "Else")
+                {
+                    break;
+                }
+            }
+            ElseBlock = i == tokens.Count ? new TokensList() : tokens[i, new Token("End")].Remove(0).Trim(false);
+            Block = tokens[condition.Count+2,i-1].Trim(false);
         }
 
-        public void GetElseBlock(TokensList tokens)
-        {
-            ElseBlock = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim();
-        }
         //extract ifblock
         //extract else block if exists
         protected override void Process(TokensList data)
