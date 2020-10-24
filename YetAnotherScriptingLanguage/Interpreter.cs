@@ -44,10 +44,11 @@ namespace YetAnotherScriptingLanguage
         public static Stack<Block> ExecutionStack => levels;
         public static Block CurrentBlock => levels.Peek();
 
-        public static POST.GET Get = new POST.GET();
-        public static POST.SET Set = new POST.SET();
-        public static POST.POP Pop = new POST.POP(); 
-        public static POST.PEEK Peek = new POST.PEEK(); 
+        public static COMMANDS.GET  Get  = new COMMANDS.GET() ;
+        public static COMMANDS.SET  Set  = new COMMANDS.SET() ;
+        public static COMMANDS.POP  Pop  = new COMMANDS.POP() ; 
+        public static COMMANDS.PEEK Peek = new COMMANDS.PEEK(); 
+        public static COMMANDS.POST Post = new COMMANDS.POST(); 
 
         public Interpreter(string script)
         {
@@ -142,7 +143,7 @@ namespace YetAnotherScriptingLanguage
             }
         } 
     }
-    namespace POST
+    namespace COMMANDS
     {
         class GET
         {
@@ -218,6 +219,18 @@ namespace YetAnotherScriptingLanguage
                 get
                 {
                     return (Interpreter.ExecutionStack.Count>0 && Interpreter.CurrentBlock.Variables.ContainsKey(token)) || Interpreter.Functions.ContainsKey(token);
+                }
+            }
+        }
+
+        class POST
+        {
+            internal POST() { }
+            public Function this[string token]
+            {
+                set
+                {
+                    Interpreter.Functions.Add(token, value);
                 }
             }
         }

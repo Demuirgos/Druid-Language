@@ -57,7 +57,6 @@ namespace YetAnotherScriptingLanguage
         }
         public Function Implimentation { get; set; }
         public String Name { get; set; }
-        public TokensList Body { get; set; }
         private Token limiter = null;
         public Token Limiter {
             get => this.Implimentation.limiter;
@@ -244,16 +243,160 @@ namespace YetAnotherScriptingLanguage
 
     class FunctionProcess : Function
     {
+        class CustomFunction : ArgumentedProcess
+        {
+
+            public KeyValuePair<List<variables.Variable>, variables.Variable.type> Signature { get; set; }
+            public TokensList Body { get; set; }
+
+            public CustomFunction(type t,TokensList body,KeyValuePair<List<variables.Variable>,variables.Variable.type> signature, string name) : base(name)
+            {
+                Type = t;
+                Body = body;
+                Signature = signature;
+                if(Type == type.procedure)
+                {
+                    Limiter = new Token("END_STATEMENT");
+                }
+                else if(Type == type.function)
+                {
+                    Limiter = new Token("Next");
+                }
+            }
+
+            
+            protected override void getArgs(TokensList tokens)
+            {
+                Arguments.Clear();
+                TokensList args = tokens[1].Spread();
+                TokensList currentArg = new TokensList();
+                for (int i = 0; i < args.Count; i++)
+                {
+                    currentArg.Add(args[i]);
+                    if (args[i].IsKeyword == "NEXT_ARG" || i == args.Count - 1)
+                    {
+                        currentArg.Trim();
+                        var arg = (variables.Variable)Parser.Evaluate(Parser.Parse(currentArg));
+                        Arguments.Add(arg);
+                        currentArg.Clear();
+                    }
+                }
+
+            }
+
+            void InitProcessBlock()
+            {
+                Interpreter.Block block = new Interpreter.Block();
+                for(int i = 0; i < this.Signature.Key.Count; i++)
+                {
+                    block.Variables.Add(this.Signature.Key[i].Name, this.Signature.Key[i]);
+                }
+                Interpreter.Set.Insert(block);
+            }
+
+            void FillProcessBlock()
+            {
+                Interpreter.Block block = new Interpreter.Block();
+                for (int i = 0; i < this.Signature.Key.Count; i++)
+                {
+                    if(this.Signature.Key[i].Type == this.Arguments[i].Type)
+                    {
+                        var varName = this.Signature.Key[i].Name;
+                        var varValue = this.Arguments[i].Value;
+                        ((variables.Variable)Interpreter.Get[varName]).Value = varValue;
+                    }
+                    else
+                    {
+                        string msg = "Argument Missmatch " + this.Name + "(";
+                        for(int j = 0; j < this.Signature.Key.Count; j++)
+                        {
+                            msg += this.Signature.Key[j].Type.ToString() + (i == this.Signature.Key.Count - 1 ? "" : ", ");
+                        }
+                        msg += ")";
+                        throw new Exception(msg);
+                    }
+                }
+            }
+
+            void ArgumentBlockPreProcess(TokensList data)
+            {
+                getArgs(data);
+                InitProcessBlock();
+                FillProcessBlock();
+            }
+
+            protected override void Process(TokensList data)
+            {
+                ArgumentBlockPreProcess(data);
+                Parser.Evaluate(Parser.Parse(this.Body));
+                Interpreter.ExecutionStack.Pop();
+            }
+
+            protected override variables.Variable Evaluate(TokensList data)
+            {
+                ArgumentBlockPreProcess(data);
+                throw new Exception("Argument Mismatch");
+            }
+
+        }
         public FunctionProcess(string name = "Function") : base(name)
         {
-            Type = type.function;
-            Limiter = new Token("END");
+            Type = type.procedure;
+            Limiter = new Token("End");
         }
-        protected override variables.Variable Evaluate(TokensList data)
+
+        List<variables.Variable> getSignature(TokensList data)
         {
-            return new variables.Variable(null, variables.Variable.type.Invalid);
+            // function f(a as decimal,b as decimal) (as bool)? 
+            // begin
+            // stuff
+            // end
+            List<variables.Variable>  Signature = new List<variables.Variable>();
+            TokensList tokens = data[2].Spread().Trim().Remove(new Token("NEXT_ARG"));
+            for (int i = 0; i < tokens.Count; i+=3)
+            {
+                var varname = tokens[i];
+                var vartype = tokens[i+2];
+                var type = vartype.Word == "Decimal" ? variables.Variable.type.Decimal : vartype.Word == "Boolean" ? variables.Variable.type.Boolean : vartype.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+                var defaultVal = VariableProcess.DefaultValue(type);
+                var v = new variables.Variable(defaultVal, type, varname.Word);
+                Signature.Add(v);
+            }
+            return Signature;
         }
-        public List<variables.Variable.type> Signature { get; set; }
+
+        string getName(TokensList data)
+        {
+            return data[1].Word;
+        }
+
+        TokensList getBody(TokensList data)
+        {
+            return data[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+        }
+
+        type getType(bool ThenFollow)
+        {
+            if (ThenFollow)
+            {
+                return type.procedure;
+            }
+            else
+            {
+                return type.function;
+            }
+        }
+
+        variables.Variable.type getReturn(TokensList data)
+        {
+            return data[4].Word == "Decimal" ? variables.Variable.type.Decimal : data[4].Word == "Boolean" ? variables.Variable.type.Boolean : data[4].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+        }
+
+        protected override void Process(TokensList data)
+        {
+            string name = getName(data);
+            Interpreter.Post[name] = new FunctionProcess.CustomFunction(getType(data[4].IsKeyword == "Begin"), getBody(data), new KeyValuePair<List<variables.Variable>,variables.Variable.type>(getSignature(data), getReturn(data)), name);
+        }
     }
 
     class SpacedProcess : Function
@@ -284,17 +427,9 @@ namespace YetAnotherScriptingLanguage
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
         }
-        protected override void Process(TokensList data)
-        {
-            //Variable n as integer (Decima | Boolean | Word | Array?)
-            //Variable n as array of Word
-            data.Trim();
-            if (data.Count != 4 || data.Count != 6)
-                new Exception("Syntax error Variable Declared Incorrectly");
-            var name = data[1].Word;
-            var type = data[3].Word == "Decimal" ? variables.Variable.type.Decimal : data[3].Word == "Boolean" ? variables.Variable.type.Boolean : data[3].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+        public static object DefaultValue(variables.Variable.type t) {
             object defaultVal = null;
-            switch (type)
+            switch (t)
             {
                 case variables.Variable.type.Decimal:
                     defaultVal = 0;
@@ -305,7 +440,22 @@ namespace YetAnotherScriptingLanguage
                 case variables.Variable.type.Word:
                     defaultVal = "";
                     break;
+                case variables.Variable.type.Invalid:
+                    throw new Exception("Invalid Type");
             }
+            return defaultVal;
+        }
+
+        protected override void Process(TokensList data)
+        {
+            //Variable n as integer (Decima | Boolean | Word | Array?)
+            //Variable n as array of Word
+            data.Trim();
+            if (data.Count != 4 || data.Count != 6)
+                new Exception("Syntax error Variable Declared Incorrectly");
+            var name = data[1].Word;
+            var type = data[3].Word == "Decimal" ? variables.Variable.type.Decimal : data[3].Word == "Boolean" ? variables.Variable.type.Boolean : data[3].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            object defaultVal = DefaultValue(type);
             var v = new variables.Variable(defaultVal, type, name);
             if (!Interpreter.Peek[name])
                 Interpreter.Set[name] = v;

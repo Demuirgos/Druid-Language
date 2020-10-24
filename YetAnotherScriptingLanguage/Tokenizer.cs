@@ -286,7 +286,7 @@ namespace YetAnotherScriptingLanguage
                     {
                         if (this[i].IsKeyword == opposites[t.IsKeyword]) 
                             balanced++;
-                        if (this[i] == t) 
+                        if (this[i] == t || (this[i].IsKeyword == "Else" && this[i + 1].IsKeyword == "If")) 
                             balanced--;
                         if (this[i] == t && balanced == 0) 
                             break;
@@ -328,6 +328,19 @@ namespace YetAnotherScriptingLanguage
                 mylist.Add(token);
             else
                 mylist.Insert(i,token) ;
+        }
+
+        public TokensList Remove(Token t)
+        {
+            for(int i = 0; i < this.Count; i++)
+            {
+                if (this[i] == t)
+                {
+                    this.Remove(i);
+                    i--;
+                }
+            }
+            return this;
         }
 
         public TokensList Remove(int idx = -1)
