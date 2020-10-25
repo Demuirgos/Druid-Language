@@ -6,6 +6,14 @@ namespace YetAnotherScriptingLanguage
 {
     class Parser
     {
+        public enum state
+        {
+            Normal,
+            Suspended,
+            TemporalSuspension,
+        }
+
+        public static state ParserState { get; set; }
         class ProceedFlag
         {
             public bool this[Node left, Node right] => left.Operation.Priority >= right.Operation.Priority || right == null;
@@ -18,13 +26,16 @@ namespace YetAnotherScriptingLanguage
         {
             index = 0;
             _tokens = tokens;
+            ParserState = state.Normal;
         }
+
+        
 
         public static LinkedList<Node> Parse(TokensList expression)
         {
             var Tree = new LinkedList<Node>();
             int i = 0;
-            while(i<expression.Count)
+            while(i<expression.Count && ParserState == state.Normal)
             {
                 variables.Variable v = null;
                 while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
@@ -47,13 +58,13 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if(expression[i].Type == Token.type.Skip)
                 {
+                    Parser.ParserState = state.TemporalSuspension;
                     i = expression.Count;
                 }
                 else if(expression[i].Type == Token.type.Exit)
                 {
-                    Tree.Clear();
-                    ConditionalProcess.State = ConditionalProcess.state.exit;
-                    return Tree;
+                    Parser.ParserState = state.Suspended;
+                    i = expression.Count;
                 }
                 else if (expression[i].Type == Token.type.function)
                 {

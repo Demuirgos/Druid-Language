@@ -66,7 +66,7 @@ namespace YetAnotherScriptingLanguage
                     "If n%2<>0 Then" + Environment.NewLine +
                     "Print(n,' is not divisible by 2')" + Environment.NewLine +
                     "End" + Environment.NewLine;
-                String code4 =
+                String code4 = //C:\Users\CykaBlyat\Desktop\test.txt
                     "Function isPrime(n as Decimal) as Boolean"     + Environment.NewLine +
                     "Begin"                                         + Environment.NewLine +
                     "   Variable value as Boolean"                  + Environment.NewLine +
@@ -75,6 +75,9 @@ namespace YetAnotherScriptingLanguage
                     "       Return n=2"                             + Environment.NewLine +
                     "   Else"                                       + Environment.NewLine +
                     "       For i From 3 To floor(sqrt(n)) By 2 Do" + Environment.NewLine +
+                    "          If i=5 Then"                         + Environment.NewLine +
+                    "               Continue"                       + Environment.NewLine +
+                    "          End"                                 + Environment.NewLine +
                     "          Print(i)"                            + Environment.NewLine +
                     "          If n%i=0 Then"                       + Environment.NewLine +
                     "             Return False"                     + Environment.NewLine +
@@ -89,8 +92,25 @@ namespace YetAnotherScriptingLanguage
                     "   Print(i,'is prime')"                        + Environment.NewLine +
                     "Else"                                          + Environment.NewLine +
                     "   Print(i,'is not prime')"                    + Environment.NewLine +
+                    "End"                                           + Environment.NewLine;
+                String code5 = 
+                    "Function ReadFile()" + Environment.NewLine +
+                    "Begin" + Environment.NewLine +
+                    "   Variable content as Word" + Environment.NewLine +
+                    "   content:=Open('C:\\Users\\CykaBlyat\\Desktop\\test.yasl')" + Environment.NewLine +
+                    "   Print(content) " + Environment.NewLine +
+                    "End" + Environment.NewLine +
+                    "ReadFile()" + Environment.NewLine;
+                String code6 =
+                    "Import('C:\\Users\\CykaBlyat\\Desktop\\test.yasl')" + Environment.NewLine +
+                    "Variable i as Decimal" + Environment.NewLine +
+                    "i := Read('Entrez le nombre')" + Environment.NewLine +
+                    "If isPrime(i) Then" + Environment.NewLine +
+                    "   Print(i,'is prime')" + Environment.NewLine +
+                    "Else" + Environment.NewLine +
+                    "   Print(i,'is not prime')" + Environment.NewLine +
                     "End" + Environment.NewLine;
-                BasicSCriptTest(false, code4);
+                BasicSCriptTest(false, code6);
 
                 // add deep return / exit / skip
                 // add arrays 

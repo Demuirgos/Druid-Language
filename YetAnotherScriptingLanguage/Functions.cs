@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 
@@ -68,24 +69,12 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class IdentityProcedure : Function
-    {
-        internal IdentityProcedure() : base()
-        {
-            Type = type.function;
-        }
-
-        protected override variables.Variable Evaluate(TokensList data)
-        {
-            throw new Exception("Not yet implemented");
-        }
-    }
-
     class ConditionalProcess : Function
     {
         public enum state
         {
             exit,
+            skip,
             normal
         }
         public virtual Token delimiter { get; set; }
@@ -178,12 +167,17 @@ namespace YetAnotherScriptingLanguage
             while (this[Blocks.Item1])
             {
                 Parser.Evaluate(Parser.Parse(Blocks.Item2));
-                if(State == state.exit || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                if (Parser.ParserState == Parser.state.TemporalSuspension)
                 {
-                    State = state.normal;
+                    Parser.ParserState = Parser.state.Normal;
+                    continue;
+                }
+                else if (Parser.ParserState == Parser.state.Suspended || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                {
                     break;
                 }
             }
+            Parser.ParserState = Parser.state.Normal;
         }
     }
 
@@ -234,25 +228,17 @@ namespace YetAnotherScriptingLanguage
                 var arg = ((variables.Variable)Interpreter.Get[indexer]);
                 var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[indexer]).Value) + Convert.ToDecimal(step.Value);
                 arg.Value = val;
-                if (State == state.exit || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                if (Parser.ParserState == Parser.state.TemporalSuspension)
                 {
-                    State = state.normal;
+                    Parser.ParserState = Parser.state.Normal;
+                    continue;
+                }
+                else if (Parser.ParserState == Parser.state.Suspended || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                {
                     break;
                 }
             }
-        }
-    }
-
-    class ImportProcess : Function
-    {
-        public ImportProcess(string name = "Import") : base(name)
-        {
-            Type = type.procedure;
-            Limiter = new Token("END_STATEMENT");
-        }
-        protected override void Process(TokensList data)
-        {
-
+            Parser.ParserState = Parser.state.Normal;
         }
     }
 
@@ -370,6 +356,7 @@ namespace YetAnotherScriptingLanguage
                 variables.Variable result = new variables.Variable(r);
                 ReturnValue.Clear();
                 Interpreter.ExecutionStack.Pop();
+                Parser.ParserState = Parser.state.Normal;
                 return result;
             }
 
@@ -445,7 +432,9 @@ namespace YetAnotherScriptingLanguage
         protected override variables.Variable Evaluate(TokensList data)
         {
             var PostReturn = data[1, this.Limiter];
-            return (variables.Variable)Parser.Evaluate(Parser.Parse(PostReturn));
+            var r = Parser.Evaluate(Parser.Parse(PostReturn));
+            Parser.ParserState = Parser.state.Suspended;
+            return r;
         }
     }
 
@@ -538,6 +527,66 @@ namespace YetAnotherScriptingLanguage
             getArgs(data);
             PrintHandler(this,Arguments);
             
+        }
+    }
+
+    class OpenProcess : ArgumentedProcess
+    {
+        protected string fileExtensionRestriction;
+        public OpenProcess(string name = "Open") : base(name)
+        {
+            Type = type.function;
+            fileExtensionRestriction = "";
+            Limiter = new Token("END_STATEMENT");
+        }
+
+        protected override void getArgs(TokensList tokens)
+        {
+            //Open('filename')
+            Arguments.Clear();
+            var args = tokens[1].Spread().Trim(true);
+            if (args.Count != 1) throw new Exception("Argument Count Missmatch, Read takes at least 1 argument");
+            else
+            {
+                if (!String.IsNullOrWhiteSpace(fileExtensionRestriction))
+                {
+                    if (args[0].Word.EndsWith(fileExtensionRestriction))
+                    {
+                        Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                    }
+                    else
+                    {
+                        throw new Exception("File extension Missmatch" + " The required File is of type : " + fileExtensionRestriction);
+                    }
+                }
+                else
+                {
+                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                }
+            }
+        }
+
+        protected override variables.Variable Evaluate(TokensList data)
+        {
+            getArgs(data);
+            StreamReader sr = new StreamReader((String)Arguments[0].Value);
+            string content = sr.ReadToEnd();
+            return new variables.Variable(content, variables.Variable.type.Word);
+        }
+    }
+
+    class ImportProcess : OpenProcess
+    {
+        public ImportProcess(string name = "Import") : base(name)
+        {
+            Type = type.procedure;
+            fileExtensionRestriction = ".yasl";
+            Limiter = new Token("END_STATEMENT");
+        }
+        protected override void Process(TokensList data)
+        {
+            var content = this.Evaluate(data);
+            Parser.Evaluate(Parser.Parse(Tokenizer.Tokenize(new TranslationUnit((String)content.Value))));
         }
     }
 

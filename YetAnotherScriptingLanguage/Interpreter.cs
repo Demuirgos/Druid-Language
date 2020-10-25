@@ -103,6 +103,9 @@ namespace YetAnotherScriptingLanguage
                     case ("ASSIGNMENT"):
                         Interpreter.Functions.Add("ASSIGNMENT", new SetProcess());
                         break;
+                    case ("Open"):
+                        Interpreter.Functions.Add("Open", new OpenProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
