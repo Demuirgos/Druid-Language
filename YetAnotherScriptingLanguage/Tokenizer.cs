@@ -202,7 +202,7 @@ namespace YetAnotherScriptingLanguage
                     if (Interpreter.Keywords[this.Word] == "Exit")
                         return type.Exit;
                     if (Interpreter.Keywords[this.Word] == "Skip")
-                        return type.Exit;
+                        return type.Skip;
                     return Token.type.keyword;
                 }
                 else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.Word))
@@ -338,7 +338,7 @@ namespace YetAnotherScriptingLanguage
 
         public TokensList Remove(Token t)
         {
-            for(int i = 0; i < this.Count; i++)
+            for (int i = 0; i < this.Count; i++)
             {
                 if (this[i] == t)
                 {
@@ -347,6 +347,18 @@ namespace YetAnotherScriptingLanguage
                 }
             }
             return this;
+        }
+
+        public bool HasToken(Token t)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (this[i] == t)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public TokensList Remove(int idx = -1)

@@ -72,22 +72,23 @@ namespace YetAnotherScriptingLanguage
                     "   Variable value as Boolean"                  + Environment.NewLine +
                     "   value:=True"                                + Environment.NewLine +
                     "   If n%2=0 Then"                              + Environment.NewLine +
-                    "       value := n=2"                           + Environment.NewLine +
+                    "       Return n=2"                             + Environment.NewLine +
                     "   Else"                                       + Environment.NewLine +
-                    "       For i From 3 To ceil(sqrt(n)) By 2 Do"  + Environment.NewLine +
+                    "       For i From 3 To floor(sqrt(n)) By 2 Do" + Environment.NewLine +
+                    "          Print(i)"                            + Environment.NewLine +
                     "          If n%i=0 Then"                       + Environment.NewLine +
-                    "              value:=false"                    + Environment.NewLine +
+                    "             Return False"                     + Environment.NewLine +
                     "          End"                                 + Environment.NewLine +
                     "       End"                                    + Environment.NewLine +
                     "   End"                                        + Environment.NewLine +
-                    "   Return value"                               + Environment.NewLine +
+                    "   Return True"                                + Environment.NewLine +
                     "End"                                           + Environment.NewLine +
                     "Variable i as Decimal"                         + Environment.NewLine +
-                    "i := 2"                                        + Environment.NewLine +
+                    "i := Read('Entrez le nombre')"                 + Environment.NewLine +
                     "If isPrime(i) Then"                            + Environment.NewLine +
                     "   Print(i,'is prime')"                        + Environment.NewLine +
-                    "Else" + Environment.NewLine +
-                    "   Print(i,'is not prime')" + Environment.NewLine +
+                    "Else"                                          + Environment.NewLine +
+                    "   Print(i,'is not prime')"                    + Environment.NewLine +
                     "End" + Environment.NewLine;
                 BasicSCriptTest(false, code4);
 

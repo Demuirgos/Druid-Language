@@ -49,6 +49,12 @@ namespace YetAnotherScriptingLanguage
                 {
                     i = expression.Count;
                 }
+                else if(expression[i].Type == Token.type.Exit)
+                {
+                    Tree.Clear();
+                    ConditionalProcess.State = ConditionalProcess.state.exit;
+                    return Tree;
+                }
                 else if (expression[i].Type == Token.type.function)
                 {
                     Function foo = new Function(expression[i].IsKeyword);
@@ -60,7 +66,7 @@ namespace YetAnotherScriptingLanguage
                         if (foo.Name == "Return")
                         {
                             Tree.Clear();
-                            Tree.AddFirst(new Node(v, new Action("Skip")));
+                            FunctionProcess.CustomFunction.ReturnValue.Enqueue(v);
                             return Tree;
                         }
                     }
@@ -102,7 +108,7 @@ namespace YetAnotherScriptingLanguage
             return true;
         }
 
-        public static object Evaluate(LinkedList<Node> expression , bool Once=false)
+        public static variables.Variable Evaluate(LinkedList<Node> expression , bool Once=false)
         {
             Func<Node,Node,Node> Merge =  (Node left, Node right) => {
                 switch (left.Operation.Operator)
@@ -173,7 +179,7 @@ namespace YetAnotherScriptingLanguage
                 expression.Remove(next);
                 return Evaluate(expression);
             }
-            return null;
+            return new variables.Variable(null,variables.Variable.type.Invalid);
         }
     }
 

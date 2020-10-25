@@ -83,11 +83,29 @@ namespace YetAnotherScriptingLanguage
 
     class ConditionalProcess : Function
     {
+        public enum state
+        {
+            exit,
+            normal
+        }
         public virtual Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
             Limiter = new Token("End");
         }
-        
+
+        public static state LoopState = state.normal;
+        public static state State
+        {
+            get
+            {
+                return LoopState;
+            }
+            set
+            {
+                LoopState = value;
+            }
+        }
+
         public virtual Tuple<TokensList, TokensList, TokensList> BlockExtraction(TokensList tokens) => throw new Exception("Not yet Implemented");
 
         public bool this[TokensList l] => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(l))).Value);
@@ -117,7 +135,7 @@ namespace YetAnotherScriptingLanguage
                     break;
                 }
             }
-            var ElseBlock = i == tokens.Count ? new TokensList() : tokens[i, new Token("End")].Remove(0).Trim(false);
+            var ElseBlock = i == tokens.Count ? new TokensList() : tokens[i,tokens.Count-1].Remove(0).Trim(false);
             var Block = tokens[condition.Count+2,i-1].Trim(false);
             return new Tuple<TokensList, TokensList, TokensList>(condition, Block, ElseBlock);
         }
@@ -146,6 +164,7 @@ namespace YetAnotherScriptingLanguage
             delimiter = new Token("Do");
         }
 
+
         public Tuple<TokensList, TokensList, TokensList> BlockToken(TokensList tokens)
         {
             var condition = tokens[0, new Token("Begin")].Remove().Remove(0);
@@ -159,6 +178,11 @@ namespace YetAnotherScriptingLanguage
             while (this[Blocks.Item1])
             {
                 Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                if(State == state.exit || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                {
+                    State = state.normal;
+                    break;
+                }
             }
         }
     }
@@ -178,7 +202,7 @@ namespace YetAnotherScriptingLanguage
             //for i from l to r (by s)? do
             var Indexer = tokens[1];
             indexer = Indexer.Word;
-            bool stepAvailable = tokens[0, new Token("Do")].Count == 9;
+            bool stepAvailable = tokens[0, new Token("Do")].HasToken(new Token("By"));
             var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("From"), new Token("To")].Remove().Remove(0).Trim(false)));
             var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("To"), stepAvailable?new Token("By"): new Token("Do")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
             step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("By"),  new Token("Do")].Remove().Remove(0).Trim(false)));
@@ -206,10 +230,15 @@ namespace YetAnotherScriptingLanguage
             var Blocks = BlockExtraction(data);
             while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                Parser.Evaluate(Parser.Parse(Blocks.Item2)); 
                 var arg = ((variables.Variable)Interpreter.Get[indexer]);
                 var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[indexer]).Value) + Convert.ToDecimal(step.Value);
                 arg.Value = val;
+                if (State == state.exit || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                {
+                    State = state.normal;
+                    break;
+                }
             }
         }
     }
@@ -241,12 +270,12 @@ namespace YetAnotherScriptingLanguage
 
     class FunctionProcess : Function
     {
-        class CustomFunction : ArgumentedProcess
+        public class CustomFunction : ArgumentedProcess
         {
 
             public KeyValuePair<List<variables.Variable>, variables.Variable.type> Signature { get; set; }
             public TokensList Body { get; set; }
-
+            public static Queue<variables.Variable> ReturnValue = new Queue<variables.Variable>();
             public CustomFunction(type t,TokensList body,KeyValuePair<List<variables.Variable>,variables.Variable.type> signature, string name) : base(name)
             {
                 Type = t;
@@ -333,11 +362,13 @@ namespace YetAnotherScriptingLanguage
             protected override variables.Variable Evaluate(TokensList data)
             {
                 ArgumentBlockPreProcess(data);
-                variables.Variable r = (variables.Variable)Parser.Evaluate(Parser.Parse(this.Body));
+                Parser.Evaluate(Parser.Parse(this.Body));
+                var r = ReturnValue.Dequeue();
                 if (r.Type != this.Signature.Value)
                     throw new Exception("The function " + this.Name + " returns a : " + this.Signature.Value.ToString());
                 r.Type = this.Signature.Value;
                 variables.Variable result = new variables.Variable(r);
+                ReturnValue.Clear();
                 Interpreter.ExecutionStack.Pop();
                 return result;
             }

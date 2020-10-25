@@ -16,7 +16,8 @@ namespace YetAnotherScriptingLanguage
                 Decimal,
                 Boolean,
                 Void,
-                function,
+                Function,
+                Keyword,
                 Invalid
             }
 
