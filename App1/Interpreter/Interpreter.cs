@@ -4,8 +4,10 @@ using System.Text;
 
 namespace YetAnotherScriptingLanguage
 {
-    class Interpreter
+    public class Interpreter
     {
+
+
         public static bool Verbose { get; set; }
         public class Block
         {
@@ -14,7 +16,7 @@ namespace YetAnotherScriptingLanguage
                 Name = name;
                 variables = new Dictionary<string, Function>();
             }
-            public Dictionary<string, Function> variables { get; set; }
+            public Dictionary<string, Function> variables;
             public Dictionary<string, Function> Variables => variables;
             public string Name { get; set; }
         }
@@ -24,6 +26,7 @@ namespace YetAnotherScriptingLanguage
         private TranslationUnit Local;
         public static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         public static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
+        public static Queue<variables.Variable> ReturnValue = new Queue<variables.Variable>();
 
         private static KeyWords keywords;
         public static KeyWords Keywords { 
@@ -57,16 +60,21 @@ namespace YetAnotherScriptingLanguage
         }
         public void Initialize()
         {
+            setUpExternals();
             SetUp();
             Local = new TranslationUnit(_script);
             main = new Parser(Local.Tokens);
         }
-        public void SetUp()
+        
+        void setUpExternals()
         {
             MathProcess.SetupFunctions();
             ConstantsMap.SetUpCanstants();
-            keywords = new KeyWords();
-            foreach (var word in keywords)
+        }
+
+        public void SetUp()
+        {
+            foreach (var word in Interpreter.Keywords)
             {
                 switch (word.Value)
                 {
@@ -106,6 +114,9 @@ namespace YetAnotherScriptingLanguage
                     case ("Open"):
                         Interpreter.Functions.Add("Open", new OpenProcess());
                         break;
+                    case ("Array"):
+                        Interpreter.Functions.Add("Array", new ArrayProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
@@ -120,22 +131,14 @@ namespace YetAnotherScriptingLanguage
             {
                 Interpreter.Functions.Add(csts, new ConstantsMap(csts));
             }
-
-            //setup printRead behaviour
-            ((PrintProcess)Interpreter.Functions["Print"]).PrintHandler += Interpreter_PrintHandler1;
-            ((ReadProcess)Interpreter.Functions["Read"]).ReadHandler += Interpreter_ReadHandler;
+            Interpreter.Keywords.UpdateColorMap();
         }
 
-        private variables.Variable Interpreter_ReadHandler(ReadProcess sender, variables.Variable Argument)
+        public void Reset()
         {
-            Console.Write(sender.Arguments[0].Value + (sender.Arguments[0].Value == ""?"":" "));
-            return new variables.Variable(Console.ReadLine());
-        }
-
-        private void Interpreter_PrintHandler1(PrintProcess sender, List<variables.Variable> Arguments)
-        {
-            for (int i = 0; i < sender.Arguments.Count; i++)
-                Console.Write(sender.Arguments[i].Value + (i < sender.Arguments.Count - 1 ? " " : Environment.NewLine));
+            Functions.Clear();
+            Interpreter.ExecutionStack.Clear();
+            SetUp();
         }
 
         public static void logStacks()
@@ -149,7 +152,7 @@ namespace YetAnotherScriptingLanguage
     }
     namespace COMMANDS
     {
-        class GET
+        public class GET
         {
             internal GET() { }
             public Function this[string token]
@@ -167,7 +170,7 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        class  SET
+        public class SET
         {
             internal SET() { }
             public Function  this[string token]
@@ -189,7 +192,7 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        class POP
+        public class POP
         {
             internal POP() { }
             public bool this[string token]
@@ -206,7 +209,7 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        class PEEK
+        public class PEEK
         {
             internal PEEK() { }
             public bool this[string token]
@@ -218,7 +221,7 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        class POST
+        public class POST
         {
             internal POST() { }
             public Function this[string token]

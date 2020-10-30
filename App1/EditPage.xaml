@@ -1,0 +1,156 @@
+﻿<Page xmlns:my="using:Microsoft.UI.Xaml.Controls" 
+    x:Class="App1.EditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    RequestedTheme="Dark">
+    <Page.Resources>
+        <DataTemplate x:Key="TreeViewItemDataTemplate">
+            <Grid Height="44">
+                <TextBlock
+            Text="{Binding Content}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Style="{ThemeResource BodyTextBlockStyle}"
+            FontWeight="Bold" />
+            </Grid>
+        </DataTemplate>
+
+        <Style TargetType="TreeView">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TreeView">
+                        <TreeViewList x:Name="ListControl"
+                              ItemTemplate="{StaticResource TreeViewItemDataTemplate}"
+                              ItemContainerStyle="{StaticResource TreeViewItemStyle}"
+                              CanDragItems="True"
+                              AllowDrop="True"
+                              CanReorderItems="True">
+                            <TreeViewList.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <ContentThemeTransition />
+                                    <ReorderThemeTransition />
+                                    <EntranceThemeTransition IsStaggeringEnabled="False" />
+                                </TransitionCollection>
+                            </TreeViewList.ItemContainerTransitions>
+                        </TreeViewList>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </Page.Resources>
+    <Grid>
+        <controls:Menu AllowTooltip="False"
+                   Orientation="Horizontal"
+                   TooltipPlacement="Bottom">
+            <controls:MenuItem Name="FileMenu"
+                         controls:Menu.InputGestureText="Alt+F"
+                         Header="^File">
+                <MenuFlyoutSubItem Text="New" Margin="0,8,0,0">
+                    <MenuFlyoutItem x:Name="NewProjectRequest" controls:Menu.InputGestureText="Ctrl+Shift+N"
+                          Text="Project" Click="NewProjectRequest_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutSubItem Text="Open" Margin="0,8,0,0">
+                    <MenuFlyoutItem x:Name="NewFItemRequest"
+                          Text="File" Click="NewFItemRequest_Click"/>
+                    <MenuFlyoutItem 
+                          Text="Project" x:Name="NewPItemRequest" Click="NewPItemRequest_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+S"
+                        CommandParameter="File Saved"
+                        Icon="Save" x:Name="Saverequested"
+                        Text="Save" Click="Saverequested_Click">
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+Shift+E"
+                        CommandParameter="Solution closed"
+                        Text="Exit" x:Name="ExitRequested"
+                        Margin="0,0,0,8" Click="ExitRequested_Click" />
+            </controls:MenuItem>
+
+            <controls:MenuItem controls:Menu.InputGestureText="Alt+E" Header="^Edit">
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+X"
+                        CommandParameter="Cut"
+                        Text="Cut"
+                        Icon="Cut" />
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+C"
+                        CommandParameter="Copied"
+                        Text="Copy"
+                        Icon="Copy" />
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+V"
+                        CommandParameter="Pasted"
+                        Text="Paste"
+                        Icon="Paste" />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+Shift+R"
+                        CommandParameter="Run Solution"
+                        Text="Run"
+                        Margin="0,0,0,8" Click="MenuFlyoutItem_Click" />
+            </controls:MenuItem>
+
+            <controls:MenuItem controls:Menu.InputGestureText="Alt+V"
+                         Header="^View">
+                <MenuFlyoutSubItem Text="Theme" Margin="0,8,0,0">
+                    <MenuFlyoutItem x:Name="DarkModeRequest"
+                          Text="Dark"  Click="DarkModeRequest_Click"/>
+                    <MenuFlyoutItem x:Name="LightModeRequest"
+                          Text="Light" Click="LightModeRequest_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Name="FullScreenRequest"
+                          Text="Zen" Click="FullScreenRequest_Click" />
+            </controls:MenuItem>
+
+            <controls:MenuItem controls:Menu.InputGestureText="Alt+H" Header="^Help">
+                <MenuFlyoutItem Text="About"
+                        Icon="Help" 
+                        CommandParameter="AYSL IDE"/>
+            </controls:MenuItem>
+        </controls:Menu>
+        <NavigationView x:Name="holder" Margin="0,40,0,0" IsPaneOpen="True" IsBackButtonVisible="Collapsed">
+            <NavigationView.PaneCustomContent>
+                <StackPanel Margin="10,5" Visibility="{Binding ElementName=holder,Path=IsPaneOpen}">
+                    <StackPanel Orientation="Horizontal">
+                        <AutoSuggestBox Width="250" HorizontalAlignment="Left"/>
+                        <Button x:Name="SearchButton" Click="SearchButton_Click" Margin="5,0,0,0">
+                            <SymbolIcon Symbol="Find"/>
+                        </Button>
+                    </StackPanel>
+                    <MenuBar>
+                        <MenuBarItem Title="▲" FontSize="35"/>
+                        <MenuBarItem Title="▼" FontSize="35"/>
+                        <MenuBarItem Title="|" IsTapEnabled="False"/>
+                        <MenuBarItem Title="&#10133;" FontSize="35">
+                            <muxc:RadioMenuFlyoutItem></muxc:RadioMenuFlyoutItem>
+                            <muxc:RadioMenuFlyoutItem></muxc:RadioMenuFlyoutItem>
+                        </MenuBarItem>
+                        <MenuBarItem Title="&#10134;" FontSize="35">
+                            <muxc:RadioMenuFlyoutItem></muxc:RadioMenuFlyoutItem>
+                            <muxc:RadioMenuFlyoutItem></muxc:RadioMenuFlyoutItem>
+                        </MenuBarItem>
+                        <MenuBarItem Title="|" IsTapEnabled="False"/>
+                        <MenuBarItem Title="🖊️" FontSize="35"/>
+                    </MenuBar>
+                    <ScrollViewer>
+                        <ListView x:Name="UsedFiles" Header="Opened Files :" SelectionMode="Single" MinHeight="75"/>
+                    </ScrollViewer>
+                    <TextBlock Text="Project Folder : "/>
+                    <TreeView x:Name="ProjectTree" Height="400" SelectionMode="Multiple" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemInvoked="ProjectTree_ItemInvoked"/>
+                </StackPanel>
+            </NavigationView.PaneCustomContent>
+            <local:ProjectEdit x:Name="EditCodePallet"/>
+        </NavigationView>
+        
+    </Grid>
+    
+</Page>

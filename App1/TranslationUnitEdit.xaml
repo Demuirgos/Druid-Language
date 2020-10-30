@@ -1,0 +1,56 @@
+﻿<UserControl
+    x:Class="App1.TranslationUnitEdit"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:converters="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" BorderThickness="0,0,1,1" Margin="10,20,10,0" BorderBrush="{ThemeResource SystemControlHighlightChromeHighBrush}" SizeChanged="RootGrid_SizeChanged">
+        <ScrollViewer>
+            <RelativePanel VerticalAlignment="Top" Background="#4C4F4F4F" Height="45" Margin="0,0,150,0">
+                <StackPanel Orientation="Horizontal" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+                    <AppBarButton x:Name="BoldButton" Width="45" Icon="Bold" Height="45" Click="BoldButton_Click"/>
+                    <AppBarButton x:Name="ItalicButton" Width="45" Icon="Italic" Height="45" Click="ItalicButton_Click"/>
+                    <AppBarButton x:Name="SubButton" Width="45" Icon="Underline" Height="45" Click="SubButton_Click"/>
+                    <AppBarSeparator/>
+                    <TextBlock Text="Spell Ckecking : " Height="25"/>
+                    <ToggleSwitch Margin="15,0" Width="100" x:Name="SpellCkeck" Toggled="SpellCkeck_Toggled"/>
+                    <AppBarSeparator/>
+                    <TextBlock Text="code prediction : " Height="25"/>
+                    <ToggleSwitch Margin="15,0" x:Name="CodePredict" Toggled="SpellCkeck_Toggled"/>
+                </StackPanel>
+                <AppBarButton x:Name="SearchRequest" Background="#FF292929" Width="50" Icon="Zoom" RelativePanel.AlignRightWithPanel="True">
+                    <FlyoutBase.AttachedFlyout>
+                        <Flyout>
+                            <Grid Width="250" Height="45" VerticalAlignment="Top" Background="Gray">
+                                <TextBox x:Name="SearchBox" Margin="0,0,50,0"/>
+                                <AppBarButton x:Name="Search" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Flyout>
+                    </FlyoutBase.AttachedFlyout>
+                </AppBarButton>
+
+            </RelativePanel>
+        </ScrollViewer>
+        <ScrollViewer  Margin="0,50,0,0" VerticalAlignment="Top">
+            <Grid >
+                <RichEditBox x:Name="EditZone"
+                                     PlaceholderText="Enter Code Here"
+                                     TextWrapping="Wrap"
+                                     TextChanged="EditZone_TextChanged"
+                                     VerticalContentAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     Padding="10,3"
+                                     BorderThickness="1"
+                                     Margin="0,0,0,0"
+                                     RequestedTheme="Dark"
+                                     IsSpellCheckEnabled="True"
+                                     Height="{Binding ElementName=RootGrid,Path=Height}"/>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

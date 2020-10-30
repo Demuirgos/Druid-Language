@@ -4,7 +4,7 @@ using System.Text;
 
 namespace YetAnotherScriptingLanguage
 {
-    class Action : Function
+    public class Action : Function
     {
         public Action(String action)
         {
@@ -12,13 +12,14 @@ namespace YetAnotherScriptingLanguage
         }
         public String Operator { get;}
         public Boolean isValidAction {
-            get => this.Operator == "*"  || this.Operator == "/"  || 
-                   this.Operator == "+"  || this.Operator == "-"  ||
-                   this.Operator == "|"  || this.Operator == "&"  ||
-                   this.Operator == "<"  || this.Operator == ">"  ||
-                   this.Operator == "<>" || this.Operator == "="  ||
-                   this.Operator == ":=" || this.Operator == "^"  ||
-                   this.Operator == "%"  || this.Operator == "!"  ;
+            get => this.Operator == "*"  || this.Operator == "/" ||
+                   this.Operator == "+"  || this.Operator == "-" ||
+                   this.Operator == "|"  || this.Operator == "&" ||
+                   this.Operator == "<"  || this.Operator == ">" ||
+                   this.Operator == "<>" || this.Operator == "=" ||
+                   this.Operator == ":=" || this.Operator == "^" ||
+                   this.Operator == "%"  || this.Operator == "!" ||
+                   this.Operator == "::" ||this.Operator == ">>";
         }
         public Int16 Priority
         {
@@ -38,7 +39,9 @@ namespace YetAnotherScriptingLanguage
                     case "!" : return 10;
                     case "|":
                     case "&" : return 9;
-                    case ":=": return 8;
+                    case "::": 
+                    case ">>": return 8;
+                    case ":=": return 7;
                     default  : return 0;
                 }
             }

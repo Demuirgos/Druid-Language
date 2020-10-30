@@ -1,0 +1,52 @@
+Function Fibb(n as Decimal,tab as Word) as Decimal
+Begin
+            Print(tab + 'n  => ',n)
+	If n = 0 | n = 1 Then
+		Return n
+	Else
+		Variable l as Decimal
+		Variable r as Decimal
+		l:=Fibb(n-1,tab + tab)
+		r:=Fibb(n-2,tab + tab)
+		Print(tab + 'l : ',l,' r : ',r)
+		Return l + r
+	End
+End
+Print(Fibb(3,'    '))
+
+
+
+Array i[10] of Decimal
+i:=[1,2,3,23,5,2,7,8,9,10]
+i:=i>>2 
+For j From 0 To 8 Do
+   Print(i[j])   
+End 
+Print(i[7])
+
+Function a(n as Decimal,m as Decimal) as Decimal
+Begin
+Return n+m
+End
+Function s(n as Decimal,m as Decimal) as Decimal
+Begin
+Return n-m
+End
+Function ev(n as Decimal,m as Decimal) as Decimal
+Begin
+Return a(n,n)+s(m,m)
+End
+Print(ev(2,1))
+
+
+Function f(n as Decimal) as Decimal
+Begin
+If n = 0 Then
+Print(n)
+Return 0
+Else
+Print(n-1)
+Return f(n-1)
+End
+End
+f(0)

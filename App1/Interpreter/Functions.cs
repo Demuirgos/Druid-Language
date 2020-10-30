@@ -5,7 +5,7 @@ using System.Text;
 
 namespace YetAnotherScriptingLanguage
 {
-    class Function
+   public class Function
     {
         public enum type
         {
@@ -172,7 +172,7 @@ namespace YetAnotherScriptingLanguage
                     Parser.ParserState = Parser.state.Normal;
                     continue;
                 }
-                else if (Parser.ParserState == Parser.state.Suspended || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                else if (Parser.ParserState == Parser.state.Suspended || Interpreter.ReturnValue.Count > 0)
                 {
                     break;
                 }
@@ -233,12 +233,15 @@ namespace YetAnotherScriptingLanguage
                     Parser.ParserState = Parser.state.Normal;
                     continue;
                 }
-                else if (Parser.ParserState == Parser.state.Suspended || FunctionProcess.CustomFunction.ReturnValue.Count > 0)
+                else if (Parser.ParserState == Parser.state.Suspended || Interpreter.ReturnValue.Count > 0)
                 {
                     break;
                 }
             }
-            Parser.ParserState = Parser.state.Normal;
+            if(Interpreter.Pop[indexer])
+                Parser.ParserState = Parser.state.Normal;
+            else
+                throw new Exception("Loop's temprorary variable not Cleared Properly");
         }
     }
 
@@ -261,7 +264,6 @@ namespace YetAnotherScriptingLanguage
 
             public KeyValuePair<List<variables.Variable>, variables.Variable.type> Signature { get; set; }
             public TokensList Body { get; set; }
-            public static Queue<variables.Variable> ReturnValue = new Queue<variables.Variable>();
             public CustomFunction(type t,TokensList body,KeyValuePair<List<variables.Variable>,variables.Variable.type> signature, string name) : base(name)
             {
                 Type = t;
@@ -278,9 +280,9 @@ namespace YetAnotherScriptingLanguage
             }
 
             
-            protected override void getArgs(TokensList tokens)
+            protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
             {
-                Arguments.Clear();
+                List<variables.Variable> Arguments = new List<variables.Variable>();
                 TokensList args = tokens[1].Spread();
                 TokensList currentArg = new TokensList();
                 for (int i = 0; i < args.Count; i++)
@@ -294,7 +296,7 @@ namespace YetAnotherScriptingLanguage
                         currentArg.Clear();
                     }
                 }
-
+                return Arguments;
             }
 
             void InitProcessBlock()
@@ -302,20 +304,20 @@ namespace YetAnotherScriptingLanguage
                 Interpreter.Block block = new Interpreter.Block();
                 for(int i = 0; i < this.Signature.Key.Count; i++)
                 {
-                    block.Variables.Add(this.Signature.Key[i].Name, this.Signature.Key[i]);
+                    block.Variables.Add(this.Signature.Key[i].Name, new variables.Variable(VariableProcess.DefaultValue(this.Signature.Key[i].Type), this.Signature.Key[i].Type));
                 }
                 Interpreter.Set.Insert(block);
             }
 
-            void FillProcessBlock()
+            void FillProcessBlock(List<variables.Variable> Arguments)
             {
-                Interpreter.Block block = new Interpreter.Block();
+                InitProcessBlock();
                 for (int i = 0; i < this.Signature.Key.Count; i++)
                 {
-                    if(this.Signature.Key[i].Type == this.Arguments[i].Type)
+                    if(this.Signature.Key[i].Type == Arguments[i].Type)
                     {
                         var varName = this.Signature.Key[i].Name;
-                        var varValue = this.Arguments[i].Value;
+                        var varValue = Arguments[i].Value;
                         ((variables.Variable)Interpreter.Get[varName]).Value = varValue;
                     }
                     else
@@ -333,9 +335,7 @@ namespace YetAnotherScriptingLanguage
 
             void ArgumentBlockPreProcess(TokensList data)
             {
-                getArgs(data);
-                InitProcessBlock();
-                FillProcessBlock();
+                FillProcessBlock(ArgumentsExtraction(data));
             }
 
             protected override void Process(TokensList data)
@@ -349,12 +349,11 @@ namespace YetAnotherScriptingLanguage
             {
                 ArgumentBlockPreProcess(data);
                 Parser.Evaluate(Parser.Parse(this.Body));
-                var r = ReturnValue.Dequeue();
+                var r = Interpreter.ReturnValue.Dequeue();
                 if (r.Type != this.Signature.Value)
                     throw new Exception("The function " + this.Name + " returns a : " + this.Signature.Value.ToString());
-                r.Type = this.Signature.Value;
                 variables.Variable result = new variables.Variable(r);
-                ReturnValue.Clear();
+                Interpreter.ReturnValue.Clear();
                 Interpreter.ExecutionStack.Pop();
                 Parser.ParserState = Parser.state.Normal;
                 return result;
@@ -369,10 +368,6 @@ namespace YetAnotherScriptingLanguage
 
         List<variables.Variable> getSignature(TokensList data)
         {
-            // function f(a as decimal,b as decimal) (as bool)? 
-            // begin
-            // stuff
-            // end
             List<variables.Variable>  Signature = new List<variables.Variable>();
             TokensList tokens = data[2].Spread().Trim().Remove(new Token("NEXT_ARG"));
             for (int i = 0; i < tokens.Count; i+=3)
@@ -438,6 +433,41 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
+    class ArrayProcess : Function
+    {
+        public ArrayProcess(string name = "Array") : base(name)
+        {
+            Type = type.procedure;
+            Limiter = new Token("END_STATEMENT");
+        }
+
+        protected override void Process(TokensList data)
+        {
+            //array name[l,l,l,l] of type
+            //::[] prepend
+            //[]::append
+            data.Trim();
+            if (data.Count != 5)
+                new Exception("Syntax error Array Declared Incorrectly");
+            var name = data[1].Word;
+            var dimensions = new Token(data[2].Word.Substring(1, data[2].Word.Length - 2)).Spread().Trim();
+            if (dimensions.Count != 1)
+                new Exception("Syntax error Array Length Incorrectly");
+            var lenght = Convert.ToInt32(dimensions[0].Word);
+            var type = data[4].Word == "Decimal" ? variables.Variable.type.Decimal : data[4].Word == "Boolean" ? variables.Variable.type.Boolean : data[4].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
+            for(int i = 0; i < lenght; i++)
+            {
+                defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(type), type));
+            }
+            var v = new variables.Array(defaultVal,variables.Variable.type.Array, type, name);
+            if (!Interpreter.Peek[name])
+                Interpreter.Set[name] = v;
+            else
+                throw new Exception("A variable with the name : " + name + " Already exists in Stack");
+        }
+    }
+
     class VariableProcess : Function
     {
         public VariableProcess(string name = "Variable") : base(name)
@@ -466,8 +496,6 @@ namespace YetAnotherScriptingLanguage
 
         protected override void Process(TokensList data)
         {
-            //Variable n as integer (Decima | Boolean | Word | Array?)
-            //Variable n as array of Word
             data.Trim();
             if (data.Count != 4 || data.Count != 6)
                 new Exception("Syntax error Variable Declared Incorrectly");
@@ -486,9 +514,7 @@ namespace YetAnotherScriptingLanguage
     {
         public ArgumentedProcess(string name) : base(name) {
         }
-        private List<variables.Variable> arguments = new List<variables.Variable>();
-        public List<variables.Variable> Arguments => arguments;
-        protected virtual void getArgs(TokensList tokens) => throw new Exception("Not yet Implimented");
+        protected virtual List<variables.Variable> ArgumentsExtraction(TokensList tokens) => throw new Exception("Not yet Implemented");
     }
 
     class PrintProcess : ArgumentedProcess
@@ -502,11 +528,10 @@ namespace YetAnotherScriptingLanguage
             Limiter = new Token("END_STATEMENT");
         }
 
-        protected override void getArgs(TokensList tokens)
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
-            Arguments.Clear();
-            var args = tokens[1].Spread();
-            args.Trim();
+            var Arguments = new List<variables.Variable>();
+            var args = tokens[1].Spread().Trim();
             TokensList curr = new TokensList();
             for(int i = 0; i < args.Count; i++) 
             {
@@ -520,13 +545,12 @@ namespace YetAnotherScriptingLanguage
                     curr.Clear();
                 }
             }
+            return Arguments;
         }
 
         protected override void Process(TokensList data)
         {
-            getArgs(data);
-            PrintHandler(this,Arguments);
-            
+            PrintHandler(this, ArgumentsExtraction(data));
         }
     }
 
@@ -540,10 +564,10 @@ namespace YetAnotherScriptingLanguage
             Limiter = new Token("END_STATEMENT");
         }
 
-        protected override void getArgs(TokensList tokens)
+
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
-            //Open('filename')
-            Arguments.Clear();
+            var Arguments = new List<variables.Variable>();
             var args = tokens[1].Spread().Trim(true);
             if (args.Count != 1) throw new Exception("Argument Count Missmatch, Read takes at least 1 argument");
             else
@@ -564,11 +588,12 @@ namespace YetAnotherScriptingLanguage
                     Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
                 }
             }
+            return Arguments;
         }
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            getArgs(data);
+            var Arguments = ArgumentsExtraction(data);
             StreamReader sr = new StreamReader((String)Arguments[0].Value);
             string content = sr.ReadToEnd();
             return new variables.Variable(content, variables.Variable.type.Word);
@@ -580,7 +605,7 @@ namespace YetAnotherScriptingLanguage
         public ImportProcess(string name = "Import") : base(name)
         {
             Type = type.procedure;
-            fileExtensionRestriction = ".yasl";
+            fileExtensionRestriction = ".aysl";
             Limiter = new Token("END_STATEMENT");
         }
         protected override void Process(TokensList data)
@@ -601,9 +626,10 @@ namespace YetAnotherScriptingLanguage
             Limiter = new Token("END_STATEMENT");
         }
 
-        protected override void getArgs(TokensList tokens)
+
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
-            Arguments.Clear();
+            var Arguments = new List<variables.Variable>();
             var args = tokens[1].Spread();
             args.Trim(true);
             if (args.Count > 1) throw new Exception("Argument Count Missmatch, Read takes 1 argument");
@@ -618,12 +644,12 @@ namespace YetAnotherScriptingLanguage
                     Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
                 }
             }
+            return Arguments;
         }
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            getArgs(data);
-            return ReadHandler(this,Arguments[0]);
+            return ReadHandler(this,ArgumentsExtraction(data)[0]);
         }
     }
 
@@ -662,9 +688,9 @@ namespace YetAnotherScriptingLanguage
             this.Type = type.function;
         }
 
-        protected override void getArgs(TokensList tokens)
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
-            Arguments.Clear();
+            var Arguments = new List<variables.Variable>();
             TokensList args = tokens[1].Spread();
             TokensList currentArg = new TokensList();
             for (int i = 0; i < args.Count; i++)
@@ -678,7 +704,7 @@ namespace YetAnotherScriptingLanguage
                     currentArg.Clear();
                 }
             }
-
+            return Arguments;
         }
 
         public static void SetupFunctions()
@@ -718,8 +744,8 @@ namespace YetAnotherScriptingLanguage
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            getArgs(data);
-            int argsCount = this.Arguments.Count;
+            var Arguments = ArgumentsExtraction(data);
+            int argsCount = Arguments.Count;
 
             if (argsCount == 1)
             {
@@ -741,24 +767,35 @@ namespace YetAnotherScriptingLanguage
             Limiter = new Token("Previous");
         }
 
-        protected override void getArgs(TokensList tokens)
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
-            Arguments.Clear();
-            Token varName = tokens[0];
-            var argVal = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[2, tokens.Count - 1]));
-            Arguments.Add(new variables.Variable(varName.Word));
+            List<variables.Variable> Arguments =  new List<variables.Variable>();
+            TokensList varName = tokens[0,new Token("ASSIGNMENT")].Remove();
+            TokensList varVal = tokens[varName.Count + 1, tokens.Count - 1].Trim();
+            var argVal = Parser.Evaluate(Parser.Parse(varVal));
+            var indexVal = varName.Count != 2 ? null : Parser.Evaluate(Parser.Parse(new Token(varName[1].Word.TrimStart('[').TrimEnd(']')).Spread()));
+            Arguments.Add(new variables.Variable(varName[0].Word));
             Arguments.Add(argVal);
+            if(!(indexVal is null))
+                Arguments.Add(indexVal);
+            return Arguments;
         }
 
         protected override void Process(TokensList data)
         {
             //Variable n as integer (Decima | Boolean | Word | Array?)
             //Variable n as array of Word
-            getArgs(data); ;
+            var Arguments = ArgumentsExtraction(data); ;
             var var = ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]);
+            if(var.Type == variables.Variable.type.Array && Arguments.Count == 3)
+            {
+                var index = Convert.ToInt32(Arguments[2].Value.ToString());
+                var = ((List<variables.Variable>)((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value)[index];
+            }
             if (var.Type != Arguments[1].Type)
                 throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
             var.Value = Arguments[1].Value;
         }
     }
+
 }

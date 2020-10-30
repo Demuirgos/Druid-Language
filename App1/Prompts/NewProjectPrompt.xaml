@@ -1,0 +1,43 @@
+﻿<ContentDialog
+    x:Class="App1.Prompts.NewProjectPrompt"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1.Prompts"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="New Project :"
+    PrimaryButtonText="Continue"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+    <Grid Width="500">
+        <ListView>
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Name :" Width="100"/>
+                    <TextBox x:Name="ProjectNameBox" PlaceholderText="Project Name" Width="300" TextChanged="ProjectNameBox_TextChanged"/>
+                </StackPanel>
+            </ListViewItem>
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Path :" Width="100"/>
+                    <TextBox x:Name="ProjectPath" IsReadOnly="True" PlaceholderText="Project Path" Width="262"/>
+                    <Button x:Name="PickFolderButton" Click="PickFolderButton_Click">
+                        <Grid>
+                            <SymbolIcon Symbol="Import"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </ListViewItem>
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Initialize :" Width="100"/>
+                    <ToggleSwitch Name="IsInitiRequest" Width="80" Toggled="IsInitiRequest_Toggled" />
+                    <TextBox x:Name="InitFileName" IsReadOnly="False" IsEnabled="{Binding ElementName=IsInitiRequest,Path=IsOn}" PlaceholderText="Initial File Name" Width="222" TextChanged="InitFileName_TextChanged"/>
+                </StackPanel>
+            </ListViewItem>
+        </ListView>
+    </Grid>
+</ContentDialog>

@@ -8,7 +8,7 @@ namespace YetAnotherScriptingLanguage
     namespace variables
     {
         
-        class Variable : Function
+        public class Variable : Function
         {
             public enum type
             {
@@ -18,7 +18,15 @@ namespace YetAnotherScriptingLanguage
                 Void,
                 Function,
                 Keyword,
+                Array,
                 Invalid
+            }
+
+            public Variable()
+            {
+                Value = null;
+                Name = "";
+                Type = type.Invalid;
             }
 
             public Variable(object value, type varType, string name=null )
@@ -248,13 +256,101 @@ namespace YetAnotherScriptingLanguage
 
 
         }
-        class Array<T>
+        public class Array : variables.Variable
         {
-            public Array(int len = 0){
-                elements = new List<Variable>(len);
+            public type innerType { get; set; }
+            public Array(object value, type t, type i, string name) : base(value, t, name)
+            {
+                innerType = i;
             }
-            public List<Variable> elements;
-            public IList<Variable> Elements => elements;
+            public Array(Array r)
+            {
+                this.Value = r.Value;
+                this.Type = r.Type;
+                this.Name = r.Name;
+                this.innerType = r.innerType;
+            }
+
+            public Array(Token data)
+            {
+                var bitsAndPieces = (new Token(data.Word.Substring(1,data.Word.Length-2))).Spread().Trim();
+                List<variables.Variable> vars = new List<variables.Variable>();
+                TokensList curr = new TokensList();
+                for (int i = 0; i < bitsAndPieces.Count; i++)
+                {
+                    if (bitsAndPieces[i].IsKeyword != "NEXT_ARG")
+                    {
+                        curr.Add(bitsAndPieces[i]);
+                    }
+                    if (bitsAndPieces[i].IsKeyword == "NEXT_ARG" || i == bitsAndPieces.Count - 1)
+                    {
+                        vars.Add(Parser.Evaluate(Parser.Parse(curr)));
+                        curr.Clear();
+                    }
+                }
+                for(int i = 0; i < vars.Count - 1; i++)
+                {
+                    if (vars[i].Type != vars[i + 1].Type)
+                        throw new Exception("Invalid Type Initiliazation");
+                }
+                this.Value = vars;
+                this.Type = type.Array;
+                this.innerType = vars[0].Type;
+            }
+
+            public static variables.Array Insert(variables.Array l, variables.Variable r)
+            {
+                if (l.innerType != r.Type) throw new Exception("Type missmatch l is a collection of type :" + l.innerType.ToString());
+                ((List<variables.Variable>)l.Value).Add(r);
+                return l;
+            }
+
+            public static variables.Array Insert(variables.Variable l, variables.Array r)
+            {
+                if (r.innerType != l.Type) throw new Exception("Type missmatch l is a collection of type :" + r.innerType.ToString());
+                ((List<variables.Variable>)r.Value).Insert(0, l);
+                return r;
+            }
+
+            public static variables.Array Insert(variables.Array l, variables.Array r)
+            {
+                if (l.innerType != r.innerType) throw new Exception("Type missmatch l is a collection of type :" + l.innerType.ToString());
+                foreach (var v in (List<variables.Variable>)r.Value)
+                {
+                    ((List<variables.Variable>)l.Value).Insert(0, v);
+                }
+                return l;
+            }
+
+            public static variables.Array Remove(variables.Variable l, variables.Variable r)
+            {
+                variables.Array left  = l as variables.Array;
+                if (left is null || r.Type != type.Decimal || Convert.ToInt32(r.Value)!=Math.Truncate(Convert.ToDouble(r.Value))) throw new Exception("Type missmatch l is a collection of type :" + left.innerType.ToString());
+                ((List<variables.Variable>)left.Value).RemoveAt(Convert.ToInt32(r.Value));
+                return left;
+            }
+
+            public static variables.Array Insert(variables.Variable l, variables.Variable r)
+            {
+                variables.Array right = r as variables.Array;
+                variables.Array left  = l as variables.Array;
+                if (!(right is null) && !(left is null))
+                {
+                    return variables.Array.Insert(left, right);
+                }
+                else if (right is null && !(left is null))
+                {
+                    return variables.Array.Insert(left, r);
+                }
+                else if (!(right is null) && left is null)
+                {
+                    return variables.Array.Insert(l, right);
+                }
+                else
+                    throw new Exception("Operation Undefined ::(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
+
+            }
+
         }
     }
 }

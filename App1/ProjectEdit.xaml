@@ -1,0 +1,72 @@
+﻿<Page
+    x:Class="App1.ProjectEdit"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" BorderThickness="0,0,1,1" Margin="10,20,10,0" BorderBrush="{ThemeResource SystemControlHighlightChromeHighBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="row1" Height="0*"/>
+            <RowDefinition x:Name="row2" Height="434*" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <controls:TabView x:Name="Tabs"
+                      TabWidthBehavior="Actual"
+                      CanCloseTabs="True"
+                      IsCloseButtonOverlay="True"
+                      CanDragItems="False"
+                      CanReorderItems="False"
+                      AllowDrop="False"
+                      SelectedTabWidth="200"
+                      Margin="0,-19,0,10"
+                      BorderBrush="White"
+                      Grid.Row="0"
+                      SelectionChanged="Tabs_SelectionChanged">
+            </controls:TabView>
+            <Button x:Name="RunRequest" Click="RunRequest_Click" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" Height="45" Margin="10,41">
+                <Grid Width="100">
+                    <SymbolIcon Symbol="Play" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Run" HorizontalAlignment="Left" Margin="50,-5,0,0" Width="50" FontSize="24"/>
+                </Grid>
+            </Button>
+        </Grid>
+        <local:ConsoleBuild Grid.Row="1" x:Name="ConsoleInterface" Margin="10,10,10,10"/>
+        <controls:GridSplitter x:Name="Splitter" Grid.Row="1" VerticalAlignment="Top" Height="16" Margin="0,0,0,0" IsEnabled="False">
+            <controls:GridSplitter.RenderTransform>
+                <TranslateTransform Y="-8" />
+            </controls:GridSplitter.RenderTransform>
+            <controls:GridSplitter.Element>
+                <TextBlock HorizontalAlignment="Center"
+                         IsHitTestVisible="False"
+                         VerticalAlignment="Center"
+                           Foreground="White"
+                         Text="&#xE76F;"
+                         FontFamily="Segoe MDL2 Assets">
+                </TextBlock>
+            </controls:GridSplitter.Element>
+        </controls:GridSplitter>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="Full">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="600" />
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="Small">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+
+                    <VisualState.Setters>
+                        <Setter Target="RootGrid.Padding" Value="12" />
+                        <Setter Target="RootGrid.FontSize" Value="12" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+</Page>

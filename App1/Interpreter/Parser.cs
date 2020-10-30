@@ -35,15 +35,17 @@ namespace YetAnotherScriptingLanguage
         {
             var Tree = new LinkedList<Node>();
             int i = 0;
+            int j = i;
             while(i<expression.Count && ParserState == state.Normal)
             {
                 variables.Variable v = null;
                 while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
+                j = i;
                 if (expression[i].Type == Token.type.constant)
                 {
                     if (expression[i].IsMathEvaluation)
                     {
-                        v = new variables.Variable((variables.Variable)Parser.Evaluate(Parser.Parse(expression[i].Spread())));
+                        v = new variables.Variable(Parser.Evaluate(Parser.Parse(expression[i].Spread())));
                     }
                     else
                     {
@@ -54,6 +56,17 @@ namespace YetAnotherScriptingLanguage
                 else if (expression[i].Type == Token.type.variable)
                 {
                     v = (variables.Variable)Interpreter.Get[expression[i].Word];
+                    if (v.Type == variables.Variable.type.Array && (i + 1 < expression.Count && expression[i + 1].Type == Token.type.array))
+                    {
+                        var index = Convert.ToInt32(Parser.Evaluate(Parser.Parse(new Token(expression[i+1].Word.TrimStart('[').TrimEnd(']')).Spread())).Value);
+                        v = ((List<variables.Variable>)v.Value)[index];
+                        i++;
+                    }
+                    i++;
+                }
+                else if (expression[i].Type == Token.type.array)
+                {
+                    v = new variables.Array(expression[i]);
                     i++;
                 }
                 else if(expression[i].Type == Token.type.Skip)
@@ -77,7 +90,7 @@ namespace YetAnotherScriptingLanguage
                         if (foo.Name == "Return")
                         {
                             Tree.Clear();
-                            FunctionProcess.CustomFunction.ReturnValue.Enqueue(v);
+                            Interpreter.ReturnValue.Enqueue(v);
                             return Tree;
                         }
                     }
@@ -95,8 +108,8 @@ namespace YetAnotherScriptingLanguage
                     if (o.Operator == ":=")
                     {
                         Function foo = new Function(expression[i].IsKeyword);
-                        var Body = expression[i, foo.Limiter];
-                        i += Body.Count - 1;
+                        var Body = expression[j + 1, foo.Limiter];
+                        i += Body.Count - i + j - 2;
                         v = foo[Body];
                         continue;
                     }
@@ -161,7 +174,13 @@ namespace YetAnotherScriptingLanguage
                         left.Value = new variables.Variable(left.Value | right.Value, variables.Variable.type.Boolean);
                         break;
                     case "!":
-                        left.Value = new variables.Variable(variables.Variable.xor(left.Value,right.Value), variables.Variable.type.Boolean);
+                        left.Value = new variables.Variable(variables.Variable.xor(left.Value, right.Value), variables.Variable.type.Boolean);
+                        break;
+                    case "::":
+                        left.Value = new variables.Array(variables.Array.Insert(left.Value, right.Value));
+                        break;
+                    case ">>":
+                        left.Value = new variables.Array(variables.Array.Remove(left.Value, right.Value));
                         break;
                 }
                 left.Operation = right.Operation;

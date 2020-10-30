@@ -37,7 +37,7 @@ namespace YetAnotherScriptingLanguage
                     if (i + 1 < TranslationCode.Length)
                     {
                         var nextChar = TranslationCode[i + 1];
-                        if ((currentChar == '<' && nextChar == '>') || (currentChar == ':' && nextChar == '='))
+                        if ((currentChar == '<' && nextChar == '>') || (currentChar == ':' && nextChar == '=') || (currentChar == ':' && nextChar == ':') || (currentChar == '>' && nextChar == '>'))
                         {
                             currentWord.Append(nextChar);
                             i++;
@@ -68,22 +68,6 @@ namespace YetAnotherScriptingLanguage
                                 currentWord.Append(nextChar);
                             } while (nextChar != '\n');
                         }
-                        else if (currentChar == '{')
-                        {
-                            isHigh = true;
-                            int balance = 1;
-                            do
-                            {
-                                nextChar = TranslationCode[++i];
-                                currentWord.Append(nextChar);
-                                if (nextChar == '{')
-                                    balance++;
-                                if (nextChar == '}')
-                                    balance--;
-                            } while (balance > 0);
-                            currentWord.Remove(0, 1);
-                            currentWord.Remove(currentWord.Length - 1, 1);
-                        }
                         else if (currentChar == '[')
                         {
                             isHigh = true;
@@ -97,8 +81,6 @@ namespace YetAnotherScriptingLanguage
                                 if (nextChar == ']')
                                     balance--;
                             } while (balance > 0);
-                            currentWord.Remove(0, 1);
-                            currentWord.Remove(currentWord.Length - 1, 1);
                         }
                         else if (currentChar == '(')
                         {
@@ -140,12 +122,13 @@ namespace YetAnotherScriptingLanguage
         }
         public static char[] Separators => ("'<>=+-*/%&|^\t (){}[]:,!\0" + Environment.NewLine).ToCharArray();
     }
-    class Token
+    public class Token
     {
         public enum type
         {
             keyword,
             variable,
+            array,
             constant,
             operation,
             Separator,
@@ -185,13 +168,17 @@ namespace YetAnotherScriptingLanguage
             get
             {
                 if (isString) return type.constant;
-                if(Word == "\r\n" || Word == "\n")
+                if(Word == "\r\n" || Word == "\n" || Word == "\r\t" || Word == "\r")
                 {
                     return type.Ender;
                 }
-                else if(Word == " " || Word == "\r" || Word == "\t")
+                else if (Word == " " || Word == "\r" || Word == "\t")
                 {
                     return type.Separator;
+                }
+                else if (Word.StartsWith('[') && Word.EndsWith(']'))
+                {
+                    return type.array;
                 }
                 else if (Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
                 {
@@ -219,7 +206,7 @@ namespace YetAnotherScriptingLanguage
             get => Dictionary[Word];
         }
     }
-    class TokensList : IEnumerable<Token>, IEnumerable
+    public class TokensList : IEnumerable<Token>, IEnumerable
     {
         List<Token> mylist = new List<Token>();
         public int Count => mylist.Count;
