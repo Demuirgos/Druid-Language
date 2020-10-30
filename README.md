@@ -1,5 +1,9 @@
 # YetAnotherLanguageRuntime
  a C# based runtime for my customizable PseudoCode based language
+  ## "IDE GUI : ": ...
+<p align="center">
+  <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/IDETest.png" width="720" alt="IDE alpha version">
+</p>
  ## "Math Evaluations : ": ...
 <p align="center">
   <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/MathEvalTest.png" width="720" alt="math expression evaluation">
