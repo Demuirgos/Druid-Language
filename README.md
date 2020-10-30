@@ -6,7 +6,7 @@
   <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/IDETest.png" width="720" alt="IDE alpha version">
 </p>
 
- ##"Math Evaluations : ": ...
+ ## "Math Evaluations : ": ...
 <p align="center">
   <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/MathEvalTest.png" width="720" alt="math expression evaluation">
 </p>
