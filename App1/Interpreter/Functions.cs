@@ -649,7 +649,8 @@ namespace YetAnotherScriptingLanguage
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            return ReadHandler(this,ArgumentsExtraction(data)[0]);
+            var r = ReadHandler(this, ArgumentsExtraction(data)[0]);
+            return r;
         }
     }
 

@@ -20,9 +20,38 @@ namespace App1
 {
     public sealed partial class ConsoleBuild : UserControl
     {
+        List<String> inputTokens = new List<String>();
         public ConsoleBuild()
         {
             this.InitializeComponent();
+            this.InputTokens.Items.VectorChanged += TokenItems_VectorChanged;
+        }
+
+        private void TokenItems_VectorChanged(IObservableVector<object> sender, IVectorChangedEventArgs @event)
+        {
+            if(@event.CollectionChange == CollectionChange.ItemRemoved && inputTokens.Count>0)
+            {
+                this.inputTokens.RemoveAt((int)@event.Index);
+            }
+            else if(@event.CollectionChange == CollectionChange.Reset)
+            {
+                this.inputTokens.Clear();
+            }
+        }
+
+        public string Token
+        {
+            get
+            {
+                string token = inputTokens[0];
+                inputTokens.RemoveAt(0);
+                return token;
+            }
+        }
+
+        public async void clear()
+        {
+            await this.InputTokens.ClearAsync();
         }
 
         public void HookEvents()
@@ -40,9 +69,8 @@ namespace App1
         {
 
             addText(Argument.Value + (Argument.Value == "" ? "" : " "));
-            string before = BuiltConsole.Text;
-            var input = BuiltConsole.Text.Substring(before.Length);
-            return new YetAnotherScriptingLanguage.variables.Variable(input);
+            var r = new YetAnotherScriptingLanguage.variables.Variable(this.Token);
+            return r;
         }
 
 
@@ -53,25 +81,9 @@ namespace App1
                 addText(Arguments[i].Value + (i < Arguments.Count - 1 ? " " : Environment.NewLine));
         }
 
-
-        private void TokenizingTextBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-
-        }
-
-        private void InputTokens_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-
-        }
-
         private void InputTokens_TokenItemAdded(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)
         {
-
-        }
-
-        private void InputTokens_TokenItemRemoved(Microsoft.Toolkit.Uwp.UI.Controls.TokenizingTextBox sender, object args)
-        {
-
+            this.inputTokens.Add(args as string);
         }
 
         private void Clear_Click(object sender, RoutedEventArgs e)
@@ -82,5 +94,6 @@ namespace App1
                                      "**********************************************************************" + Environment.NewLine +
                                      "Entry Point >>" + Environment.NewLine;
         }
+
     }
 }

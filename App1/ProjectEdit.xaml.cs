@@ -63,8 +63,10 @@ namespace App1
             {
                 TranslationUnit tes = new TranslationUnit(((Tabs.SelectedItem as TabViewItem).Content as TranslationUnitEdit).Code);
                 var res = Parser.Evaluate(Parser.Parse(tes.Tokens));
+
                 _interpreter.Reset();
                 ConsoleInterface.HookEvents();
+                ConsoleInterface.clear();
             }
             catch (Exception _e)
             {
@@ -72,6 +74,7 @@ namespace App1
                 this.ConsoleInterface.addText(_e.StackTrace);
                 _interpreter.Reset();
                 ConsoleInterface.HookEvents();
+                ConsoleInterface.clear();
             }
         }
 

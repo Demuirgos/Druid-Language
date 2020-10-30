@@ -45,6 +45,7 @@ namespace YetAnotherScriptingLanguage
 
             public Variable(Variable t)
             {
+                if (t is null) return;
                 this.Value = t.Value;
                 this.Type = t.Type;
                 this.Name = t.Name;

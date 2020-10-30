@@ -13,12 +13,8 @@
     <Grid>
         <ScrollViewer>
             <Grid>
-                <controls:TokenizingTextBox x:Name="InputTokens" Height="50" VerticalAlignment="Top" Header="Console Input:" TextChanged="InputTokens_TextChanged" TokenItemAdded="InputTokens_TokenItemAdded" TokenItemRemoved="InputTokens_TokenItemRemoved">
-                    <controls:TokenizingTextBox.TokenItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Text}" Padding="4,0,0,0"/>
-                        </DataTemplate>
-                    </controls:TokenizingTextBox.TokenItemTemplate>
+                <controls:TokenizingTextBox x:Name="InputTokens" Height="50" TokenDelimiter=""  PlaceholderText="Add Values" VerticalAlignment="Top" Header="Console Input:" TokenItemAdded="InputTokens_TokenItemAdded" Margin="0,0,0,0">
+                   
                 </controls:TokenizingTextBox>
                 <Button x:Name="Clear" VerticalAlignment="Top" HorizontalAlignment="Right" Height="50" Width="50" Click="Clear_Click">
                     <SymbolIcon Symbol="Refresh"/>
