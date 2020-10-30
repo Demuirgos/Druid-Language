@@ -10,35 +10,35 @@
     mc:Ignorable="d">
 
     <Grid x:Name="RootGrid" BorderThickness="0,0,1,1" Margin="10,20,10,0" BorderBrush="{ThemeResource SystemControlHighlightChromeHighBrush}" SizeChanged="RootGrid_SizeChanged">
-        <ScrollViewer>
-            <RelativePanel VerticalAlignment="Top" Background="#4C4F4F4F" Height="45" Margin="0,0,150,0">
-                <StackPanel Orientation="Horizontal" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
-                    <AppBarButton x:Name="BoldButton" Width="45" Icon="Bold" Height="45" Click="BoldButton_Click"/>
-                    <AppBarButton x:Name="ItalicButton" Width="45" Icon="Italic" Height="45" Click="ItalicButton_Click"/>
-                    <AppBarButton x:Name="SubButton" Width="45" Icon="Underline" Height="45" Click="SubButton_Click"/>
-                    <AppBarSeparator/>
-                    <TextBlock Text="Spell Ckecking : " Height="25"/>
-                    <ToggleSwitch Margin="15,0" Width="100" x:Name="SpellCkeck" Toggled="SpellCkeck_Toggled"/>
-                    <AppBarSeparator/>
-                    <TextBlock Text="code prediction : " Height="25"/>
-                    <ToggleSwitch Margin="15,0" x:Name="CodePredict" Toggled="SpellCkeck_Toggled"/>
-                </StackPanel>
-                <AppBarButton x:Name="SearchRequest" Background="#FF292929" Width="50" Icon="Zoom" RelativePanel.AlignRightWithPanel="True">
-                    <FlyoutBase.AttachedFlyout>
-                        <Flyout>
-                            <Grid Width="250" Height="45" VerticalAlignment="Top" Background="Gray">
-                                <TextBox x:Name="SearchBox" Margin="0,0,50,0"/>
-                                <AppBarButton x:Name="Search" HorizontalAlignment="Right"/>
-                            </Grid>
-                        </Flyout>
-                    </FlyoutBase.AttachedFlyout>
-                </AppBarButton>
-
-            </RelativePanel>
+        <ScrollViewer Margin="0,0,150,0">
+            <StackPanel Orientation="Horizontal" Background="#4C4F4F4F" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                <AppBarButton x:Name="BoldButton" Width="45" Icon="Bold" Height="45" Click="BoldButton_Click"/>
+                <AppBarButton x:Name="ItalicButton" Width="45" Icon="Italic" Height="45" Click="ItalicButton_Click"/>
+                <AppBarButton x:Name="SubButton" Width="45" Icon="Underline" Height="45" Click="SubButton_Click"/>
+                <AppBarSeparator/>
+                <ComboBox x:Name="FontSelection" Background="#4C4F4F4F" Width="150" PlaceholderText="Font" VerticalAlignment="Center"/>
+                <AppBarSeparator/>
+                <AppBarButton x:Name="SizeIncButton" Width="45" Icon="FontIncrease" Height="45" Click="SizeIncButton_Click"/>
+                <AppBarButton x:Name="SizeDecButton" Width="45" Icon="FontDecrease" Height="45" Click="SizeDecButton_Click"/>
+                <AppBarSeparator/>
+                <TextBlock Text="TabSize : " VerticalAlignment="Center"/>
+                <Slider x:Name="TabSizeSlider" Margin="15,0" Width="100" TickFrequency="4" Minimum="4" Maximum="16" StepFrequency="4" Height="30" VerticalAlignment="Center" Value="4" ValueChanged="TabSizeSlider_ValueChanged"/>
+            </StackPanel>
         </ScrollViewer>
+        <AppBarButton x:Name="SearchRequest" Background="#FF292929" Width="50" Height="45" Icon="Zoom" HorizontalAlignment="Right" Margin="0,0,150,0" Click="SearchRequest_Click" FocusVisualSecondaryBrush="#FF292929">
+            <FlyoutBase.AttachedFlyout>
+                <Flyout Placement="LeftEdgeAlignedTop">
+                        <AutoSuggestBox x:Name="SearchBox" Width="250" Height="100" />
+                </Flyout>
+            </FlyoutBase.AttachedFlyout>
+        </AppBarButton>
         <ScrollViewer  Margin="0,50,0,0" VerticalAlignment="Top">
             <Grid >
-                <RichEditBox x:Name="EditZone"
+                    <Viewbox x:Name="EditZoneWrapper" 
+                                     Width="{Binding ElementName=RootGrid,Path=Width}">
+                        <RichEditBox x:Name="EditZone"
+                                     KeyDown="EditZone_KeyDown"
+                                     IsTabStop="True"
                                      PlaceholderText="Enter Code Here"
                                      TextWrapping="Wrap"
                                      TextChanged="EditZone_TextChanged"
@@ -47,9 +47,14 @@
                                      Padding="10,3"
                                      BorderThickness="1"
                                      Margin="0,0,0,0"
+                                     IsTextPredictionEnabled="True"
                                      RequestedTheme="Dark"
                                      IsSpellCheckEnabled="True"
-                                     Height="{Binding ElementName=RootGrid,Path=Height}"/>
+                                     Height="{Binding ElementName=EditZoneWrapper,Path=Height}"
+                                     Width="{Binding ElementName=EditZoneWrapper,Path=Width}"
+                                     >
+                        </RichEditBox>
+                    </Viewbox>
             </Grid>
         </ScrollViewer>
     </Grid>

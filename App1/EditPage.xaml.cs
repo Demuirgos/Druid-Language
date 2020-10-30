@@ -90,6 +90,7 @@ namespace App1
             FileOpenPicker picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".aysl");
             var f = await picker.PickSingleFileAsync();
+            if (f is null) return;
             ImportFileCode(f);
         }
 

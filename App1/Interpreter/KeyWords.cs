@@ -58,9 +58,13 @@ namespace YetAnotherScriptingLanguage
                 {
                     ColoringMap.Add(key, Windows.UI.Colors.LimeGreen);
                 }
-                else if(type == "keyword")
+                else if (type == "keyword")
                 {
                     ColoringMap.Add(key, Windows.UI.Colors.BlueViolet);
+                }
+                else if (type == "value")
+                {
+                    ColoringMap.Add(key, Windows.UI.Colors.OrangeRed);
                 }
                 else
                 {

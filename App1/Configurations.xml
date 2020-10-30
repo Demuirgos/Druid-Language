@@ -56,9 +56,9 @@
 
         <keyword map="AND"      key="And"        Mode="All"     type="Keyword"/>
         <keyword map="OR"       key="Or"         Mode="All"     type="Keyword"/>
-        <keyword map="False"    key="False"      Mode="All"     type="Keyword"/>
+        <keyword map="False"    key="False"      Mode="All"     type="Value"/>
         <keyword map="True"     key="True"       Mode="All"     type="Keyword"/>
-        <keyword map="NOT"      key="Not"        Mode="All"     type="Keyword"/>
+        <keyword map="NOT"      key="Not"        Mode="All"     type="Value"/>
         
         <keyword key="Begin"    map="Begin"      Mode="All"     type="Block"/>
         <keyword key="Then"     map="Begin"      Mode="All"     type="Block"/>
