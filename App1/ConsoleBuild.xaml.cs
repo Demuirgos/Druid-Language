@@ -69,7 +69,9 @@ namespace App1
         {
 
             addText(Argument.Value + (Argument.Value == "" ? "" : " "));
-            var r = new YetAnotherScriptingLanguage.variables.Variable(this.Token);
+	    string token = this.Token;
+            var r = new YetAnotherScriptingLanguage.variables.Variable(token);
+	    addText(token + Environment.NewLine));
             return r;
         }
 
