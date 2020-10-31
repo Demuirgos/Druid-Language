@@ -69,9 +69,9 @@ namespace App1
         {
 
             addText(Argument.Value + (Argument.Value == "" ? "" : " "));
-	    string token = this.Token;
+            var token = this.Token;
+            addText(token + Environment.NewLine);
             var r = new YetAnotherScriptingLanguage.variables.Variable(token);
-	    addText(token + Environment.NewLine));
             return r;
         }
 
@@ -95,6 +95,7 @@ namespace App1
                                      "** Where every bug is shroedinger's bug                                      **" + Environment.NewLine +
                                      "**********************************************************************" + Environment.NewLine +
                                      "Entry Point >>" + Environment.NewLine;
+            clear();
         }
 
     }
