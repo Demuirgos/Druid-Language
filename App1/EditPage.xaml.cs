@@ -77,12 +77,39 @@ namespace App1
 
         private void Saverequested_Click(object sender, RoutedEventArgs e)
         {
-
+            save();
         }
 
-        private void ExitRequested_Click(object sender, RoutedEventArgs e)
+        private async void save()
         {
+            foreach (var pair in list)
+            {
+                await PathIO.WriteTextAsync(pair.Key, list[pair.Key].Code);
+            }
+        }
 
+        private async void  ExitRequested_Click(object sender, RoutedEventArgs e)
+        {
+            MessageDialog requestSaveDialog =
+                                  new MessageDialog($"Save The Modified Files");
+            var okCommand = new UICommand("Save");
+            requestSaveDialog.Commands.Add(okCommand);
+            var NotOkCommand = new UICommand("Don't Save");
+            requestSaveDialog.Commands.Add(NotOkCommand);
+            var cancelCommand = new UICommand("Cancel");
+            requestSaveDialog.Commands.Add(cancelCommand);
+            requestSaveDialog.DefaultCommandIndex = 0;
+            requestSaveDialog.CancelCommandIndex = 1;
+            var requestPermissionResult = await requestSaveDialog.ShowAsync();
+            if (requestPermissionResult == okCommand)
+            {
+                save();
+                Application.Current.Exit();
+            }
+            else if (requestPermissionResult == NotOkCommand)
+            {
+                Application.Current.Exit();
+            }
         }
 
         private async void NewFItemRequest_Click(object sender, RoutedEventArgs e)
@@ -104,7 +131,7 @@ namespace App1
             ImportFolderProject(f);
         }
 
-        private async void ImportFileCode(StorageFile file)
+        private void ImportFileCode(StorageFile file)
         {
             if (!list.ContainsKey(file.Path))
             {

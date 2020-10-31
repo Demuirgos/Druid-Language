@@ -19,7 +19,7 @@
                 <Button x:Name="Clear" VerticalAlignment="Top" HorizontalAlignment="Right" Height="50" Width="50" Click="Clear_Click">
                     <SymbolIcon Symbol="Refresh"/>
                 </Button>
-                <TextBox x:Name="BuiltConsole" Background="Black" AcceptsReturn="True" Margin="0,50,0,0" Foreground="White"  Text="********************************************************************** &#x0a;**  AYSL CLI Runtime                                                                      **&#x0a;**  Where every bug is shroedinger's bug                                     **&#x0a;**********************************************************************&#x0a;Entry Point >>&#x0a;"/>
+                <TextBox x:Name="BuiltConsole" Background="Black" IsReadOnly="True" AcceptsReturn="True" Margin="0,50,0,0" Foreground="White"  Text="********************************************************************** &#x0a;**  AYSL CLI Runtime                                                                      **&#x0a;**  Where every bug is shroedinger's bug                                     **&#x0a;**********************************************************************&#x0a;Entry Point >>&#x0a;"/>
             </Grid>
         </ScrollViewer>
     </Grid>

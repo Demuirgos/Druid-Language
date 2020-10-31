@@ -94,5 +94,11 @@ namespace App1
         {
             currentTranslationUnit = (sender as Microsoft.Toolkit.Uwp.UI.Controls.TabView).SelectedIndex;
         }
+
+        private async void Tabs_TabClosing(object sender, TabClosingEventArgs e)
+        {
+            var UIEditCode = e.Tab.Content as TranslationUnitEdit;
+            await PathIO.WriteTextAsync(UIEditCode.Path, UIEditCode.Code);
+        }
     }
 }

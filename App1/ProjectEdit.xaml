@@ -25,7 +25,8 @@
                       Margin="0,-19,0,10"
                       BorderBrush="White"
                       Grid.Row="0"
-                      SelectionChanged="Tabs_SelectionChanged">
+                      SelectionChanged="Tabs_SelectionChanged"
+                      TabClosing="Tabs_TabClosing">
             </controls:TabView>
             <Button x:Name="RunRequest" Click="RunRequest_Click" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" Height="45" Margin="10,41">
                 <Grid Width="100">

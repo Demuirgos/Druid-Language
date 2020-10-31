@@ -14,6 +14,24 @@ Begin
 End
 Print(Fibb(3,'    '))
 
+Function isPrime(n as Decimal) as Boolean
+Begin
+	Variable value as Boolean
+	value:=True
+	If n%2=0 Then
+		Return n=2
+	Else
+		For i From 3 To floor(sqrt(n)) By 2 Do
+			If n%i=0 Then
+				Return False
+			End
+		End
+	End
+	Return True
+End
+Variable s as Decimal
+s:=Read('please enter a value')
+If isPrime(s) Then Print(s,' is a prime number') Else Print(s,' is not a prime number') End
 
 
 Array i[10] of Decimal

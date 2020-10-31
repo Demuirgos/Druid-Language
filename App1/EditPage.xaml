@@ -80,19 +80,6 @@
             </controls:MenuItem>
 
             <controls:MenuItem controls:Menu.InputGestureText="Alt+E" Header="^Edit">
-                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+X"
-                        CommandParameter="Cut"
-                        Text="Cut"
-                        Icon="Cut" />
-                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+C"
-                        CommandParameter="Copied"
-                        Text="Copy"
-                        Icon="Copy" />
-                <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+V"
-                        CommandParameter="Pasted"
-                        Text="Paste"
-                        Icon="Paste" />
-                <MenuFlyoutSeparator />
                 <MenuFlyoutItem controls:Menu.InputGestureText="Ctrl+Shift+R"
                         CommandParameter="Run Solution"
                         Text="Run"
