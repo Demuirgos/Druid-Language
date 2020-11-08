@@ -99,6 +99,9 @@
             </controls:MenuItem>
 
             <controls:MenuItem controls:Menu.InputGestureText="Alt+H" Header="^Help">
+                <MenuFlyoutItem Text="Settings" Name="SettingRequest"
+                        Icon="Setting"
+                        CommandParameter="AYSL IDE" Click="SettingRequest_Click"/>
                 <MenuFlyoutItem Text="About"
                         Icon="Help" 
                         CommandParameter="AYSL IDE"/>

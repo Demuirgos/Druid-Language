@@ -255,5 +255,15 @@ namespace App1
                 EditCodePallet.InnerConsole.addText("Please Open a AYSL File" + Environment.NewLine);
             }
         }
+
+        private async void SettingRequest_Click(object sender, RoutedEventArgs e)
+        {
+            var settingPrompt = new App1.Prompts.LanguageSettingsPrompt();
+            var result = await settingPrompt.ShowAsync();
+            if(result == ContentDialogResult.Primary)
+            {
+                EditCodePallet.reset();
+            }
+        }
     }
 }

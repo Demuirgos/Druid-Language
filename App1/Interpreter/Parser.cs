@@ -43,14 +43,12 @@ namespace YetAnotherScriptingLanguage
                 j = i;
                 if (expression[i].Type == Token.type.constant)
                 {
-                    if (expression[i].IsMathEvaluation)
-                    {
-                        v = new variables.Variable(Parser.Evaluate(Parser.Parse(expression[i].Spread())));
-                    }
-                    else
-                    {
-                        v = new variables.Variable(expression[i].Word);
-                    }
+                    v = new variables.Variable(expression[i].Word);
+                    i++;
+                }
+                else if(expression[i].Type == Token.type.Math)
+                {
+                    v = new variables.Variable(Parser.Evaluate(Parser.Parse(expression[i].Spread())));
                     i++;
                 }
                 else if (expression[i].Type == Token.type.variable)
@@ -58,8 +56,7 @@ namespace YetAnotherScriptingLanguage
                     v = (variables.Variable)Interpreter.Get[expression[i].Word];
                     if (v.Type == variables.Variable.type.Array && (i + 1 < expression.Count && expression[i + 1].Type == Token.type.array))
                     {
-                        var index = Convert.ToInt32(Parser.Evaluate(Parser.Parse(new Token(expression[i+1].Word.TrimStart('[').TrimEnd(']')).Spread())).Value);
-                        v = ((List<variables.Variable>)v.Value)[index];
+                        v = variables.Array.getElement(v as variables.Array, expression[i + 1]);
                         i++;
                     }
                     i++;
@@ -87,7 +84,7 @@ namespace YetAnotherScriptingLanguage
                     if (foo.Type == Function.type.function)
                     {
                         v = foo[Body];
-                        if (foo.Name == "Return")
+                        if (foo.Name == "RETURN")
                         {
                             Tree.Clear();
                             Interpreter.ReturnValue.Enqueue(v);
@@ -101,11 +98,11 @@ namespace YetAnotherScriptingLanguage
                     }
                 }
                 while (i < expression.Count && expression[i].Type == Token.type.Separator) i++;
-                Action o = new Action("Skip");
+                Action o = new Action(new Token("SKIP"));
                 if (i < expression.Count)
                 {
-                    o = new Action(expression[i].Word);
-                    if (o.Operator == ":=")
+                    o = new Action(expression[i]);
+                    if (o.Operator.IsKeyword == "SET")
                     {
                         Function foo = new Function(expression[i].IsKeyword);
                         var Body = expression[j + 1, foo.Limiter];
@@ -121,65 +118,54 @@ namespace YetAnotherScriptingLanguage
             return Tree;
         }
 
-        public Node Parse()
-        {
-            throw new Exception("Not Implemented Yet");
-        }
-
-        public static bool IsValid(TokensList expression)
-        {
-
-            return true;
-        }
-
         public static variables.Variable Evaluate(LinkedList<Node> expression , bool Once=false)
         {
             Func<Node,Node,Node> Merge =  (Node left, Node right) => {
-                switch (left.Operation.Operator)
+                switch (left.Operation.Operator.IsKeyword)
                 {
-                    case "^":
+                    case "POWER":
                         left.Value ^= right.Value;
                         break;
-                    case "*":
+                    case "MULTIPLY":
                         left.Value *= right.Value;
                         break;
-                    case "/":
+                    case "DIVIDE":
                         left.Value /= right.Value;
                         break;
-                    case "+":
+                    case "PLUS":
                         left.Value += right.Value;
                         break;
-                    case "-":
+                    case "MINUS":
                         left.Value -= right.Value;
                         break;
-                    case "%":
+                    case "REMAINDER":
                         left.Value %= right.Value;
                         break;
-                    case "<":
+                    case "SMALLER":
                         left.Value = new variables.Variable(left.Value < right.Value, variables.Variable.type.Boolean);
                         break;
-                    case ">":
+                    case "BIGGER":
                         left.Value = new variables.Variable(left.Value > right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "=":
+                    case "EQUAL":
                         left.Value = new variables.Variable(left.Value == right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "<>":
+                    case "DIFF":
                         left.Value = new variables.Variable(left.Value != right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "&":
+                    case "AND":
                         left.Value = new variables.Variable(left.Value & right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "|":
+                    case "OR":
                         left.Value = new variables.Variable(left.Value | right.Value, variables.Variable.type.Boolean);
                         break;
-                    case "!":
+                    case "NOT":
                         left.Value = new variables.Variable(variables.Variable.xor(left.Value, right.Value), variables.Variable.type.Boolean);
                         break;
-                    case "::":
+                    case "APPEND":
                         left.Value = new variables.Array(variables.Array.Insert(left.Value, right.Value));
                         break;
-                    case ">>":
+                    case "REMOVE":
                         left.Value = new variables.Array(variables.Array.Remove(left.Value, right.Value));
                         break;
                 }

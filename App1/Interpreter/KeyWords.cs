@@ -1,23 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
-using System.Text.RegularExpressions;
-using System.Text;
+using Windows.Storage;
 
 namespace YetAnotherScriptingLanguage
 {
     public class KeyWords : Dictionary<String, String>
     {
         XmlDocument configurationFile = new XmlDocument();
-        string chosenLanguage = "slang";
+        string chosenLanguage = "eng";
         private Dictionary<string, Windows.UI.Color> colorMapValue;
         public Dictionary<string, Windows.UI.Color> ColorMapValue => colorMapValue;
         public KeyWords() : base()
         {
-            configurationFile.Load("configurations.xml");
-            String SettingConfig = configurationFile.SelectSingleNode("//Settings/Current/configuration").Attributes.GetNamedItem("value").Value;
-            chosenLanguage = configurationFile.SelectSingleNode("//Settings/"+ SettingConfig + "/language").Attributes.GetNamedItem("Name").Value;
-            XmlNodeList keywordSet = configurationFile.SelectNodes("//Settings//Localizations/lang[@Name='" + chosenLanguage + "'] | //Settings/symbols | //Settings/operators");
+            configurationFile.Load(ApplicationData.Current.LocalFolder.Path + "\\Configurations.xml");
+            chosenLanguage = configurationFile.SelectSingleNode("//Settings/Current/configuration").Attributes.GetNamedItem("value").Value;
+            XmlNodeList keywordSet = configurationFile.SelectNodes("//Settings//Localizations/lang[@Name='" + chosenLanguage + "']/operators | //Settings/symbols | //Settings//Localizations/lang[@Name='" + chosenLanguage + "']/keywords");
             foreach (XmlNode WordMap in keywordSet)
             {
                 foreach (var keyword in WordMap)
@@ -34,9 +32,7 @@ namespace YetAnotherScriptingLanguage
         Dictionary<string, Windows.UI.Color> GetColorMap()
         {
             Dictionary<string, Windows.UI.Color> ColoringMap = new Dictionary<string, Windows.UI.Color>();
-            var keywordSet = configurationFile.SelectSingleNode("//Settings//Localizations/lang[@Name='" + chosenLanguage + "']");
-            var OperatorsSet = configurationFile.SelectSingleNode("//Settings/operators");
-            var symbolsSet = configurationFile.SelectSingleNode("//Settings/symbols");
+            var keywordSet = configurationFile.SelectSingleNode("//Settings//Localizations/lang[@Name='" + chosenLanguage + "']/keywords");
             foreach (XmlNode keyword in keywordSet)
             {
                 var key = keyword.Attributes.GetNamedItem("key").Value.ToLower();

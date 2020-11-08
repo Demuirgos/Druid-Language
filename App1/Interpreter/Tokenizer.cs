@@ -21,8 +21,7 @@ namespace YetAnotherScriptingLanguage
             };
             StringBuilder currentWord = new StringBuilder();
             string TranslationCode = code.Code + Environment.NewLine;
-            bool isHigh = false;
-            bool isString = false;
+            bool isMathEvaluation = false;
             for (var i = 0;i< TranslationCode.Length; i++)
             {
                 var currentChar = TranslationCode[i];
@@ -37,14 +36,14 @@ namespace YetAnotherScriptingLanguage
                     if (i + 1 < TranslationCode.Length)
                     {
                         var nextChar = TranslationCode[i + 1];
-                        if ((currentChar == '<' && nextChar == '>') || (currentChar == ':' && nextChar == '=') || (currentChar == ':' && nextChar == ':') || (currentChar == '>' && nextChar == '>'))
+                        if (contains(Operators,currentChar))
                         {
-                            currentWord.Append(nextChar);
-                            i++;
-                        }
-                        else if(currentChar == '!')
-                        {
-                            Tokens.Add(new Token("True"));
+                            while (contains(Operators, nextChar))
+                            {
+                                currentWord.Append(nextChar);
+                                i++;
+                                nextChar = TranslationCode[i + 1];
+                            }
                         }
                         else if (currentChar == '\'')
                         {
@@ -53,24 +52,17 @@ namespace YetAnotherScriptingLanguage
                                 nextChar = TranslationCode[++i];
                                 currentWord.Append(nextChar);
                             }
-                            currentWord.Remove(0, 1);
-                            currentWord.Remove(currentWord.Length-1, 1);
-                            isString = true;
                         }
                         else if (currentChar == '/' && nextChar == '/')
                         {
-                            currentWord.Append(TranslationCode[++i]);
-                            Tokens.Add(new Token(currentWord.ToString()));
-                            currentWord.Clear();
                             do
                             {
                                 nextChar = TranslationCode[++i];
-                                currentWord.Append(nextChar);
                             } while (nextChar != '\n');
+                            currentWord.Clear();
                         }
                         else if (currentChar == '[')
                         {
-                            isHigh = true;
                             int balance = 1;
                             do
                             {
@@ -84,7 +76,6 @@ namespace YetAnotherScriptingLanguage
                         }
                         else if (currentChar == '(')
                         {
-                            isHigh = true;
                             int balance = 1;
                             do
                             {
@@ -95,8 +86,6 @@ namespace YetAnotherScriptingLanguage
                                 if (nextChar == ')') 
                                     balance--;
                             } while (balance > 0);
-                            currentWord.Remove(0, 1);
-                            currentWord.Remove(currentWord.Length-1, 1);
                         }
                         else if(currentChar == '\r' && nextChar == '\n' || currentChar=='\n')
                         {
@@ -107,10 +96,8 @@ namespace YetAnotherScriptingLanguage
                             }
                         }
                     }
-                    Tokens.Add(new Token(currentWord.ToString(),isHigh,isString));
+                    Tokens.Add(new Token(currentWord.ToString()));
                     currentWord.Clear();
-                    isHigh = false;
-                    isString = false;
                 }
                 else
                 {
@@ -121,6 +108,7 @@ namespace YetAnotherScriptingLanguage
             return Tokens;
         }
         public static char[] Separators => ("'<>=+-*/%&|^\t (){}[]:,!\0" + Environment.NewLine).ToCharArray();
+        public static char[] Operators => ("<>=+-*/%&|^:!").ToCharArray();
     }
     public class Token
     {
@@ -135,14 +123,14 @@ namespace YetAnotherScriptingLanguage
             Skip,
             Exit,
             Ender,
-            function
+            Math,
+            function,
+            Unexpected
         }
 
-        public Token(String word, bool isHigh = false, bool _isString = false)
+        public Token(String _word)
         {
-            Word = word;
-            isString = _isString;
-            IsMathEvaluation = isHigh;
+            word = _word;
         }
 
         public TokensList Spread()
@@ -152,7 +140,7 @@ namespace YetAnotherScriptingLanguage
 
         public static bool operator ==(Token left, Token right)
         {
-            return left.IsMathEvaluation == right.IsMathEvaluation && (left.Word == right.Word || left.IsKeyword==right.IsKeyword);
+            return (left.Word == right.Word || left.IsKeyword == right.IsKeyword);
         }
 
         public static bool operator !=(Token left, Token right)
@@ -160,50 +148,57 @@ namespace YetAnotherScriptingLanguage
             return !(left == right);
         }
 
-        static private KeyWords Dictionary = new KeyWords();
-        public bool IsMathEvaluation { get; set; }
-        public String Word { get; }
-        private bool isString { get; set; }
+        static private KeyWords Dictionary => new KeyWords();
+        private String word;
+        public String Word => (word.StartsWith('\'') && word.EndsWith('\'')) ||(word.StartsWith('(') && word.EndsWith(')')) ? word.Substring(1, word.Length - 2) : word;
         public Token.type Type {
             get
             {
-                if (isString) return type.constant;
-                if(Word == "\r\n" || Word == "\n" || Word == "\r\t" || Word == "\r")
+                
+                if(word.StartsWith('(') && word.EndsWith(')'))
+                {
+                    return type.Math;
+                }
+                else if(word == "\r\n" || word == "\n" || word == "\r\t" || word == "\r")
                 {
                     return type.Ender;
                 }
-                else if (Word == " " || Word == "\r" || Word == "\t")
+                else if (word == " " || word == "\r" || word == "\t")
                 {
                     return type.Separator;
                 }
-                else if (Word.StartsWith('[') && Word.EndsWith(']'))
+                else if (word.StartsWith('[') && word.EndsWith(']'))
                 {
                     return type.array;
                 }
-                else if (Interpreter.Functions.ContainsKey(this.Word) || Interpreter.Actions.ContainsKey(this.Word))
+                else if (Interpreter.Functions.ContainsKey(this.IsKeyword) || Interpreter.Actions.ContainsKey(this.IsKeyword))
                 {
                     return Token.type.function;
                 }
                 else if (Interpreter.Keywords.ContainsKey(this.Word))
                 {
-                    if (Interpreter.Keywords[this.Word] == "Exit")
+                    if (Interpreter.Keywords[this.Word] == "EXIT")
                         return type.Exit;
-                    if (Interpreter.Keywords[this.Word] == "Skip")
+                    if (Interpreter.Keywords[this.Word] == "SKIP")
                         return type.Skip;
                     return Token.type.keyword;
                 }
-                else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.Word))
+                else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.IsKeyword))
                 {
                     return Token.type.variable;
                 }
+                else if ((word.StartsWith('\'') && word.EndsWith('\'')) || Regex.Match(word, "[0-9]+([.][0-9]+)?").Success)
+                {
+                    return type.constant;
+                }
                 else
                 {
-                    return Token.type.constant;
+                    return Token.type.Unexpected;
                 }
             }
         }
         public String IsKeyword {
-            get => Dictionary[Word];
+            get => Dictionary[word];
         }
     }
     public class TokensList : IEnumerable<Token>, IEnumerable
@@ -239,6 +234,48 @@ namespace YetAnotherScriptingLanguage
             }
             return this;
         }
+        public void Add(Token token,int i=-1)
+        {
+            if (i == -1)
+                mylist.Add(token);
+            else
+                mylist.Insert(i,token) ;
+        }
+        public TokensList Remove(Token t)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (this[i] == t)
+                {
+                    this.Remove(i);
+                    i--;
+                }
+            }
+            return this;
+        }
+        public bool HasToken(Token t)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (this[i] == t)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public TokensList Remove(int idx = -1)
+        {
+            if (idx == -1) mylist.RemoveAt(this.Count - 1);
+            else
+                mylist.RemoveAt(idx);
+            return this;
+        }
+        public void Clear()
+        {
+            mylist.Clear();
+        }
+
         public TokensList this[int l,Token left, Token limit]
         {
             get
@@ -253,33 +290,31 @@ namespace YetAnotherScriptingLanguage
         {
             get
             {
-                if (t.Word == "Current")
+                if (t.Word == "CURRENT")
                 {
                     return this[l, l];
                 }
-                else if (t.Word == "Next")
+                else if (t.Word == "NEXT")
                 {
                     return this[l, l + 1];
                 }
-                else if (t.Word == "Previous")
+                else if (t.Word == "PREVIOUS")
                 {
                     return this[l - 1, new Token("END_STATEMENT")];
                 }
                 var result = new TokensList();
-                Dictionary<String, String> opposites = new Dictionary<String, String>
-                {
-                    ["End"] = "Begin",
-                    ["Else"] = "If"
-                };
+                Dictionary<String, List<String>> opposites = new Dictionary<String, List<String>>();
+                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO" };
+                opposites["ELSE"] = new List<string>() { "IF" };
                 int balanced = 0;
                 for (int i = l; i<this.Count; i++)
                 {
                     result.Add(this[i]);
                     if (opposites.ContainsKey(t.IsKeyword))
                     {
-                        if (this[i].IsKeyword == opposites[t.IsKeyword]) 
+                        if (opposites[t.IsKeyword].Contains(this[i].IsKeyword)) 
                             balanced++;
-                        if (this[i] == t || (this[i].IsKeyword == "Else" && this[i + 1].IsKeyword == "If")) 
+                        if (this[i] == t || (this[i].IsKeyword == "ELSE" && this[i + 1].IsKeyword == "IF")) 
                             balanced--;
                         if (this[i] == t && balanced == 0) 
                             break;
@@ -292,7 +327,6 @@ namespace YetAnotherScriptingLanguage
                 return result;
             }
         }
-
         public TokensList this[int l,int r]
         {
             get {
@@ -315,57 +349,10 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        public void Add(Token token,int i=-1)
-        {
-            if (i == -1)
-                mylist.Add(token);
-            else
-                mylist.Insert(i,token) ;
-        }
-
-        public TokensList Remove(Token t)
-        {
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (this[i] == t)
-                {
-                    this.Remove(i);
-                    i--;
-                }
-            }
-            return this;
-        }
-
-        public bool HasToken(Token t)
-        {
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (this[i] == t)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public TokensList Remove(int idx = -1)
-        {
-            if (idx == -1) mylist.RemoveAt(this.Count - 1);
-            else 
-                mylist.RemoveAt(idx);
-            return this;
-        }
-
-        public void Clear()
-        {
-            mylist.Clear();
-        }
-
         public IEnumerator<Token> GetEnumerator()
         {
             return mylist.GetEnumerator();
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

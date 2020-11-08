@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Storage;
+using System.Threading.Tasks;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using YetAnotherScriptingLanguage;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -57,24 +58,27 @@ namespace App1
             this.Tabs.Items.Add(t);
         }
 
+        public void reset()
+        {
+            _interpreter.Reset();
+            ConsoleInterface.HookEvents();
+            ConsoleInterface.clear();
+        }
+
         public void Run()
         {
             try
             {
                 TranslationUnit tes = new TranslationUnit(((Tabs.SelectedItem as TabViewItem).Content as TranslationUnitEdit).Code);
                 var res = Parser.Evaluate(Parser.Parse(tes.Tokens));
-
-                _interpreter.Reset();
-                ConsoleInterface.HookEvents();
-                ConsoleInterface.clear();
+                reset();
             }
             catch (Exception _e)
             {
                 this.ConsoleInterface.addText(_e.Message);
                 this.ConsoleInterface.addText(_e.StackTrace);
-                _interpreter.Reset();
-                ConsoleInterface.HookEvents();
-                ConsoleInterface.clear();
+                this.ConsoleInterface.addText(Environment.NewLine);
+                reset();
             }
         }
 

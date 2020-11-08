@@ -56,8 +56,8 @@ namespace App1
 
         public void HookEvents()
         {
-            ((PrintProcess)Interpreter.Functions["Print"]).PrintHandler += Interpreter_PrintHandler1;
-            ((ReadProcess)Interpreter.Functions["Read"]).ReadHandler += Interpreter_ReadHandler;
+            ((PrintProcess)Interpreter.Functions["PRINT"]).PrintHandler += Interpreter_PrintHandler1;
+            ((ReadProcess)Interpreter.Functions["READ"]).ReadHandler += Interpreter_ReadHandler;
         }
 
         public void addText(string s)
@@ -65,11 +65,12 @@ namespace App1
             this.BuiltConsole.Text += s;
         }
 
+        
+
         private YetAnotherScriptingLanguage.variables.Variable Interpreter_ReadHandler(ReadProcess sender, YetAnotherScriptingLanguage.variables.Variable Argument)
         {
-
-            addText(Argument.Value + (Argument.Value == "" ? "" : " "));
             var token = this.Token;
+            addText(Argument.Value + (Argument.Value == "" ? "" : " "));
             addText(token + Environment.NewLine);
             var r = new YetAnotherScriptingLanguage.variables.Variable(token);
             return r;

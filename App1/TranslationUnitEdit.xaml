@@ -27,8 +27,8 @@
         </ScrollViewer>
         <AppBarButton x:Name="SearchRequest" Background="#FF292929" Width="50" Height="45" Icon="Zoom" HorizontalAlignment="Right" Margin="0,0,150,0" Click="SearchRequest_Click" FocusVisualSecondaryBrush="#FF292929">
             <FlyoutBase.AttachedFlyout>
-                <Flyout Placement="LeftEdgeAlignedTop">
-                        <AutoSuggestBox x:Name="SearchBox" Width="250" Height="100" />
+                <Flyout Placement="Left">
+                        <TextBox x:Name="SearchBox" Width="250" Height="35" />
                 </Flyout>
             </FlyoutBase.AttachedFlyout>
         </AppBarButton>

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -79,7 +80,7 @@ namespace YetAnotherScriptingLanguage
         }
         public virtual Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
-            Limiter = new Token("End");
+            Limiter = new Token("END");
         }
 
         public static state LoopState = state.normal;
@@ -103,23 +104,23 @@ namespace YetAnotherScriptingLanguage
 
     class IfProcess : ConditionalProcess
     {
-        public IfProcess(string name = "If") : base(name)
+        public IfProcess(string name = "IF") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("End");
+            delimiter = new Token("END");
         }
 
         public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
         {
             int i = 1;
-            var condition = tokens[0, new Token("Begin")].Remove().Remove(0);
+            var condition = tokens[0, new Token("THEN")].Remove().Remove(0);
             for (; i < tokens.Count; i++)
             {
-                if (tokens[i].IsKeyword == "If")
+                if (tokens[i].IsKeyword == "IF")
                 {
-                    i += tokens[i, new Token("End")].Count;
+                    i += tokens[i, new Token("END")].Count;
                 }
-                if (tokens[i].IsKeyword == "Else")
+                if (tokens[i].IsKeyword == "ELSE")
                 {
                     break;
                 }
@@ -147,17 +148,17 @@ namespace YetAnotherScriptingLanguage
 
     class WhileProcess : ConditionalProcess
     {
-        public WhileProcess(string name = "While") : base(name)
+        public WhileProcess(string name = "WHILE") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("Do");
+            delimiter = new Token("END");
         }
 
 
         public Tuple<TokensList, TokensList, TokensList> BlockToken(TokensList tokens)
         {
-            var condition = tokens[0, new Token("Begin")].Remove().Remove(0);
-            var Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            var condition = tokens[0, new Token("DO")].Remove().Remove(0);
+            var Block = tokens[0, new Token("DO"), new Token("END")].Remove().Remove(0).Trim(false);
             return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
         }
 
@@ -184,22 +185,20 @@ namespace YetAnotherScriptingLanguage
     class ForProcess : WhileProcess
     {
         private variables.Variable step;
-        private string indexer;
-        public ForProcess(string name = "For") : base(name)
+        public ForProcess(string name = "FOR") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("END_STATEMENT");
+            delimiter = new Token("END");
         }
 
         public TokensList ConditionToken(TokensList tokens)
         {
             //for i from l to r (by s)? do
             var Indexer = tokens[1];
-            indexer = Indexer.Word;
-            bool stepAvailable = tokens[0, new Token("Do")].HasToken(new Token("By"));
-            var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("From"), new Token("To")].Remove().Remove(0).Trim(false)));
-            var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("To"), stepAvailable?new Token("By"): new Token("Do")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
-            step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("By"),  new Token("Do")].Remove().Remove(0).Trim(false)));
+            bool stepAvailable = tokens[0, new Token("DO")].HasToken(new Token("BY"));
+            var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("FROM"), new Token("TO")].Remove().Remove(0).Trim(false)));
+            var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("TO"), stepAvailable?new Token("BY"): new Token("DO")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
+            step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("BY"),  new Token("DO")].Remove().Remove(0).Trim(false)));
             if (leftLim.Type != variables.Variable.type.Decimal || rightLim.Type != variables.Variable.type.Decimal || step.Type != variables.Variable.type.Decimal)
             {
                 throw new Exception("Upper and Lower limits must be numbers!");
@@ -207,7 +206,7 @@ namespace YetAnotherScriptingLanguage
             Interpreter.Set[Indexer.Word] = leftLim;
             var condition = new TokensList();
             condition.Add(Indexer);
-            condition.Add(new Token("<"));
+            condition.Add(new Token("SMALLER"));
             condition.Add(new Token(rightLim.Value.ToString()));
             return condition;
         }
@@ -215,18 +214,19 @@ namespace YetAnotherScriptingLanguage
         public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
         {
             var condition = ConditionToken(tokens);
-            var Block = tokens[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            var Block = tokens[0, new Token("DO"), new Token("END")].Remove().Remove(0).Trim(false);
             return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
         }
 
         protected override void Process(TokensList data)
         {
             var Blocks = BlockExtraction(data);
+            var IndexerName = Blocks.Item1[0].Word;
             while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item2)); 
-                var arg = ((variables.Variable)Interpreter.Get[indexer]);
-                var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[indexer]).Value) + Convert.ToDecimal(step.Value);
+                Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                var arg = ((variables.Variable)Interpreter.Get[IndexerName]);
+                var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[IndexerName]).Value) + Convert.ToDecimal(step.Value);
                 arg.Value = val;
                 if (Parser.ParserState == Parser.state.TemporalSuspension)
                 {
@@ -238,7 +238,7 @@ namespace YetAnotherScriptingLanguage
                     break;
                 }
             }
-            if(Interpreter.Pop[indexer])
+            if(Interpreter.Pop[IndexerName])
                 Parser.ParserState = Parser.state.Normal;
             else
                 throw new Exception("Loop's temprorary variable not Cleared Properly");
@@ -247,7 +247,7 @@ namespace YetAnotherScriptingLanguage
 
     class ClassProcess : Function
     {
-        public ClassProcess(string name = "Class") : base(name)
+        public ClassProcess(string name = "CLASS") : base(name)
         {
             Type = type.procedure;
         }
@@ -275,7 +275,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if(Type == type.function)
                 {
-                    Limiter = new Token("Next");
+                    Limiter = new Token("NEXT");
                 }
             }
 
@@ -360,10 +360,10 @@ namespace YetAnotherScriptingLanguage
             }
 
         }
-        public FunctionProcess(string name = "Function") : base(name)
+        public FunctionProcess(string name = "FUNCTION") : base(name)
         {
             Type = type.procedure;
-            Limiter = new Token("End");
+            Limiter = new Token("END");
         }
 
         List<variables.Variable> getSignature(TokensList data)
@@ -389,7 +389,7 @@ namespace YetAnotherScriptingLanguage
 
         TokensList getBody(TokensList data)
         {
-            return data[0, new Token("Begin"), new Token("End")].Remove().Remove(0).Trim(false);
+            return data[0, new Token("BEGIN"), new Token("END")].Remove().Remove(0).Trim(false);
         }
 
         type getType(bool ThenFollow)
@@ -418,7 +418,7 @@ namespace YetAnotherScriptingLanguage
 
     class ReturnProcess : Function
     {
-        public ReturnProcess(string name = "Return") : base(name)
+        public ReturnProcess(string name = "RETURN") : base(name)
         {
             this.Type = type.function;
             Limiter = new Token("END_STATEMENT");
@@ -435,7 +435,7 @@ namespace YetAnotherScriptingLanguage
 
     class ArrayProcess : Function
     {
-        public ArrayProcess(string name = "Array") : base(name)
+        public ArrayProcess(string name = "ARRAY") : base(name)
         {
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
@@ -450,17 +450,21 @@ namespace YetAnotherScriptingLanguage
             if (data.Count != 5)
                 new Exception("Syntax error Array Declared Incorrectly");
             var name = data[1].Word;
-            var dimensions = new Token(data[2].Word.Substring(1, data[2].Word.Length - 2)).Spread().Trim();
-            if (dimensions.Count != 1)
-                new Exception("Syntax error Array Length Incorrectly");
-            var lenght = Convert.ToInt32(dimensions[0].Word);
+            var dimensions = new Token(data[2].Word.Substring(1, data[2].Word.Length - 2)).Spread().Trim().Remove(new Token("NEXT_ARG"));
+            var dimensionsLens = new List<int>();
+            var lenght =1;
+            foreach(var len in dimensions)
+            {
+                lenght *= Convert.ToInt32(len.Word);
+                dimensionsLens.Add(Convert.ToInt32(len.Word));
+            }
             var type = data[4].Word == "Decimal" ? variables.Variable.type.Decimal : data[4].Word == "Boolean" ? variables.Variable.type.Boolean : data[4].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
             List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
             for(int i = 0; i < lenght; i++)
             {
                 defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(type), type));
             }
-            var v = new variables.Array(defaultVal,variables.Variable.type.Array, type, name);
+            var v = new variables.Array(defaultVal,variables.Variable.type.Array, dimensionsLens, type, name);
             if (!Interpreter.Peek[name])
                 Interpreter.Set[name] = v;
             else
@@ -470,7 +474,7 @@ namespace YetAnotherScriptingLanguage
 
     class VariableProcess : Function
     {
-        public VariableProcess(string name = "Variable") : base(name)
+        public VariableProcess(string name = "VARIABLE") : base(name)
         {
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
@@ -496,17 +500,45 @@ namespace YetAnotherScriptingLanguage
 
         protected override void Process(TokensList data)
         {
-            data.Trim();
-            if (data.Count != 4 || data.Count != 6)
-                new Exception("Syntax error Variable Declared Incorrectly");
-            var name = data[1].Word;
-            var type = data[3].Word == "Decimal" ? variables.Variable.type.Decimal : data[3].Word == "Boolean" ? variables.Variable.type.Boolean : data[3].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            data.Trim(false);
+            var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
+            var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
+            var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
             object defaultVal = DefaultValue(type);
-            var v = new variables.Variable(defaultVal, type, name);
-            if (!Interpreter.Peek[name])
-                Interpreter.Set[name] = v;
-            else
-                throw new Exception("A variable with the name : " + name + " Already exists in Stack");
+            foreach (var nameToken in names)
+            {
+                if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
+                {
+                    var v = new variables.Variable(defaultVal, type, nameToken.Word);
+                    if (!Interpreter.Peek[nameToken.Word])
+                        Interpreter.Set[nameToken.Word] = v;
+                    else
+                        throw new Exception("A variable with the name : " + nameToken.Word + " Already exists in Stack");
+                }
+            }
+        }
+    }
+
+    class DeleteProcess : Function
+    {
+        public DeleteProcess(string name = "DELETE") : base(name)
+        {
+            this.Type = type.procedure;
+            Limiter = new Token("END_STATEMENT");
+        }
+
+        protected override void Process(TokensList data)
+        {
+            data.Trim(false);
+            var names = data[1, new Token("END_STATEMENT")].Remove().Remove(new Token("NEXT_ARG"));
+            foreach (var nameToken in names)
+            {
+                if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
+                {
+                    if (!Interpreter.Pop[nameToken.Word])
+                        throw new Exception("No variable with the name : " + nameToken.Word + " exists in Stack");
+                }
+            }
         }
     }
 
@@ -522,7 +554,7 @@ namespace YetAnotherScriptingLanguage
 
         public delegate void PrintInvoked(PrintProcess sender,List<variables.Variable> Arguments);
         public event PrintInvoked PrintHandler;
-        public PrintProcess(string name = "Print") : base(name)
+        public PrintProcess(string name = "PRINT") : base(name)
         {
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
@@ -556,14 +588,15 @@ namespace YetAnotherScriptingLanguage
 
     class OpenProcess : ArgumentedProcess
     {
+
         protected string fileExtensionRestriction;
-        public OpenProcess(string name = "Open") : base(name)
+        string content = "";
+        public OpenProcess(string name = "OPEN") : base(name)
         {
             Type = type.function;
             fileExtensionRestriction = "";
             Limiter = new Token("END_STATEMENT");
         }
-
 
         protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
@@ -598,20 +631,30 @@ namespace YetAnotherScriptingLanguage
             string content = sr.ReadToEnd();
             return new variables.Variable(content, variables.Variable.type.Word);
         }
-    }
 
+    }
+    
     class ImportProcess : OpenProcess
     {
-        public ImportProcess(string name = "Import") : base(name)
+        public ImportProcess(string name = "IMPORT") : base(name)
         {
             Type = type.procedure;
             fileExtensionRestriction = ".aysl";
             Limiter = new Token("END_STATEMENT");
         }
-        protected override void Process(TokensList data)
+        protected async override void Process(TokensList data)
         {
-            var content = this.Evaluate(data);
-            Parser.Evaluate(Parser.Parse(Tokenizer.Tokenize(new TranslationUnit((String)content.Value))));
+            string content = null;
+            if(Interpreter.Mode == Interpreter.mode.console)
+            {
+                content = (String)(this.Evaluate(data).Value);
+            }
+            else if(Interpreter.Mode == Interpreter.mode.Uwp)
+            {
+                var Arguments = ArgumentsExtraction(data);
+                content = await PathIO.ReadTextAsync((String)Arguments[0].Value);
+            }
+            Parser.Evaluate(Parser.Parse(Tokenizer.Tokenize(new TranslationUnit(content))));
         }
     }
 
@@ -620,7 +663,7 @@ namespace YetAnotherScriptingLanguage
 
         public delegate variables.Variable ReadInvoked(ReadProcess sender, variables.Variable Argument);
         public event ReadInvoked ReadHandler; 
-        public ReadProcess(string name = "Read") : base(name)
+        public ReadProcess(string name = "READ") : base(name)
         {
             Type = type.function;
             Limiter = new Token("END_STATEMENT");
@@ -660,19 +703,19 @@ namespace YetAnotherScriptingLanguage
         public ConstantsMap(string name) : base(name)
         {
             Type = type.function;
-            Limiter = new Token("Current");
+            Limiter = new Token("CURRENT");
         }
 
         public static void SetUpCanstants()
         {
             Canstants.Add("e", Math.E); Canstants.Add("E", Math.E);
             Canstants.Add("pi", Math.PI); Canstants.Add("PI", Math.PI);
-            Canstants.Add("False", 0); Canstants.Add("True", 1);
+            Canstants.Add("FALSE", 0); Canstants.Add("TRUE", 1);
         }
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            if (Name != "False" && Name != "True")
+            if (Name != "FALSE" && Name != "TRUE")
                 return new variables.Variable(Canstants[this.Name], variables.Variable.type.Decimal);
             return new variables.Variable(Canstants[this.Name], variables.Variable.type.Boolean);
         }
@@ -685,7 +728,7 @@ namespace YetAnotherScriptingLanguage
         static Random rnd = new Random();
         public MathProcess(string name) : base(name)
         {
-            Limiter = new Token("Next");
+            Limiter = new Token("NEXT");
             this.Type = type.function;
         }
 
@@ -731,7 +774,7 @@ namespace YetAnotherScriptingLanguage
             UnaryFunctions.Add("sqrt", Math.Sqrt); UnaryFunctions.Add("ceil", Math.Ceiling);
             UnaryFunctions.Add("fact", (double d) =>
             {
-                if (d != Math.Truncate(d)) throw new Exception("Factorial Function Takes an Integer input");
+                if (d != Math.Truncate(d) || d < 0) throw new Exception("Factorial Function Takes an Integer input");
                 double result = 1;
                 for(int i = 1; i <= Math.Floor(d); i++)
                 {
@@ -762,16 +805,16 @@ namespace YetAnotherScriptingLanguage
 
     class SetProcess : ArgumentedProcess
     {
-        public SetProcess(string name=":=") : base(name)
+        public SetProcess(string name="SET") : base(name)
         {
             this.Type = type.procedure;
-            Limiter = new Token("Previous");
+            Limiter = new Token("PREVIOUS");
         }
 
         protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
         {
             List<variables.Variable> Arguments =  new List<variables.Variable>();
-            TokensList varName = tokens[0,new Token("ASSIGNMENT")].Remove();
+            TokensList varName = tokens[0,new Token("SET")].Remove();
             TokensList varVal = tokens[varName.Count + 1, tokens.Count - 1].Trim();
             var argVal = Parser.Evaluate(Parser.Parse(varVal));
             var indexVal = varName.Count != 2 ? null : Parser.Evaluate(Parser.Parse(new Token(varName[1].Word.TrimStart('[').TrimEnd(']')).Spread()));
@@ -788,15 +831,17 @@ namespace YetAnotherScriptingLanguage
             //Variable n as array of Word
             var Arguments = ArgumentsExtraction(data); ;
             var var = ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]);
-            if(var.Type == variables.Variable.type.Array && Arguments.Count == 3)
+            if (var.Type == variables.Variable.type.Array)
             {
-                var index = Convert.ToInt32(Arguments[2].Value.ToString());
-                var = ((List<variables.Variable>)((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value)[index];
+                if (Arguments.Count == 3)
+                {
+                    var index = Convert.ToInt32(Arguments[2].Value.ToString());
+                    var = ((List<variables.Variable>)((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value)[index];
+                }
             }
             if (var.Type != Arguments[1].Type)
                 throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
             var.Value = Arguments[1].Value;
         }
     }
-
 }

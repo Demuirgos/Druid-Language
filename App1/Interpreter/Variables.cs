@@ -260,10 +260,32 @@ namespace YetAnotherScriptingLanguage
         public class Array : variables.Variable
         {
             public type innerType { get; set; }
-            public Array(object value, type t, type i, string name) : base(value, t, name)
+            public int dimensionsCount => dimensionsLengths is null ? 0 : dimensionsLengths.Count;
+            public int length {
+                get
+                {
+                    int len = 1;
+                    foreach (var d in DimensionsLengths) len *= d;
+                    return len;
+                }
+            }
+            public List<int> dimensionsLengths;
+            public List<int> DimensionsLengths
+            {
+                get
+                {
+                    if (dimensionsLengths is null)
+                        dimensionsLengths = new List<int>();
+                    return dimensionsLengths;
+                }
+            }
+
+            public Array(object value, type t, List<int> d, type i, string name) : base(value, t, name)
             {
                 innerType = i;
+                dimensionsLengths = d;
             }
+
             public Array(Array r)
             {
                 this.Value = r.Value;
@@ -274,22 +296,13 @@ namespace YetAnotherScriptingLanguage
 
             public Array(Token data)
             {
-                var bitsAndPieces = (new Token(data.Word.Substring(1,data.Word.Length-2))).Spread().Trim();
+                var bitsAndPieces = (new Token(data.Word.Substring(1,data.Word.Length-2))).Spread().Trim().Remove(new Token("NEXT_ARG"));
                 List<variables.Variable> vars = new List<variables.Variable>();
-                TokensList curr = new TokensList();
                 for (int i = 0; i < bitsAndPieces.Count; i++)
                 {
-                    if (bitsAndPieces[i].IsKeyword != "NEXT_ARG")
-                    {
-                        curr.Add(bitsAndPieces[i]);
-                    }
-                    if (bitsAndPieces[i].IsKeyword == "NEXT_ARG" || i == bitsAndPieces.Count - 1)
-                    {
-                        vars.Add(Parser.Evaluate(Parser.Parse(curr)));
-                        curr.Clear();
-                    }
+                    vars.Add(Parser.Evaluate(Parser.Parse(bitsAndPieces[i].Spread())));
                 }
-                for(int i = 0; i < vars.Count - 1; i++)
+                for (int i = 0; i < vars.Count - 1; i++)
                 {
                     if (vars[i].Type != vars[i + 1].Type)
                         throw new Exception("Invalid Type Initiliazation");
@@ -337,19 +350,41 @@ namespace YetAnotherScriptingLanguage
                 variables.Array left  = l as variables.Array;
                 if (!(right is null) && !(left is null))
                 {
+                    if(right.dimensionsCount!=1 || left.dimensionsCount!=1)
+                        throw new Exception("MultiDimentional Arrays are Immutable ::() operation Undefined");
                     return variables.Array.Insert(left, right);
                 }
                 else if (right is null && !(left is null))
                 {
+                    if (left.dimensionsCount != 1)
+                        throw new Exception("MultiDimentional Arrays are Immutable ::() operation Undefined");
                     return variables.Array.Insert(left, r);
                 }
                 else if (!(right is null) && left is null)
                 {
+                    if (right.dimensionsCount != 1)
+                        throw new Exception("MultiDimentional Arrays are Immutable ::() operation Undefined");
                     return variables.Array.Insert(l, right);
                 }
                 else
                     throw new Exception("Operation Undefined ::(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
 
+            }
+
+            public static variables.Variable getElement(variables.Array src, Token indexer)
+            {
+                var dimensions = new Token(indexer.Word.Substring(1, indexer.Word.Length - 2)).Spread().Trim().Remove(new Token("NEXT_ARG"));
+                if (dimensions.Count != src.dimensionsCount)
+                    throw new Exception("Invalid Indexer The Dimensions of the collection and the index missmatch");
+                int idx = 0;
+                int Len = 1;
+                for (int i = 0; i < dimensions.Count; i++)
+                {
+                    Len *= src.DimensionsLengths[i];
+                    var v = Convert.ToInt32(Parser.Evaluate(Parser.Parse(dimensions[i].Spread())).Value);
+                    idx += v * ((i< dimensions.Count-1)? Len:1);
+                }
+                return (src.Value as List<variables.Variable>)[idx];
             }
 
         }

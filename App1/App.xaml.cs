@@ -13,7 +13,9 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using System.Xml;
 using Windows.UI.Xaml.Navigation;
+using Windows.Storage;
 using YetAnotherScriptingLanguage;
 
 namespace App1
@@ -31,6 +33,7 @@ namespace App1
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            setUpConfigFiles();
         }
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -40,7 +43,6 @@ namespace App1
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;
-
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
             if (rootFrame == null)
@@ -72,10 +74,24 @@ namespace App1
                 Window.Current.Activate();
             }
         }
-
         /// <summary>
         /// Invoked when Navigation to a certain page fails
         /// </summary>
+        /// Invoked To setup Config files Xml in LocalFolder 
+        private async void setUpConfigFiles()
+        {
+            XmlDocument configurationFile = new XmlDocument();
+            configurationFile.Load("Configurations.xml");
+            try
+            {
+                var file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("Configurations.xml", CreationCollisionOption.FailIfExists);//.CopyAsync(ApplicationData.Current.LocalFolder, "Configurations.xml", NameCollisionOption.FailIfExists);
+                StreamWriter sw = new StreamWriter(file.Path);
+                configurationFile.Save(sw);
+                sw.Close();
+            }
+            catch (Exception) { }
+        }
+        
         /// <param name="sender">The Frame which failed navigation</param>
         /// <param name="e">Details about the navigation failure</param>
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)

@@ -134,11 +134,6 @@ namespace App1
             }
         }
 
-        private void SpellCkeck_Toggled(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void SizeIncButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = EditZone.Document.Selection;
@@ -164,11 +159,6 @@ namespace App1
         private void SearchRequest_Click(object sender, RoutedEventArgs e)
         {
             FlyoutBase.ShowAttachedFlyout(sender as FrameworkElement);
-        }
-
-        private void CodePredict_Toggled(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)

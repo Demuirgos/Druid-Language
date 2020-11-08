@@ -33,14 +33,26 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="App1.App">
       <uap:VisualElements
-        DisplayName="App1"
+        DisplayName="YetAnotherIDE"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="App1"
+        Description="YetAnotherIDE is a simple IDE to Yasl (Yet Another simple language)"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="ayslcodeunit">
+            <uap:SupportedFileTypes>
+              <uap:FileType ContentType="code/file">.aysl</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Aysl</uap:DisplayName>
+            <uap:EditFlags OpenIsSafe="true"/>
+            <uap:Logo>Assets\StoreLogo.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

@@ -6,9 +6,6 @@ namespace YetAnotherScriptingLanguage
 {
     public class Interpreter
     {
-
-
-        public static bool Verbose { get; set; }
         public class Block
         {
             public Block(string name = null)
@@ -21,24 +18,19 @@ namespace YetAnotherScriptingLanguage
             public string Name { get; set; }
         }
         private Parser main;
-
+        public enum mode
+        {
+            console,
+            Uwp
+        }
+        public static mode Mode = mode.Uwp;
         private string _script;
         private TranslationUnit Local;
         public static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         public static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
         public static Queue<variables.Variable> ReturnValue = new Queue<variables.Variable>();
 
-        private static KeyWords keywords;
-        public static KeyWords Keywords { 
-            get
-            {
-                if (keywords == null)
-                {
-                    keywords = new KeyWords();
-                }
-                return keywords;
-            }
-        }
+        public static KeyWords Keywords => new KeyWords();
 
         public TokensList tokens { get; set; }
         public int index = 0;
@@ -78,44 +70,47 @@ namespace YetAnotherScriptingLanguage
             {
                 switch (word.Value)
                 {
-                    case ("If"): 
-                        Interpreter.Functions.Add("If", new IfProcess());
+                    case ("IF"): 
+                        Interpreter.Functions.Add("IF", new IfProcess());
                         break;
-                    case ("While"):
-                        Interpreter.Functions.Add("While", new WhileProcess());
+                    case ("WHILE"):
+                        Interpreter.Functions.Add("WHILE", new WhileProcess());
                         break;
-                    case ("Print"):
-                        Interpreter.Functions.Add("Print", new PrintProcess());
+                    case ("PRINT"):
+                        Interpreter.Functions.Add("PRINT", new PrintProcess());
                         break;
-                    case ("Read"):
-                        Interpreter.Functions.Add("Read", new ReadProcess());
+                    case ("READ"):
+                        Interpreter.Functions.Add("READ", new ReadProcess());
                         break;
-                    case ("Return"):
-                        Interpreter.Functions.Add("Return", new ReturnProcess());
+                    case ("RETURN"):
+                        Interpreter.Functions.Add("RETURN", new ReturnProcess());
                         break;
-                    case ("Variable"):
-                        Interpreter.Functions.Add("Variable", new VariableProcess());
+                    case ("VARIABLE"):
+                        Interpreter.Functions.Add("VARIABLE", new VariableProcess());
                         break;
-                    case ("For"):
-                        Interpreter.Functions.Add("For", new ForProcess());
+                    case ("FOR"):
+                        Interpreter.Functions.Add("FOR", new ForProcess());
                         break;
-                    case ("Import"):
-                        Interpreter.Functions.Add("Import", new ImportProcess());
+                    case ("IMPORT"):
+                        Interpreter.Functions.Add("IMPORT", new ImportProcess());
                         break;
-                    case ("Class"):
-                        Interpreter.Functions.Add("Class", new ClassProcess());
+                    case ("TYPE"):
+                        Interpreter.Functions.Add("TYPE", new ClassProcess());
                         break;
-                    case ("Function"):
-                        Interpreter.Functions.Add("Function", new FunctionProcess());
+                    case ("FUNCTION"):
+                        Interpreter.Functions.Add("FUNCTION", new FunctionProcess());
                         break;
-                    case ("ASSIGNMENT"):
-                        Interpreter.Functions.Add("ASSIGNMENT", new SetProcess());
+                    case ("SET"):
+                        Interpreter.Functions.Add("SET", new SetProcess());
                         break;
-                    case ("Open"):
-                        Interpreter.Functions.Add("Open", new OpenProcess());
+                    case ("OPEN"):
+                        Interpreter.Functions.Add("OPEN", new OpenProcess());
                         break;
-                    case ("Array"):
-                        Interpreter.Functions.Add("Array", new ArrayProcess());
+                    case ("ARRAY"):
+                        Interpreter.Functions.Add("ARRAY", new ArrayProcess());
+                        break;
+                    case ("DELETE"):
+                        Interpreter.Functions.Add("DELETE", new DeleteProcess());
                         break;
                 }
             }
