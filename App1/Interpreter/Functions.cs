@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace YetAnotherScriptingLanguage
@@ -842,6 +841,21 @@ namespace YetAnotherScriptingLanguage
             if (var.Type != Arguments[1].Type)
                 throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
             var.Value = Arguments[1].Value;
+        }
+    }
+
+    class EvalProcess : Function
+    {
+        public EvalProcess(string name = "EVALUATE") : base(name)
+        {
+            Limiter = new Token("NEXT");
+            this.Type = type.function;
+        }
+
+        protected override variables.Variable Evaluate(TokensList data)
+        {
+            var result = Parser.Evaluate(Parser.Parse(data));
+            return result; 
         }
     }
 }

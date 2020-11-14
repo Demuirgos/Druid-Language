@@ -8,7 +8,7 @@ namespace YetAnotherScriptingLanguage
     public class KeyWords : Dictionary<String, String>
     {
         XmlDocument configurationFile = new XmlDocument();
-        string chosenLanguage = "eng";
+        string chosenLanguage = "English";
         private Dictionary<string, Windows.UI.Color> colorMapValue;
         public Dictionary<string, Windows.UI.Color> ColorMapValue => colorMapValue;
         public KeyWords() : base()

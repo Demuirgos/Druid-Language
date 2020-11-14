@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -111,6 +110,9 @@ namespace YetAnotherScriptingLanguage
                         break;
                     case ("DELETE"):
                         Interpreter.Functions.Add("DELETE", new DeleteProcess());
+                        break;
+                    case ("EVALUATE"):
+                        Interpreter.Functions.Add("EVALUATE", new EvalProcess());
                         break;
                 }
             }

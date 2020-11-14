@@ -134,7 +134,6 @@
       <DependentUpon>EditPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interpreter\Action.cs" />
-    <Compile Include="Interpreter\Analyzer.cs" />
     <Compile Include="Interpreter\Functions.cs" />
     <Compile Include="Interpreter\Interpreter.cs" />
     <Compile Include="Interpreter\KeyWords.cs" />

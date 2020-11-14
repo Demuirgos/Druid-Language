@@ -29,6 +29,7 @@
         <keyword key="Open"     map="OPEN"       type="Function"/>
         <keyword key="Read"     map="READ"       type="Function"/>
         <keyword key="Include"  map="IMPORT"     type="Function"/>
+        <keyword key="Eval"     map="EVALUATE"   type="Function"/>
         
         <keyword key="Function" map="FUNCTION"   type="Keyword"/>
         <keyword map="ARRAY"    key="Array"      type="Type"/>
