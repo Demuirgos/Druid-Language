@@ -97,7 +97,7 @@ namespace YetAnotherScriptingLanguage
 
         public virtual Tuple<TokensList, TokensList, TokensList> BlockExtraction(TokensList tokens) => throw new Exception("Not yet Implemented");
 
-        public bool this[TokensList l] => Convert.ToBoolean(((variables.Variable)Parser.Evaluate(Parser.Parse(l))).Value);
+        public bool this[TokensList l] => Convert.ToBoolean(((variables.Variable)Parser.Process(l)).Value);
 
     }
 
@@ -136,11 +136,11 @@ namespace YetAnotherScriptingLanguage
             var Blocks = BlockExtraction(data);
             if (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                Parser.Process(Blocks.Item2);
             }
             else
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item3));
+                Parser.Process(Blocks.Item3);
             }
         }
     }
@@ -166,7 +166,7 @@ namespace YetAnotherScriptingLanguage
             var Blocks = BlockToken(data);
             while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                Parser.Process(Blocks.Item2);
                 if (Parser.ParserState == Parser.state.TemporalSuspension)
                 {
                     Parser.ParserState = Parser.state.Normal;
@@ -183,11 +183,19 @@ namespace YetAnotherScriptingLanguage
 
     class ForProcess : WhileProcess
     {
-        private variables.Variable step;
         public ForProcess(string name = "FOR") : base(name)
         {
             Type = type.procedure;
             delimiter = new Token("END");
+        }
+
+        private TokensList StepValue(TokensList tokens,bool isForwardMoving=true)
+        {
+            bool stepAvailable = tokens[0, new Token("DO")].HasToken(new Token("BY"));
+            var step = !stepAvailable ? (isForwardMoving? new variables.Variable("1"): new variables.Variable("-1")) : Parser.Process(tokens[0, new Token("BY"), new Token("DO")].Remove().Remove(0).Trim(false));
+            if(step.Type != variables.Variable.type.Decimal) 
+                throw new Exception("Step Value must be a number!");
+            return new TokensList() { mylist = new List<Token>() { new Token(step.Value.ToString()) } };       
         }
 
         public TokensList ConditionToken(TokensList tokens)
@@ -195,17 +203,18 @@ namespace YetAnotherScriptingLanguage
             //for i from l to r (by s)? do
             var Indexer = tokens[1];
             bool stepAvailable = tokens[0, new Token("DO")].HasToken(new Token("BY"));
-            var leftLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0,new Token("FROM"), new Token("TO")].Remove().Remove(0).Trim(false)));
-            var rightLim = (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("TO"), stepAvailable?new Token("BY"): new Token("DO")].Remove().Remove(0).Trim(false))) + new variables.Variable("1");
-            step = !stepAvailable ? new variables.Variable("1") : (variables.Variable)Parser.Evaluate(Parser.Parse(tokens[0, new Token("BY"),  new Token("DO")].Remove().Remove(0).Trim(false)));
-            if (leftLim.Type != variables.Variable.type.Decimal || rightLim.Type != variables.Variable.type.Decimal || step.Type != variables.Variable.type.Decimal)
+            var leftLim = Parser.Process(tokens[0,new Token("FROM"), new Token("TO")].Remove().Remove(0).Trim(false));
+            var rightLim = Parser.Process(tokens[0, new Token("TO"), stepAvailable?new Token("BY"): new Token("DO")].Remove().Remove(0).Trim(false));
+            bool Forward = Convert.ToDecimal(leftLim.Value) < Convert.ToDecimal(rightLim.Value);
+            rightLim += Forward ? new variables.Variable("1"): leftLim == rightLim ? new variables.Variable("0"): new variables.Variable("-1");
+            if (leftLim.Type != variables.Variable.type.Decimal || rightLim.Type != variables.Variable.type.Decimal)
             {
                 throw new Exception("Upper and Lower limits must be numbers!");
             }
             Interpreter.Set[Indexer.Word] = leftLim;
             var condition = new TokensList();
             condition.Add(Indexer);
-            condition.Add(new Token("SMALLER"));
+            condition.Add(Forward?new Token("SMALLER"):new Token("BIGGER"));
             condition.Add(new Token(rightLim.Value.ToString()));
             return condition;
         }
@@ -213,8 +222,13 @@ namespace YetAnotherScriptingLanguage
         public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
         {
             var condition = ConditionToken(tokens);
+            var step = StepValue(tokens, condition.HasToken(new Token("SMALLER")));
+            condition = condition.Add(new Token("AND"))
+                                 .Add(new Token(step.mylist[0].Word))
+                                 .Add(condition.HasToken(new Token("SMALLER"))? new Token("BIGGER") : new Token("SMALLER"))
+                                 .Add(new Token("0"));
             var Block = tokens[0, new Token("DO"), new Token("END")].Remove().Remove(0).Trim(false);
-            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
+            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, step);
         }
 
         protected override void Process(TokensList data)
@@ -223,9 +237,9 @@ namespace YetAnotherScriptingLanguage
             var IndexerName = Blocks.Item1[0].Word;
             while (this[Blocks.Item1])
             {
-                Parser.Evaluate(Parser.Parse(Blocks.Item2));
+                Parser.Process(Blocks.Item2);
                 var arg = ((variables.Variable)Interpreter.Get[IndexerName]);
-                var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[IndexerName]).Value) + Convert.ToDecimal(step.Value);
+                var val = Convert.ToDecimal(((variables.Variable)Interpreter.Get[IndexerName]).Value) + Convert.ToDecimal(Parser.Process(Blocks.Item3).Value);
                 arg.Value = val;
                 if (Parser.ParserState == Parser.state.TemporalSuspension)
                 {
@@ -290,7 +304,7 @@ namespace YetAnotherScriptingLanguage
                     if (args[i].IsKeyword == "NEXT_ARG" || i == args.Count - 1)
                     {
                         currentArg.Trim();
-                        var arg = (variables.Variable)Parser.Evaluate(Parser.Parse(currentArg));
+                        var arg = Parser.Process(currentArg);
                         Arguments.Add(arg);
                         currentArg.Clear();
                     }
@@ -340,14 +354,14 @@ namespace YetAnotherScriptingLanguage
             protected override void Process(TokensList data)
             {
                 ArgumentBlockPreProcess(data);
-                Parser.Evaluate(Parser.Parse(this.Body));
+                Parser.Process(this.Body);
                 Interpreter.ExecutionStack.Pop();
             }
 
             protected override variables.Variable Evaluate(TokensList data)
             {
                 ArgumentBlockPreProcess(data);
-                Parser.Evaluate(Parser.Parse(this.Body));
+                Parser.Process(this.Body);
                 var r = Interpreter.ReturnValue.Dequeue();
                 if (r.Type != this.Signature.Value)
                     throw new Exception("The function " + this.Name + " returns a : " + this.Signature.Value.ToString());
@@ -426,7 +440,7 @@ namespace YetAnotherScriptingLanguage
         protected override variables.Variable Evaluate(TokensList data)
         {
             var PostReturn = data[1, this.Limiter];
-            var r = Parser.Evaluate(Parser.Parse(PostReturn));
+            var r = Parser.Process(PostReturn);
             Parser.ParserState = Parser.state.Suspended;
             return r;
         }
@@ -572,7 +586,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 if(args[i].IsKeyword=="NEXT_ARG" || i == args.Count - 1)
                 {
-                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(curr)));
+                    Arguments.Add(Parser.Process(curr));
                     curr.Clear();
                 }
             }
@@ -589,7 +603,6 @@ namespace YetAnotherScriptingLanguage
     {
 
         protected string fileExtensionRestriction;
-        string content = "";
         public OpenProcess(string name = "OPEN") : base(name)
         {
             Type = type.function;
@@ -608,7 +621,7 @@ namespace YetAnotherScriptingLanguage
                 {
                     if (args[0].Word.EndsWith(fileExtensionRestriction))
                     {
-                        Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                        Arguments.Add(Parser.Process(args));
                     }
                     else
                     {
@@ -617,7 +630,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 else
                 {
-                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                    Arguments.Add(Parser.Process(args));
                 }
             }
             return Arguments;
@@ -653,7 +666,7 @@ namespace YetAnotherScriptingLanguage
                 var Arguments = ArgumentsExtraction(data);
                 content = await PathIO.ReadTextAsync((String)Arguments[0].Value);
             }
-            Parser.Evaluate(Parser.Parse(Tokenizer.Tokenize(new TranslationUnit(content))));
+            Parser.Process(Tokenizer.Tokenize(new TranslationUnit(content)));
         }
     }
 
@@ -683,7 +696,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 else
                 {
-                    Arguments.Add((variables.Variable)Parser.Evaluate(Parser.Parse(args)));
+                    Arguments.Add(Parser.Process(args));
                 }
             }
             return Arguments;
@@ -742,7 +755,7 @@ namespace YetAnotherScriptingLanguage
                 if (args[i].IsKeyword == "NEXT_ARG" || i == args.Count - 1)
                 {
                     currentArg.Trim();
-                    var arg = (variables.Variable)Parser.Evaluate(Parser.Parse(currentArg));
+                    var arg = Parser.Process(currentArg);
                     Arguments.Add(arg);
                     currentArg.Clear();
                 }
@@ -781,7 +794,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 return result;
             });
-            UnaryFunctions.Add("-", (double d) => -d); UnaryFunctions.Add("+", (double d) => d);
+            UnaryFunctions.Add("MINUS", (double d) => -d); UnaryFunctions.Add("PLUS", (double d) => d);
         }
 
 
@@ -815,8 +828,8 @@ namespace YetAnotherScriptingLanguage
             List<variables.Variable> Arguments =  new List<variables.Variable>();
             TokensList varName = tokens[0,new Token("SET")].Remove();
             TokensList varVal = tokens[varName.Count + 1, tokens.Count - 1].Trim();
-            var argVal = Parser.Evaluate(Parser.Parse(varVal));
-            var indexVal = varName.Count != 2 ? null : Parser.Evaluate(Parser.Parse(new Token(varName[1].Word.TrimStart('[').TrimEnd(']')).Spread()));
+            var argVal = Parser.Process(varVal);
+            var indexVal = varName.Count != 2 ? null : Parser.Process(new Token(varName[1].Word.TrimStart('[').TrimEnd(']')).Spread());
             Arguments.Add(new variables.Variable(varName[0].Word));
             Arguments.Add(argVal);
             if(!(indexVal is null))
@@ -854,7 +867,7 @@ namespace YetAnotherScriptingLanguage
 
         protected override variables.Variable Evaluate(TokensList data)
         {
-            var result = Parser.Evaluate(Parser.Parse(data));
+            var result = Parser.Process(data);
             return result; 
         }
     }

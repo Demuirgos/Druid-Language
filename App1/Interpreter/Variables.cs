@@ -299,7 +299,7 @@ namespace YetAnotherScriptingLanguage
                 List<variables.Variable> vars = new List<variables.Variable>();
                 for (int i = 0; i < bitsAndPieces.Count; i++)
                 {
-                    vars.Add(Parser.Evaluate(Parser.Parse(bitsAndPieces[i].Spread())));
+                    vars.Add(Parser.Process(bitsAndPieces[i].Spread()));
                 }
                 for (int i = 0; i < vars.Count - 1; i++)
                 {
@@ -380,7 +380,7 @@ namespace YetAnotherScriptingLanguage
                 for (int i = 0; i < dimensions.Count; i++)
                 {
                     Len *= src.DimensionsLengths[i];
-                    var v = Convert.ToInt32(Parser.Evaluate(Parser.Parse(dimensions[i].Spread())).Value);
+                    var v = Convert.ToInt32(Parser.Process(dimensions[i].Spread()).Value);
                     idx += v * ((i< dimensions.Count-1)? Len:1);
                 }
                 return (src.Value as List<variables.Variable>)[idx];

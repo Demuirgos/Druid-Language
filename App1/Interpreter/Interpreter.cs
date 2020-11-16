@@ -16,7 +16,6 @@ namespace YetAnotherScriptingLanguage
             public Dictionary<string, Function> Variables => variables;
             public string Name { get; set; }
         }
-        private Parser main;
         public enum mode
         {
             console,
@@ -24,12 +23,17 @@ namespace YetAnotherScriptingLanguage
         }
         public static mode Mode = mode.Uwp;
         private string _script;
-        private TranslationUnit Local;
         public static Dictionary<string, Function> Functions = new Dictionary<string, Function>();
         public static Dictionary<string, Action> Actions = new Dictionary<string, Action>();
         public static Queue<variables.Variable> ReturnValue = new Queue<variables.Variable>();
 
-        public static KeyWords Keywords => new KeyWords();
+        private static KeyWords keywords;
+        public static KeyWords Keywords {
+            get {
+                if (keywords is null) return keywords =new KeyWords();
+                return keywords;
+            }
+        }
 
         public TokensList tokens { get; set; }
         public int index = 0;
@@ -44,17 +48,14 @@ namespace YetAnotherScriptingLanguage
         public static COMMANDS.PEEK Peek = new COMMANDS.PEEK(); 
         public static COMMANDS.POST Post = new COMMANDS.POST(); 
 
-        public Interpreter(string script)
+        public Interpreter()
         {
-            _script = script;
             Initialize();
         }
         public void Initialize()
         {
             setUpExternals();
             SetUp();
-            Local = new TranslationUnit(_script);
-            main = new Parser(Local.Tokens);
         }
         
         void setUpExternals()
@@ -133,6 +134,7 @@ namespace YetAnotherScriptingLanguage
 
         public void Reset()
         {
+            keywords.Update();
             Functions.Clear();
             Interpreter.ExecutionStack.Clear();
             SetUp();

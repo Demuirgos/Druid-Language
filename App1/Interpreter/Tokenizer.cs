@@ -203,7 +203,7 @@ namespace YetAnotherScriptingLanguage
     }
     public class TokensList : IEnumerable<Token>, IEnumerable
     {
-        List<Token> mylist = new List<Token>();
+        public List<Token> mylist = new List<Token>();
         public int Count => mylist.Count;
 
         public override string ToString()
@@ -234,12 +234,13 @@ namespace YetAnotherScriptingLanguage
             }
             return this;
         }
-        public void Add(Token token,int i=-1)
+        public TokensList Add(Token token,int i=-1)
         {
             if (i == -1)
                 mylist.Add(token);
             else
                 mylist.Insert(i,token) ;
+            return this;
         }
         public TokensList Remove(Token t)
         {

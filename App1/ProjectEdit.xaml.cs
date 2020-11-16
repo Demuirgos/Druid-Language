@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,7 +16,7 @@ namespace App1
     public sealed partial class ProjectEdit : Page
     {
         public Action<string, int> removeTab;
-        static public Interpreter _interpreter = new Interpreter("");
+        static public Interpreter _interpreter = new Interpreter();
         int currentTranslationUnit = -1;
         public int CurrentTranslationUnit => currentTranslationUnit;
         public ConsoleBuild InnerConsole => this.ConsoleInterface;
@@ -59,7 +60,7 @@ namespace App1
             try
             {
                 TranslationUnit tes = new TranslationUnit(((Tabs.SelectedItem as TabViewItem).Content as TranslationUnitEdit).Code);
-                var res = Parser.Evaluate(Parser.Parse(tes.Tokens));
+                var res = Parser.Process(tes.Tokens);
                 reset();
             }
             catch (Exception _e)

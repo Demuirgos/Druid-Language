@@ -19,19 +19,10 @@ namespace YetAnotherScriptingLanguage
             public bool this[Node left, Node right] => left.Operation.Priority >= right.Operation.Priority || right == null;
         }
         public static bool Verbose { get; set; }
-        private int index;
-        private TokensList _tokens;
         private static ProceedFlag Proceed = new ProceedFlag();
-        public Parser(TokensList tokens)
-        {
-            index = 0;
-            _tokens = tokens;
-            ParserState = state.Normal;
-        }
+        public static variables.Variable Process(TokensList Expression) => Evaluate(Parse(Expression));
 
-        
-
-        public static LinkedList<Node> Parse(TokensList expression)
+        private static LinkedList<Node> Parse(TokensList expression)
         {
             var Tree = new LinkedList<Node>();
             int i = 0;
@@ -117,8 +108,7 @@ namespace YetAnotherScriptingLanguage
             }
             return Tree;
         }
-
-        public static variables.Variable Evaluate(LinkedList<Node> expression , bool Once=false)
+        private static variables.Variable Evaluate(LinkedList<Node> expression , bool Once=false)
         {
             Func<Node,Node,Node> Merge =  (Node left, Node right) => {
                 switch (left.Operation.Operator.IsKeyword)

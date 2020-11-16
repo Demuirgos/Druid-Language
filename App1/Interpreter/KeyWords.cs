@@ -13,6 +13,11 @@ namespace YetAnotherScriptingLanguage
         public Dictionary<string, Windows.UI.Color> ColorMapValue => colorMapValue;
         public KeyWords() : base()
         {
+            Update();
+        }
+        public void Update()
+        {
+            this.Clear();
             configurationFile.Load(ApplicationData.Current.LocalFolder.Path + "\\Configurations.xml");
             chosenLanguage = configurationFile.SelectSingleNode("//Settings/Current/configuration").Attributes.GetNamedItem("value").Value;
             XmlNodeList keywordSet = configurationFile.SelectNodes("//Settings//Localizations/lang[@Name='" + chosenLanguage + "']/operators | //Settings/symbols | //Settings//Localizations/lang[@Name='" + chosenLanguage + "']/keywords");
