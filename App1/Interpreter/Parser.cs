@@ -50,6 +50,36 @@ namespace YetAnotherScriptingLanguage
                         v = variables.Array.getElement(v as variables.Array, expression[i + 1]);
                         i++;
                     }
+                    while(v.Type == variables.Variable.type.Record && (i + 1 < expression.Count && expression[i + 1].IsKeyword == "ACCESS"))
+                    {
+                        i += 2;
+                        var member = (v as variables.Record)[expression[i].Word];
+                        if(member.Type == Function.type.variable)
+                        {
+                            v = member as variables.Variable;
+                            continue;
+                        }
+                        else if(member.Type == (Function.type.function | Function.type.procedure))
+                        {
+                            Function foo = member as MethodProcess.CustomFunction;
+                            var Body = expression[i, foo.Limiter];
+                            i += Body.Count;
+                            if (foo.Type == Function.type.function)
+                            {
+                                v = foo[Body];
+                            }
+                            else if (foo.Type == Function.type.procedure)
+                            {
+                                v = foo[Body];
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Inexpected Token : " + expression[i].Word);
+                        }
+                        i++;
+                    }
                     i++;
                 }
                 else if (expression[i].Type == Token.type.array)

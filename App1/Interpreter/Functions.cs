@@ -271,14 +271,21 @@ namespace YetAnotherScriptingLanguage
             return data[0, new Token("DEFINE"), new Token("END")].Remove().Remove(0).Trim(false);
         }
 
+        protected override string getName(TokensList data, bool isMethod = false)
+        {
+            return data[0, new Token("TYPE") , new Token("BEGIN")].Trim()[1].Word;
+        }
+
         protected override void Process(TokensList expression)
         {
             var Name = getName(expression,true);
             var Body = getBody(expression).Trim(false);
             variables.Record template = new variables.Record(Name);
+            variables.Variable.CustomTypes.Add(Name,template);
             int i = 0;
             while (i < Body.Count)
             {
+                while (Body[i].IsKeyword == "END_STATEMENT") i++;
                 if (Body[i].Type == Token.type.function)
                 {
                     Function foo = new Function(Body[i].IsKeyword);
@@ -303,9 +310,7 @@ namespace YetAnotherScriptingLanguage
                     else
                         throw new Exception("Invalid Keyword" + Body[i].Word);
                 }
-                i++;
             }
-            variables.Variable.CustomTypes.Add(Name, template);
         }
     }
 
@@ -324,12 +329,14 @@ namespace YetAnotherScriptingLanguage
             var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
             var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
             var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array : variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword) ? variables.Variable.type.Record : variables.Variable.type.Invalid;
-            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal)
+            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
             {
-                object defaultVal = DefaultValue(type);
+                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native");
                 foreach (var nameToken in names)
                 {
-                    result.Add(new variables.Variable(defaultVal, type, nameToken.Word));
+                    var r = type == variables.Variable.type.Record ? defaultVal as variables.Record : new variables.Variable(defaultVal, type, nameToken.Word);
+                    r.Name = nameToken.Word;
+                    result.Add(r);
                 }
             }
             else if (type == variables.Variable.type.Array)
@@ -344,7 +351,7 @@ namespace YetAnotherScriptingLanguage
                     dimensionsLens.Add(Convert.ToInt32(len.Word));
                 }
                 var TypeStr = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")][2];
-                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.CustomTypes.ContainsKey(TypeStr.IsKeyword)? variables.Variable.type.Record: variables.Variable.type.Invalid;
                 List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
                 for (int i = 0; i < lenght; i++)
                 {
@@ -354,10 +361,6 @@ namespace YetAnotherScriptingLanguage
                 {
                     result.Add(new variables.Array(defaultVal, variables.Variable.type.Array, dimensionsLens, arrType, name.Word));
                 }
-            }
-            else if (type == variables.Variable.type.Record)
-            {
-
             }
             return result;
         }
@@ -381,8 +384,8 @@ namespace YetAnotherScriptingLanguage
     class CreateProcess : FunctionProcess
     {
         public CreateProcess(string name="CREATE") : base(name) {
-            //make constructor
-            throw new Exception("not yet implemented");
+            Type = type.procedure;
+            Limiter = new Token("END");
         }
     }
 
@@ -524,21 +527,25 @@ namespace YetAnotherScriptingLanguage
 
         protected type getType(TokensList data, bool isMethod = false)
         {
-            bool ThenFollow = data[0, isMethod ? new Token("METHOD") : new Token("FUNCTION"), new Token("BEGIN")].HasToken(new Token("OFTYPE"));
-            if (ThenFollow)
+            bool HasType = data[0, isMethod ? new Token("METHOD") : new Token("FUNCTION"), new Token("BEGIN")].HasToken(new Token("OFTYPE"));
+            if (HasType)
             {
-                return type.procedure;
+                return type.function;
             }
             else
             {
-                return type.function;
+                return type.procedure;
             }
         }
 
         protected variables.Variable.type getReturn(TokensList data, bool isMethod = false)
         {
-            var returnType = data[0, new Token("OFTYPE"), new Token("BEGIN")].Trim(false)[1];
-            return returnType.Word == "Decimal" ? variables.Variable.type.Decimal : returnType.Word == "Boolean" ? variables.Variable.type.Boolean : returnType.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            if (getType(data,isMethod)== type.function)
+            {
+                var returnType = data[0, new Token("OFTYPE"), new Token("BEGIN")].Trim(false)[1];
+                return returnType.Word == "Decimal" ? variables.Variable.type.Decimal : returnType.Word == "Boolean" ? variables.Variable.type.Boolean : returnType.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            }
+            return variables.Variable.type.Void;
         }
 
         protected override void Process(TokensList data)
@@ -642,9 +649,9 @@ namespace YetAnotherScriptingLanguage
             var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
             var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
             var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array: variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword)? variables.Variable.type.Record : variables.Variable.type.Invalid;
-            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal)
+            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
             {
-                object defaultVal = DefaultValue(type);
+                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native");
                 foreach (var nameToken in names)
                 {
                     if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
@@ -996,7 +1003,7 @@ namespace YetAnotherScriptingLanguage
         protected override void Process(TokensList data)
         {
             var Arguments = ArgumentsExtraction(data); ;
-            var var = ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]);
+            var var = Interpreter.Get[(string)Arguments[0].Value] as variables.Variable;
             if (var.Type == variables.Variable.type.Array)
             {
                 if (Arguments.Count == 3)

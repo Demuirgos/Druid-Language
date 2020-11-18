@@ -377,19 +377,20 @@ namespace YetAnotherScriptingLanguage
             public Record(string name,Dictionary<string,Function> param)
             {
                 typeName = name;
-            
+                this.Type = type.Record;
             }
 
             public Record(Record clone)
             {
                 typeName = clone.typeName;
                 members = clone.members;
+                this.Type = type.Record;
             }
 
             public Record(string name)
             {
                 typeName = name;
-
+                this.Type = type.Record;
             }
 
             Dictionary<String, Function> members = new Dictionary<string, Function>();

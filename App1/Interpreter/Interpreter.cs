@@ -144,6 +144,7 @@ namespace YetAnotherScriptingLanguage
             Functions.Clear();
             variables.Variable.CustomTypes.Clear();
             Interpreter.ExecutionStack.Clear();
+            Parser.ParserState = Parser.state.Normal;
             SetUp();
         }
 
