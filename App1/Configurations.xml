@@ -6,43 +6,42 @@
   <Localizations>
     <lang Name="English">
       <keywords>
-        <keyword key="Boolean"  map="Boolean"    type="Type"/>
-        <keyword key="Decimal"  map="Decimal"    type="Type"/>
-        <keyword key="Word"     map="Word"       type="Type"/>
-
-        <keyword map="FALSE"    key="False"      type="Value"/>
-        <keyword map="TRUE"     key="True"       type="Value"/>
-        
-        <keyword key="Begin"    map="BEGIN"      type="Block"/>
-        <keyword key="Then"     map="THEN"       type="Block"/>
-        <keyword key="Else"     map="ELSE"       type="Keyword"/>
-        <keyword key="End"      map="END"        type="Block"/>
-        <keyword key="If"       map="IF"         type="Keyword"/>
-        <keyword key="While"    map="WHILE"      type="Keyword"/>
-        <keyword key="To"       map="TO"         type="Accessory"/>
-        <keyword key="From"     map="FROM"       type="Accessory"/>
-        <keyword key="Do"       map="DO"         type="Block"/>
-        <keyword key="For"      map="FOR"        type="Keyword"/>
-        <keyword key="By"       map="BY"         type="Accessory"/>
-        
-        <keyword key="Print"    map="PRINT"      type="Function"/>
-        <keyword key="Open"     map="OPEN"       type="Function"/>
-        <keyword key="Read"     map="READ"       type="Function"/>
-        <keyword key="Include"  map="IMPORT"     type="Function"/>
-        <keyword key="Eval"     map="EVALUATE"   type="Function"/>
-        
-        <keyword key="Function" map="FUNCTION"   type="Keyword"/>
-        <keyword map="ARRAY"    key="Array"      type="Type"/>
-        <keyword key="Variable" map="VARIABLE"   type="Keyword"/>
-        <keyword key="As"       map="OFTYPE"     type="Accessory"/>
-        <keyword key="Continue" map="SKIP"       type="Accessory"/>
-        <keyword key="Break"    map="EXIT"       type="Accessory"/>
-        <keyword key="Return"   map="RETURN"     type="Accessory"/>
-
-        <keyword key="Create"   map="MAKE"       type="Keyword"/>
-        <keyword key="Delete"   map="DELETE"     type="Keyword"/>
-        <keyword key="Type"     map="TYPE"       type="Keyword"/>
-        <keyword key="Member"   map="METHOD"     type="Keyword"/>
+        <keyword key="Boolean"  map="Boolean"    type="Type"      construct="TypeConstruct" />
+        <keyword key="Decimal"  map="Decimal"    type="Type"      construct="TypeConstruct" />
+        <keyword key="Word"     map="Word"       type="Type"      construct="TypeConstruct" />
+        <keyword map="ARRAY"    key="Array"      type="Type"      construct="TypeConstruct" />
+        <keyword map="FALSE"    key="False"      type="Value"     construct="PreDefindedVal"/>
+        <keyword map="TRUE"     key="True"       type="Value"     construct="PreDefindedVal"/>
+        <keyword key="Function" map="FUNCTION"   type="Keyword"   construct="FunctionBlock" />
+        <keyword key="Begin"    map="BEGIN"      type="Block"     construct="FunctionBlock" />
+        <keyword key="Then"     map="THEN"       type="Block"     construct="IFBlock"       />
+        <keyword key="Else"     map="ELSE"       type="Keyword"   construct="IFBlock"       />
+        <keyword key="End"      map="END"        type="Block"     construct="SharedBlock"   />
+        <keyword key="If"       map="IF"         type="Keyword"   construct="IFBlock"       />
+        <keyword key="While"    map="WHILE"      type="Keyword"   construct="WhileBlock"    />
+        <keyword key="To"       map="TO"         type="Accessory" construct="ForBlock"      />
+        <keyword key="From"     map="FROM"       type="Accessory" construct="ForBlock"      />
+        <keyword key="Do"       map="DO"         type="Block"     construct="LoopBlock"     />
+        <keyword key="For"      map="FOR"        type="Keyword"   construct="ForBlock"      />
+        <keyword key="By"       map="BY"         type="Accessory" construct="ForBlock"      />
+        <keyword key="Print"    map="PRINT"      type="Function"  construct="IOConstruct"   />
+        <keyword key="Open"     map="OPEN"       type="Function"  construct="IOConstruct"   />
+        <keyword key="Read"     map="READ"       type="Function"  construct="IOConstruct"   />
+        <keyword key="Include"  map="IMPORT"     type="Function"  construct="IOConstruct"   />
+        <keyword key="Eval"     map="EVALUATE"   type="Function"  construct="IOConstruct"   />
+        <keyword key="Variable" map="VARIABLE"   type="Keyword"   construct="DeclConstruct" />
+        <keyword key="Delete"   map="DELETE"     type="Keyword"   construct="DeclConstruct" />
+        <keyword key="As"       map="OFTYPE"     type="Accessory" construct="TypeConstruct" />
+        <keyword key="Of"       map="ASTYPE"     type="Accessory" construct="TypeConstruct" />
+        <keyword key="Continue" map="SKIP"       type="Accessory" construct="ControlWord"   />
+        <keyword key="Break"    map="EXIT"       type="Accessory" construct="ControlWord"   />
+        <keyword key="Return"   map="RETURN"     type="Accessory" construct="ControlWord"   />
+        <keyword key="Type"     map="TYPE"       type="Keyword"   construct="ObjConstruct"  />
+        <keyword key="This"     map="HOLDER"     type="Accessory" construct="ObjConstruct"  />
+        <keyword key="Define"   map="DEFINE"     type="Block"     construct="ObjConstruct"  />
+        <keyword key="Member"   map="MEMBER"     type="Keyword"   construct="ObjConstruct"  />
+        <keyword key="New"      map="CREATE"     type="Keyword"   construct="ObjConstruct"  />
+        <keyword key="Method"   map="METHOD"     type="Keyword"   construct="ObjConstruct"  />
       </keywords>
       <operators>
         <symbol map="SET"           key=":="         />
@@ -62,6 +61,7 @@
         <symbol map="AND"           key="&amp;"      />
         <symbol map="NOT"           key="!"          />
         <symbol map="ACCESS"        key="->"         />
+        <symbol map="FORWARD"       key="|>"         />
       </operators>
       </lang> 
   </Localizations>

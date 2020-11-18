@@ -21,7 +21,7 @@ namespace YetAnotherScriptingLanguage
         public static bool Verbose { get; set; }
         private static ProceedFlag Proceed = new ProceedFlag();
         public static variables.Variable Process(TokensList Expression) => Evaluate(Parse(Expression));
-
+        
         private static LinkedList<Node> Parse(TokensList expression)
         {
             var Tree = new LinkedList<Node>();

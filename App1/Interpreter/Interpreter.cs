@@ -115,6 +115,12 @@ namespace YetAnotherScriptingLanguage
                     case ("EVALUATE"):
                         Interpreter.Functions.Add("EVALUATE", new EvalProcess());
                         break;
+                    case ("MEMBER"):
+                        Interpreter.Functions.Add("MEMBER", new MemberProcess());
+                        break;
+                    case ("METHOD"):
+                        Interpreter.Functions.Add("METHOD", new MethodProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
@@ -136,6 +142,7 @@ namespace YetAnotherScriptingLanguage
         {
             keywords.Update();
             Functions.Clear();
+            variables.Variable.CustomTypes.Clear();
             Interpreter.ExecutionStack.Clear();
             SetUp();
         }

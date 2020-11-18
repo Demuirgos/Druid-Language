@@ -32,11 +32,10 @@
                 </Flyout>
             </FlyoutBase.AttachedFlyout>
         </AppBarButton>
-        <ScrollViewer  Margin="0,50,0,0" VerticalAlignment="Top">
-            <Grid >
-                    <Viewbox x:Name="EditZoneWrapper" 
+        <Grid Margin="0,50,0,0">
+            <Viewbox x:Name="EditZoneWrapper" 
                                      Width="{Binding ElementName=RootGrid,Path=Width}">
-                        <RichEditBox x:Name="EditZone"
+                <RichEditBox x:Name="EditZone"
                                      KeyDown="EditZone_KeyDown"
                                      IsTabStop="True"
                                      PlaceholderText="Enter Code Here"
@@ -53,9 +52,8 @@
                                      Height="{Binding ElementName=EditZoneWrapper,Path=Height}"
                                      Width="{Binding ElementName=EditZoneWrapper,Path=Width}"
                                      >
-                        </RichEditBox>
-                    </Viewbox>
-            </Grid>
-        </ScrollViewer>
+                </RichEditBox>
+            </Viewbox>
+        </Grid>
     </Grid>
 </UserControl>

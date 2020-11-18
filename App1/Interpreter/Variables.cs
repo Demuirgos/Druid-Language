@@ -9,52 +9,52 @@ namespace YetAnotherScriptingLanguage
         
         public class Variable : Function
         {
-            public enum type
+            public new enum type
             {
                 Word,
                 Decimal,
                 Boolean,
                 Void,
-                Function,
-                Keyword,
                 Array,
+                Record,
                 Invalid
             }
+            public static Dictionary<string, Record> CustomTypes = new Dictionary<string, Record>();
 
             public Variable()
             {
                 Value = null;
                 Name = "";
                 Type = type.Invalid;
+                Ftype = Function.type.variable;
             }
-
             public Variable(object value, type varType, string name=null )
             {
+                Ftype = Function.type.variable;
                 Value = value;
                 Name = name;
                 Type = varType;
             }
-
             public Variable(object value, string name = null)
             {
+                Ftype = Function.type.variable;
                 Value = value;
                 Name = name;
                 Type = Regex.Match(Convert.ToString(value), "[0-9]+([.][0-9]+)?").Success ? variables.Variable.type.Decimal : variables.Variable.type.Word;
             }
-
             public Variable(Variable t)
             {
                 if (t is null) return;
                 this.Value = t.Value;
                 this.Type = t.Type;
                 this.Name = t.Name;
+                this.Ftype = t.Ftype;
             }
 
             public object Value { get; set; }
-            public String Name { get; set; }
-            public virtual Variable.type Type { get; set; }
+            public virtual new Variable.type Type { get; set; }
 
-            public static Variable operator +(Variable left, Variable right)
+            public static Variable  operator +(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                 {
@@ -70,8 +70,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static Variable operator *(Variable left, Variable right)
+            public static Variable  operator *(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                 {
@@ -85,8 +84,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static Variable operator /(Variable left, Variable right)
+            public static Variable  operator /(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                 {
@@ -103,8 +101,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined +(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static Variable operator ^(Variable left, Variable right)
+            public static Variable  operator ^(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                 {
@@ -118,8 +115,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined ^(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static Variable operator -(Variable left, Variable right)
+            public static Variable  operator -(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                 {
@@ -133,8 +129,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined -(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-            
-            public static Variable operator %(Variable left, Variable right)
+            public static Variable  operator %(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                     switch (left.Type)
@@ -149,8 +144,7 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined %(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static bool operator ==(Variable left, Variable right)
+            public static bool      operator ==(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                     switch (left.Type)
@@ -176,13 +170,11 @@ namespace YetAnotherScriptingLanguage
                     }
                 return false;
             }
-
-            public static bool operator !=(Variable left, Variable right)
+            public static bool      operator !=(Variable left, Variable right)
             {
                 return !(left==right);
             }
-
-            public static bool operator <(Variable left, Variable right)
+            public static bool      operator <(Variable left, Variable right)
             {
                 if(left.Type == right.Type)
                     switch (left.Type)
@@ -196,8 +188,7 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined <(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static bool operator >(Variable left, Variable right)
+            public static bool      operator >(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                     switch (left.Type)
@@ -211,8 +202,7 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined >(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static bool operator &(Variable left, Variable right)
+            public static bool      operator &(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                     switch (left.Type)
@@ -222,8 +212,7 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined &(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-            public static bool operator ~(Variable left)
+            public static bool      operator ~(Variable left)
             {
                     switch (left.Type)
                     {
@@ -232,8 +221,7 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined ^(" + left.Type.ToString() + ")");
             }
-
-            public static bool xor(Variable left , Variable right)
+            public static bool      xor(Variable left , Variable right)
             {
                 switch (right.Type)
                 {
@@ -242,8 +230,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 throw new Exception("Operation Undefined !(" + left.Type.ToString() + ")");
             }
-
-            public static bool operator |(Variable left, Variable right)
+            public static bool      operator |(Variable left, Variable right)
             {
                 if (left.Type == right.Type)
                     switch (left.Type)
@@ -253,8 +240,6 @@ namespace YetAnotherScriptingLanguage
                     }
                 throw new Exception("Operation Undefined |(" + left.Type.ToString() + " , " + right.Type.ToString() + ")");
             }
-
-
         }
         public class Array : variables.Variable
         {
@@ -386,6 +371,32 @@ namespace YetAnotherScriptingLanguage
                 return (src.Value as List<variables.Variable>)[idx];
             }
 
+        }
+        public class Record : Variable
+        {
+            public Record(string name,Dictionary<string,Function> param)
+            {
+                typeName = name;
+            
+            }
+
+            public Record(Record clone)
+            {
+                typeName = clone.typeName;
+                members = clone.members;
+            }
+
+            public Record(string name)
+            {
+                typeName = name;
+
+            }
+
+            Dictionary<String, Function> members = new Dictionary<string, Function>();
+            public Dictionary<String, Function> Members => members;
+            string typeName = null;
+            public string TypeName => typeName;
+            public Function this[string name] => Members.ContainsKey(name)?Members[name]:throw new Exception("Member/Method Not Found");
         }
     }
 }

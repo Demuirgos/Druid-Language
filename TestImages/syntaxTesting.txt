@@ -45,7 +45,7 @@ For j From 0 To 1 Do
    End   
 End 
 
-Array i[10] of Decimal
+Array i[10] Of Decimal //or Variable i As Array of [10] Decimal
 i:=[1,2,3,23,5,2,7,8,9,10]
 i:=i>>2 
 For j From 0 To 8 Do

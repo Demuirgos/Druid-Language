@@ -305,7 +305,7 @@ namespace YetAnotherScriptingLanguage
                 }
                 var result = new TokensList();
                 Dictionary<String, List<String>> opposites = new Dictionary<String, List<String>>();
-                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO" };
+                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO", "DEFINE" };
                 opposites["ELSE"] = new List<string>() { "IF" };
                 int balanced = 0;
                 for (int i = l; i<this.Count; i++)

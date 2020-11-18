@@ -6,10 +6,11 @@ using Windows.Storage;
 namespace YetAnotherScriptingLanguage
 {
    public class Function
-    {
+   {
         public enum type
         {
             undetermined,
+            variable,
             procedure,
             function
         }
@@ -43,7 +44,7 @@ namespace YetAnotherScriptingLanguage
         }
         protected virtual variables.Variable Evaluate(TokensList data) => throw new Exception("Not Implemented");
         protected virtual void Process(TokensList data) => throw new Exception("Not Implemented");
-        private type Ftype = Function.type.undetermined;
+        protected type Ftype = Function.type.undetermined;
         public type Type
         {
             get
@@ -258,15 +259,130 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
-    class ClassProcess : Function
+    class ClassProcess : FunctionProcess
     {
-        public ClassProcess(string name = "CLASS") : base(name)
+        public ClassProcess(string name = "TYPE") : base(name)
         {
             Type = type.procedure;
+            Limiter = new Token("END");
         }
-        protected override void Process(TokensList data)
+        protected override TokensList getBody(TokensList data)
         {
+            return data[0, new Token("DEFINE"), new Token("END")].Remove().Remove(0).Trim(false);
+        }
 
+        protected override void Process(TokensList expression)
+        {
+            var Name = getName(expression,true);
+            var Body = getBody(expression).Trim(false);
+            variables.Record template = new variables.Record(Name);
+            int i = 0;
+            while (i < Body.Count)
+            {
+                if (Body[i].Type == Token.type.function)
+                {
+                    Function foo = new Function(Body[i].IsKeyword);
+                    var body = Body[i, foo.Limiter];
+                    i += body.Count;
+                    if (foo.Name == "METHOD")
+                    {
+                        var Method = foo.Implimentation as MethodProcess;
+                        var r = Method.Process(body);
+                        template.Members.Add(r.Name, r);
+                    }
+                    else if (foo.Name == "MEMBER")
+                    {
+                        var Field = foo.Implimentation as MemberProcess;
+                        var fields = Field.Process(body);
+                        foreach(var r in fields) template.Members.Add(r.Name, r);
+                    }
+                    else if (foo.Name == "CREATE")
+                    {
+                        throw new Exception("not yet implemented");
+                    }
+                    else
+                        throw new Exception("Invalid Keyword" + Body[i].Word);
+                }
+                i++;
+            }
+            variables.Variable.CustomTypes.Add(Name, template);
+        }
+    }
+
+    class MemberProcess : VariableProcess
+    {
+        public MemberProcess(string name = "MEMBER") : base(name)
+        {
+            Type = type.procedure;
+            Limiter = new Token("END_STATEMENT");
+        }
+
+        public new List<variables.Variable> Process(TokensList data)
+        {
+            data.Trim(false);
+            List<variables.Variable> result = new List<variables.Variable>();
+            var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
+            var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
+            var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array : variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword) ? variables.Variable.type.Record : variables.Variable.type.Invalid;
+            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal)
+            {
+                object defaultVal = DefaultValue(type);
+                foreach (var nameToken in names)
+                {
+                    result.Add(new variables.Variable(defaultVal, type, nameToken.Word));
+                }
+            }
+            else if (type == variables.Variable.type.Array)
+            {
+                var arrData = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
+                var dimensions = new Token(arrData.Word.Substring(1, arrData.Word.Length - 2)).Spread().Trim().Remove(new Token("NEXT_ARG"));
+                var dimensionsLens = new List<int>();
+                var lenght = 1;
+                foreach (var len in dimensions)
+                {
+                    lenght *= Convert.ToInt32(len.Word);
+                    dimensionsLens.Add(Convert.ToInt32(len.Word));
+                }
+                var TypeStr = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")][2];
+                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+                List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
+                for (int i = 0; i < lenght; i++)
+                {
+                    defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(arrType), arrType));
+                }
+                foreach (var name in names)
+                {
+                    result.Add(new variables.Array(defaultVal, variables.Variable.type.Array, dimensionsLens, arrType, name.Word));
+                }
+            }
+            else if (type == variables.Variable.type.Record)
+            {
+
+            }
+            return result;
+        }
+    }
+
+    class MethodProcess : FunctionProcess
+    {
+        public MethodProcess(string name = "METHOD") : base(name)
+        {
+            Type = type.procedure;
+            Limiter = new Token("END");
+        }
+
+        public new Function Process(TokensList data)
+        {
+            string name = getName(data,isMethod:true);
+            return new MethodProcess.CustomFunction(getType(data,true), getBody(data), new KeyValuePair<List<variables.Variable>, variables.Variable.type>(getSignature(data, isMethod: true), getReturn(data,isMethod: true)), name);
+        }
+    }
+    
+    class CreateProcess : FunctionProcess
+    {
+        public CreateProcess(string name="CREATE") : base(name) {
+            //make constructor
+            throw new Exception("not yet implemented");
         }
     }
 
@@ -379,10 +495,11 @@ namespace YetAnotherScriptingLanguage
             Limiter = new Token("END");
         }
 
-        List<variables.Variable> getSignature(TokensList data)
+        protected List<variables.Variable> getSignature(TokensList data, bool isMethod = false)
         {
-            List<variables.Variable>  Signature = new List<variables.Variable>();
-            TokensList tokens = data[2].Spread().Trim().Remove(new Token("NEXT_ARG"));
+            var param = data[0, isMethod ? new Token("METHOD") : new Token("FUNCTION"), new Token("BEGIN")].Trim()[2];
+            List<variables.Variable> Signature = new List<variables.Variable>();
+            TokensList tokens = param.Spread().Trim().Remove(new Token("NEXT_ARG"));
             for (int i = 0; i < tokens.Count; i+=3)
             {
                 var varname = tokens[i];
@@ -395,18 +512,19 @@ namespace YetAnotherScriptingLanguage
             return Signature;
         }
 
-        string getName(TokensList data)
+        protected virtual string getName(TokensList data,bool isMethod = false)
         {
-            return data[1].Word;
+            return data[0, isMethod? new Token("METHOD") : new Token("FUNCTION"),new Token("BEGIN")].Trim()[1].Word;
         }
 
-        TokensList getBody(TokensList data)
+        protected virtual TokensList getBody(TokensList data)
         {
             return data[0, new Token("BEGIN"), new Token("END")].Remove().Remove(0).Trim(false);
         }
 
-        type getType(bool ThenFollow)
+        protected type getType(TokensList data, bool isMethod = false)
         {
+            bool ThenFollow = data[0, isMethod ? new Token("METHOD") : new Token("FUNCTION"), new Token("BEGIN")].HasToken(new Token("OFTYPE"));
             if (ThenFollow)
             {
                 return type.procedure;
@@ -417,15 +535,16 @@ namespace YetAnotherScriptingLanguage
             }
         }
 
-        variables.Variable.type getReturn(TokensList data)
+        protected variables.Variable.type getReturn(TokensList data, bool isMethod = false)
         {
-            return data[4].Word == "Decimal" ? variables.Variable.type.Decimal : data[4].Word == "Boolean" ? variables.Variable.type.Boolean : data[4].Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+            var returnType = data[0, new Token("OFTYPE"), new Token("BEGIN")].Trim(false)[1];
+            return returnType.Word == "Decimal" ? variables.Variable.type.Decimal : returnType.Word == "Boolean" ? variables.Variable.type.Boolean : returnType.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
         }
 
         protected override void Process(TokensList data)
         {
             string name = getName(data);
-            Interpreter.Post[name] = new FunctionProcess.CustomFunction(getType(data[4].IsKeyword == "Begin"), getBody(data), new KeyValuePair<List<variables.Variable>,variables.Variable.type>(getSignature(data), getReturn(data)), name);
+            Interpreter.Post[name] = new FunctionProcess.CustomFunction(getType(data), getBody(data), new KeyValuePair<List<variables.Variable>,variables.Variable.type>(getSignature(data), getReturn(data)), name);
         }
     }
 
@@ -492,7 +611,7 @@ namespace YetAnotherScriptingLanguage
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
         }
-        public static object DefaultValue(variables.Variable.type t) {
+        public static object DefaultValue(variables.Variable.type t,string typeDetails="Native") {
             object defaultVal = null;
             switch (t)
             {
@@ -505,7 +624,13 @@ namespace YetAnotherScriptingLanguage
                 case variables.Variable.type.Word:
                     defaultVal = "";
                     break;
-                case variables.Variable.type.Invalid:
+                case variables.Variable.type.Array:
+                    defaultVal = new List<variables.Variable>();
+                    break;
+                case variables.Variable.type.Record:
+                    defaultVal = new variables.Record(variables.Variable.CustomTypes[typeDetails]);
+                    break;
+                default:
                     throw new Exception("Invalid Type");
             }
             return defaultVal;
@@ -516,19 +641,51 @@ namespace YetAnotherScriptingLanguage
             data.Trim(false);
             var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
             var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
-            var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
-            object defaultVal = DefaultValue(type);
-            foreach (var nameToken in names)
+            var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array: variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword)? variables.Variable.type.Record : variables.Variable.type.Invalid;
+            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal)
             {
-                if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
+                object defaultVal = DefaultValue(type);
+                foreach (var nameToken in names)
                 {
-                    var v = new variables.Variable(defaultVal, type, nameToken.Word);
-                    if (!Interpreter.Peek[nameToken.Word])
-                        Interpreter.Set[nameToken.Word] = v;
-                    else
-                        throw new Exception("A variable with the name : " + nameToken.Word + " Already exists in Stack");
+                    if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
+                    {
+                        var v = type == variables.Variable.type.Record ? defaultVal as variables.Record : new variables.Variable(defaultVal, type, nameToken.Word);
+                        if (!Interpreter.Peek[nameToken.Word])
+                            Interpreter.Set[nameToken.Word] = v;
+                        else
+                            throw new Exception("A variable with the name : " + nameToken.Word + " Already exists in Stack");
+                    }
                 }
             }
+            else if (type == variables.Variable.type.Array)
+            {
+                var arrData = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
+                var dimensions = new Token(arrData.Word.Substring(1, arrData.Word.Length - 2)).Spread().Trim().Remove(new Token("NEXT_ARG"));
+                var dimensionsLens = new List<int>();
+                var lenght = 1;
+                foreach (var len in dimensions)
+                {
+                    lenght *= Convert.ToInt32(len.Word);
+                    dimensionsLens.Add(Convert.ToInt32(len.Word));
+                }
+                var TypeStr = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")][2];
+                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+                List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
+                for (int i = 0; i < lenght; i++)
+                {
+                    defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(arrType), arrType));
+                }
+                foreach (var name in names)
+                {
+                    var v = new variables.Array(defaultVal, variables.Variable.type.Array, dimensionsLens, arrType, name.Word);
+                    if (!Interpreter.Peek[name.Word])
+                        Interpreter.Set[name.Word] = v;
+                    else
+                        throw new Exception("A variable with the name : " + name + " Already exists in Stack");
+                }
+            }
+            else if (type == variables.Variable.type.Invalid)
+                throw new Exception("Invalid Type :" + typeToken.Word);
         }
     }
 
@@ -557,8 +714,7 @@ namespace YetAnotherScriptingLanguage
 
     class ArgumentedProcess : Function
     {
-        public ArgumentedProcess(string name) : base(name) {
-        }
+        public ArgumentedProcess(string name) : base(name) {}
         protected virtual List<variables.Variable> ArgumentsExtraction(TokensList tokens) => throw new Exception("Not yet Implemented");
     }
 
@@ -839,8 +995,6 @@ namespace YetAnotherScriptingLanguage
 
         protected override void Process(TokensList data)
         {
-            //Variable n as integer (Decima | Boolean | Word | Array?)
-            //Variable n as array of Word
             var Arguments = ArgumentsExtraction(data); ;
             var var = ((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]);
             if (var.Type == variables.Variable.type.Array)
@@ -854,6 +1008,25 @@ namespace YetAnotherScriptingLanguage
             if (var.Type != Arguments[1].Type)
                 throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
             var.Value = Arguments[1].Value;
+        }
+    }
+
+    class AccessProcess : ArgumentedProcess
+    {
+        public AccessProcess(string name= "ACCESS") : base(name)
+        {
+            this.Type = type.procedure;
+            Limiter = new Token("PREVIOUS");
+        }
+
+        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
+        {
+            throw new Exception("not yet implemented");
+        }
+
+        protected override void Process(TokensList data)
+        {
+            throw new Exception("not yet implemented");
         }
     }
 
