@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using Windows.Storage;
+using YetAnotherScriptingLanguage.variables;
 
 namespace YetAnotherScriptingLanguage
 {
@@ -285,7 +286,11 @@ namespace YetAnotherScriptingLanguage
             int i = 0;
             while (i < Body.Count)
             {
-                while (Body[i].IsKeyword == "END_STATEMENT") i++;
+                while (i < Body.Count && Body[i].IsKeyword == "END_STATEMENT")
+                {
+                    i++;
+                    if (i == Body.Count) return;
+                }
                 if (Body[i].Type == Token.type.function)
                 {
                     Function foo = new Function(Body[i].IsKeyword);
@@ -305,7 +310,9 @@ namespace YetAnotherScriptingLanguage
                     }
                     else if (foo.Name == "CREATE")
                     {
-                        throw new Exception("not yet implemented");
+                        var Method = foo.Implimentation as CreateProcess;
+                        var construct = Method.Process(body);
+                        template.Members.Add(construct.Name, construct);
                     }
                     else
                         throw new Exception("Invalid Keyword" + Body[i].Word);
@@ -383,9 +390,63 @@ namespace YetAnotherScriptingLanguage
     
     class CreateProcess : FunctionProcess
     {
+        public class ConstructorProcess : CustomFunction
+        {
+            public ConstructorProcess(type t, TokensList body, KeyValuePair<List<variables.Variable>, variables.Variable.type> signature, string name) : base(t,body,signature,name)
+            {
+                this.Type = type.procedure;
+            }
+
+            protected override void InitProcessBlock()
+            {
+                Interpreter.Block block = new Interpreter.Block();
+                Interpreter.Set.Insert(block);
+            }
+
+            public void Process()
+            {
+                InitProcessBlock();
+                Parser.Process(this.Body);
+                Interpreter.ExecutionStack.Pop();
+            }
+        }
         public CreateProcess(string name="CREATE") : base(name) {
             Type = type.procedure;
             Limiter = new Token("END");
+        }
+
+        protected override TokensList getBody(TokensList data)
+        {
+            var r = data[0, new Token("CREATE"), new Token("END")].Remove().Remove(0).Trim(false);
+            return r;
+        }
+
+        public new Function Process(TokensList data)
+        {
+            return new ConstructorProcess(type.procedure,getBody(data), new KeyValuePair<List<variables.Variable>, variables.Variable.type>(new List<variables.Variable>(), variables.Variable.type.Void), "CONSTRUCTOR");
+        }
+    }
+
+    class ThisHolderProcess : Function
+    {
+        public ThisHolderProcess(string name = "HOLDER") : base(name) {
+            Type = type.variable;
+            Limiter = new Token("CURRENT");
+        }
+
+        private static variables.Record referenced = null;
+        public static variables.Record Referenced {
+            get => referenced;
+            set
+            {
+                referenced = value;
+            }
+        }
+
+        protected override variables.Variable Evaluate(TokensList dummyVar)
+        {
+            if (referenced is null) throw new Exception("The SelfReference Keyword is not available in this Context");
+            return referenced;
         }
     }
 
@@ -410,7 +471,6 @@ namespace YetAnotherScriptingLanguage
                     Limiter = new Token("NEXT");
                 }
             }
-
             
             protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
             {
@@ -431,7 +491,7 @@ namespace YetAnotherScriptingLanguage
                 return Arguments;
             }
 
-            void InitProcessBlock()
+            protected virtual void InitProcessBlock()
             {
                 Interpreter.Block block = new Interpreter.Block();
                 for(int i = 0; i < this.Signature.Key.Count; i++)
@@ -551,7 +611,7 @@ namespace YetAnotherScriptingLanguage
         protected override void Process(TokensList data)
         {
             string name = getName(data);
-            Interpreter.Post[name] = new FunctionProcess.CustomFunction(getType(data), getBody(data), new KeyValuePair<List<variables.Variable>,variables.Variable.type>(getSignature(data), getReturn(data)), name);
+            Interpreter.Post[name] = new CustomFunction(getType(data), getBody(data), new KeyValuePair<List<variables.Variable>,variables.Variable.type>(getSignature(data), getReturn(data)), name);
         }
     }
 
@@ -618,7 +678,7 @@ namespace YetAnotherScriptingLanguage
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
         }
-        public static object DefaultValue(variables.Variable.type t,string typeDetails="Native") {
+        public static object DefaultValue(variables.Variable.type t,string typeDetails="Native",Dictionary<string,Function> initList = null) {
             object defaultVal = null;
             switch (t)
             {
@@ -635,7 +695,14 @@ namespace YetAnotherScriptingLanguage
                     defaultVal = new List<variables.Variable>();
                     break;
                 case variables.Variable.type.Record:
-                    defaultVal = new variables.Record(variables.Variable.CustomTypes[typeDetails]);
+                    defaultVal = new variables.Record(variables.Variable.CustomTypes[typeDetails],initList);
+                    var temp = defaultVal as variables.Record;
+                    if (temp.Members.ContainsKey("CONSTRUCTOR"))
+                    {
+                        ThisHolderProcess.Referenced = defaultVal as variables.Record;
+                        (ThisHolderProcess.Referenced.Members["CONSTRUCTOR"] as CreateProcess.ConstructorProcess).Process();
+                        ThisHolderProcess.Referenced = null;
+                    }
                     break;
                 default:
                     throw new Exception("Invalid Type");
@@ -649,9 +716,29 @@ namespace YetAnotherScriptingLanguage
             var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
             var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
             var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array: variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword)? variables.Variable.type.Record : variables.Variable.type.Invalid;
+            Dictionary<string, Function> initBlock = null;
             if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
             {
-                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native");
+                if(type == Variable.type.Record)
+                {
+                    initBlock = new Dictionary<string, Function>();
+                    bool isInitList = data.HasToken(new Token("WITH"));
+                    if (isInitList)
+                    {
+                        var initBlockTokens = data[0, new Token("WITH"), new Token("END")].Trim().Remove(0).Remove().Separate(new Token("NEXT_ARG"),new Token("END_STATEMENT"));
+                        foreach(var Block in initBlockTokens)
+                        {
+                            for(int i = 0; i< Block.Count; i++)
+                            {
+                                if (Block[i].IsKeyword == "SET")
+                                {
+                                    initBlock.Add(Block[i - 1].IsKeyword, Parser.Process(Block[i + 1, new Token("END_STATEMENT")].Remove()));
+                                }
+                            }
+                        }
+                    }
+                }
+                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native",initBlock);
                 foreach (var nameToken in names)
                 {
                     if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
@@ -993,7 +1080,7 @@ namespace YetAnotherScriptingLanguage
             TokensList varVal = tokens[varName.Count + 1, tokens.Count - 1].Trim();
             var argVal = Parser.Process(varVal);
             var indexVal = varName.Count != 2 ? null : Parser.Process(new Token(varName[1].Word.TrimStart('[').TrimEnd(']')).Spread());
-            Arguments.Add(new variables.Variable(varName[0].Word));
+            Arguments.Add(Interpreter.Get[varName,0].Item1 as variables.Variable);
             Arguments.Add(argVal);
             if(!(indexVal is null))
                 Arguments.Add(indexVal);
@@ -1003,7 +1090,7 @@ namespace YetAnotherScriptingLanguage
         protected override void Process(TokensList data)
         {
             var Arguments = ArgumentsExtraction(data); ;
-            var var = Interpreter.Get[(string)Arguments[0].Value] as variables.Variable;
+            var var = Arguments[0];
             if (var.Type == variables.Variable.type.Array)
             {
                 if (Arguments.Count == 3)
@@ -1015,25 +1102,6 @@ namespace YetAnotherScriptingLanguage
             if (var.Type != Arguments[1].Type)
                 throw new Exception("Argument Type Missmatch, cannot assign a value of " + Arguments[1].Type.ToString() + " to a variable of type " + Arguments[0].Type.ToString());
             var.Value = Arguments[1].Value;
-        }
-    }
-
-    class AccessProcess : ArgumentedProcess
-    {
-        public AccessProcess(string name= "ACCESS") : base(name)
-        {
-            this.Type = type.procedure;
-            Limiter = new Token("PREVIOUS");
-        }
-
-        protected override List<variables.Variable> ArgumentsExtraction(TokensList tokens)
-        {
-            throw new Exception("not yet implemented");
-        }
-
-        protected override void Process(TokensList data)
-        {
-            throw new Exception("not yet implemented");
         }
     }
 

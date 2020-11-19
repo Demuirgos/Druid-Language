@@ -374,17 +374,16 @@ namespace YetAnotherScriptingLanguage
         }
         public class Record : Variable
         {
-            public Record(string name,Dictionary<string,Function> param)
-            {
-                typeName = name;
-                this.Type = type.Record;
-            }
-
-            public Record(Record clone)
+            public Record(Record clone, Dictionary<string, Function> parameters=null)
             {
                 typeName = clone.typeName;
-                members = clone.members;
+                foreach (var member in clone.Members) members.Add(member.Key, member.Value);
                 this.Type = type.Record;
+                if(!(parameters is null))
+                    foreach(var param in parameters)
+                    {
+                        this.Members[param.Key] = param.Value;
+                    }
             }
 
             public Record(string name)

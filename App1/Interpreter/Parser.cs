@@ -44,43 +44,9 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if (expression[i].Type == Token.type.variable)
                 {
-                    v = (variables.Variable)Interpreter.Get[expression[i].Word];
-                    if (v.Type == variables.Variable.type.Array && (i + 1 < expression.Count && expression[i + 1].Type == Token.type.array))
-                    {
-                        v = variables.Array.getElement(v as variables.Array, expression[i + 1]);
-                        i++;
-                    }
-                    while(v.Type == variables.Variable.type.Record && (i + 1 < expression.Count && expression[i + 1].IsKeyword == "ACCESS"))
-                    {
-                        i += 2;
-                        var member = (v as variables.Record)[expression[i].Word];
-                        if(member.Type == Function.type.variable)
-                        {
-                            v = member as variables.Variable;
-                            continue;
-                        }
-                        else if(member.Type == (Function.type.function | Function.type.procedure))
-                        {
-                            Function foo = member as MethodProcess.CustomFunction;
-                            var Body = expression[i, foo.Limiter];
-                            i += Body.Count;
-                            if (foo.Type == Function.type.function)
-                            {
-                                v = foo[Body];
-                            }
-                            else if (foo.Type == Function.type.procedure)
-                            {
-                                v = foo[Body];
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            throw new Exception("Inexpected Token : " + expression[i].Word);
-                        }
-                        i++;
-                    }
-                    i++;
+                    var r = Interpreter.Get[expression, i];
+                    v = r.Item1 as variables.Variable; 
+                    i = 1 + r.Item2;
                 }
                 else if (expression[i].Type == Token.type.array)
                 {

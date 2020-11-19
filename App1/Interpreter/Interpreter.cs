@@ -121,6 +121,12 @@ namespace YetAnotherScriptingLanguage
                     case ("METHOD"):
                         Interpreter.Functions.Add("METHOD", new MethodProcess());
                         break;
+                    case ("CREATE"):
+                        Interpreter.Functions.Add("CREATE", new CreateProcess());
+                        break;
+                    case ("HOLDER"):
+                        Interpreter.Functions.Add("HOLDER", new ThisHolderProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
@@ -173,6 +179,58 @@ namespace YetAnotherScriptingLanguage
                     }
                     if (Interpreter.Functions.ContainsKey(token)) return Interpreter.Functions[token];
                     throw new Exception(token + " Method undefined");
+                }
+            }
+
+            public Tuple<Function,int> this[TokensList expression,int i]
+            {
+                get
+                {
+                    variables.Variable v = null;
+                    if (expression[i].IsKeyword == "HOLDER")
+                    {
+                        v = ThisHolderProcess.Referenced;
+                    }
+                    else
+                    {
+                        v = (variables.Variable)Interpreter.Get[expression[i].Word];
+                    }
+                    if (v.Type == variables.Variable.type.Array && (i + 1 < expression.Count && expression[i + 1].Type == Token.type.array))
+                    {
+                        v = variables.Array.getElement(v as variables.Array, expression[i + 1]);
+                        i++;
+                    }
+                    while (v.Type == variables.Variable.type.Record && (i + 1 < expression.Count && expression[i + 1].IsKeyword == "ACCESS"))
+                    {
+                        i += 2;
+                        var member = (v as variables.Record)[expression[i].Word];
+                        if (member.Type == Function.type.variable)
+                        {
+                            v = (variables.Variable)member;
+                            continue;
+                        }
+                        else if (member.Type == (Function.type.function | Function.type.procedure))
+                        {
+                            Function foo = member as MethodProcess.CustomFunction;
+                            var Body = expression[i, foo.Limiter];
+                            i += Body.Count;
+                            if (foo.Type == Function.type.function)
+                            {
+                                v = foo[Body];
+                            }
+                            else if (foo.Type == Function.type.procedure)
+                            {
+                                v = foo[Body];
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Inexpected Token : " + expression[i].Word);
+                        }
+                        i++;
+                    }
+                    return new Tuple<Function, int>(v,i);
                 }
             }
         }

@@ -42,6 +42,7 @@
         <keyword key="Member"   map="MEMBER"     type="Keyword"   construct="ObjConstruct"  />
         <keyword key="New"      map="CREATE"     type="Keyword"   construct="ObjConstruct"  />
         <keyword key="Method"   map="METHOD"     type="Keyword"   construct="ObjConstruct"  />
+        <keyword key="With"     map="WITH"       type="Keyword"   construct="ObjInitializor"/>
       </keywords>
       <operators>
         <symbol map="SET"           key=":="         />

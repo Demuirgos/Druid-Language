@@ -1,11 +1,11 @@
-Function Fibb(n as Decimal,tab as Word) as Decimal
+Function Fibb(n As Decimal,tab As Word) As Decimal
 Begin
             Print(tab + 'n  => ',n)
 	If n = 0 | n = 1 Then
 		Return n
 	Else
-		Variable l as Decimal
-		Variable r as Decimal
+		Variable l As Decimal
+		Variable r As Decimal
 		l:=Fibb(n-1,tab + tab)
 		r:=Fibb(n-2,tab + tab)
 		Print(tab + 'l : ',l,' r : ',r)

@@ -171,19 +171,21 @@ namespace YetAnotherScriptingLanguage
                 {
                     return type.array;
                 }
-                else if (Interpreter.Functions.ContainsKey(this.IsKeyword) || Interpreter.Actions.ContainsKey(this.IsKeyword))
+                else if ((Interpreter.Functions.ContainsKey(this.IsKeyword) || Interpreter.Actions.ContainsKey(this.IsKeyword)) && this.IsKeyword!="HOLDER")
                 {
                     return Token.type.function;
                 }
                 else if (Interpreter.Keywords.ContainsKey(this.Word))
                 {
                     if (Interpreter.Keywords[this.Word] == "EXIT")
-                        return type.Exit;
+                        return type.Exit; 
+                    if (Interpreter.Keywords[this.Word] == "HOLDER")
+                        return type.variable;
                     if (Interpreter.Keywords[this.Word] == "SKIP")
                         return type.Skip;
                     return Token.type.keyword;
                 }
-                else if (Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.IsKeyword))
+                else if ((Interpreter.ExecutionStack.Count> 0 && Interpreter.CurrentBlock.Variables.ContainsKey(this.IsKeyword)) || this.IsKeyword == "HOLDER")
                 {
                     return Token.type.variable;
                 }
@@ -272,6 +274,25 @@ namespace YetAnotherScriptingLanguage
                 mylist.RemoveAt(idx);
             return this;
         }
+        public List<TokensList> Separate(Token Separator,Token Ender=null)
+        {
+            List<TokensList> result = new List<TokensList>();
+            TokensList holder = new TokensList();
+            for(int i = 0; i < this.Count; i++)
+            {
+                if (this[i] != Separator)
+                {
+                    holder.Add(this[i]);
+                }
+                if (this[i] == Separator || (i == this.Count-1))
+                {
+                    if (!(Ender is null)) holder.Add(Ender);
+                    result.Add(holder);
+                    holder = new TokensList();
+                }
+            }
+            return result;
+        }
         public void Clear()
         {
             mylist.Clear();
@@ -301,11 +322,13 @@ namespace YetAnotherScriptingLanguage
                 }
                 else if (t.Word == "PREVIOUS")
                 {
-                    return this[l - 1, new Token("END_STATEMENT")];
+                    int i = l;
+                    for (; i < this.Count && (this[i].Type != Token.type.Separator && this[i].Type != Token.type.Ender); i--) ;
+                    return this[i+1, new Token("END_STATEMENT")];
                 }
                 var result = new TokensList();
                 Dictionary<String, List<String>> opposites = new Dictionary<String, List<String>>();
-                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO", "DEFINE" };
+                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO", "DEFINE", "WITH", "CREATE" };
                 opposites["ELSE"] = new List<string>() { "IF" };
                 int balanced = 0;
                 for (int i = l; i<this.Count; i++)
