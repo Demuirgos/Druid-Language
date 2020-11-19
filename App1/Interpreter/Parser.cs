@@ -46,7 +46,7 @@ namespace YetAnotherScriptingLanguage
                 {
                     var r = Interpreter.Get[expression, i];
                     v = r.Item1 as variables.Variable; 
-                    i = 1 + r.Item2;
+                    i = r.Item2 + 1;
                 }
                 else if (expression[i].Type == Token.type.array)
                 {

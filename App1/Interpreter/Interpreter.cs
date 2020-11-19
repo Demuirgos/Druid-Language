@@ -209,20 +209,18 @@ namespace YetAnotherScriptingLanguage
                             v = (variables.Variable)member;
                             continue;
                         }
-                        else if (member.Type == (Function.type.function | Function.type.procedure))
+                        else if (member.Type == Function.type.function || member.Type == Function.type.procedure)
                         {
                             Function foo = member as MethodProcess.CustomFunction;
                             var Body = expression[i, foo.Limiter];
                             i += Body.Count;
-                            if (foo.Type == Function.type.function)
-                            {
-                                v = foo[Body];
-                            }
-                            else if (foo.Type == Function.type.procedure)
-                            {
-                                v = foo[Body];
-                                continue;
-                            }
+                            if(i<expression.Count)
+                                i -= expression[i].Type == Token.type.function ? 2 : 0;
+                            ThisHolderProcess.Referenced = v as variables.Record;
+                            v = foo[Body];
+                            ThisHolderProcess.Referenced = null;
+                            if(foo.Type == Function.type.procedure)
+                                break;
                         }
                         else
                         {
