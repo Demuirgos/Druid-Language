@@ -1,0 +1,96 @@
+Function Creation and invoking (recursion)======================================
+Function Fibb(n As Decimal,tab As Word) As Decimal
+Begin
+            Print(tab + 'n  => ',n)
+	If n = 0 | n = 1 Then
+		Return n
+	Else
+		Variable l As Decimal
+		Variable r As Decimal
+		l:=Fibb(n-1,tab + tab)
+		r:=Fibb(n-2,tab + tab)
+		Print(tab + 'l : ',l,' r : ',r)
+		Return l + r
+	End
+End
+Print(Fibb(3,'    '))
+Function Creation and invoking (normal)  ======================================
+Function isPrime(n as Decimal) as Boolean
+Begin
+	Variable value as Boolean
+	value:=True
+	If n%2=0 Then
+		Return n=2
+	Else
+		For i From 3 To floor(sqrt(n)) By 2 Do
+			If n%i=0 Then
+				Return False
+			End
+		End
+	End
+	Return True
+End
+Variable s as Decimal
+s:=Read('please enter a value')
+If isPrime(s) Then Print(s,' is a prime number') Else Print(s,' is not a prime number') End
+Array Creation and Indexing mono dimensional ======================================
+Array i[2,2,2,2] of Decimal
+i:=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+For j From 0 To 1 Do
+   For k From 0 To 1 Do
+       For l From 0 To 1 Do
+       		For n From 0 To 1 Do
+       			Print(i[j,k,l,n])   
+   		End 
+   	End 
+   End   
+End 
+Array Creation and Indexing multi dimensional ======================================
+Array i[10] Of Decimal //or Variable i As Array of [10] Decimal
+i:=[1,2,3,23,5,2,7,8,9,10]
+i:=i>>2 
+For j From 0 To 8 Do
+   Print(i[j])   
+End 
+Print(i[7])
+Type Creation and Using with constructor      ======================================
+Type custom Define
+    ==== Moethods & members block =====
+    Method meth(in As Decimal) As Decimal
+    Begin
+        Return in*23
+    End
+    Method meth2(in As Decimal) 
+    Begin
+        Print(in)
+    End
+    Member mem As Decimal
+    ==== constructor block ===== 	
+    New
+        This->mem:=This->mem * 3
+    End
+End
+Variable s As custom With mem=23 End // initialization with named parameters
+Variable t As Decimal
+t:=23+s->meth(3)-23
+Print(t)
+=======================================================================================
+Language constructs 
+varname := value to set a value to a variable
+[value([operator]value)+] | Function(Parameters) | \[[elem,]+\] values possible
+Variable name As type [With (field:= Value)+ End]? to create variables
+Variable name As Array Of [dimensions length] type  to create arrays
+name[index] to Access element at index in an array
+if(condition) Then instructions [Else instructions]? [End] for conditional branching
+For varName From leftLim To right [Lim By step]? Do instructions End for itr Looping
+While (condition) Do instructions End for conditional Looping
+Function name(param1 As type,...) [As Type]? Begin instructions End to create funcs
+funcName(param1,..) to invoke functions
+Type name Define 
+	[Member [variable creation]]+
+	[Method [Function creation]]+ 
+	[New instructions  End]?
+End to define a new Type
+var->method(param1,...) | var->member to access record types members
+
+=======================================================================================
