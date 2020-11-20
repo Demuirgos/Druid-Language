@@ -62,11 +62,20 @@ namespace YetAnotherScriptingLanguage
         public Function Implimentation { get; set; }
         public String Name { get; set; }
         private Token limiter = null;
+        private Token alternativeLimiter = null;
         public Token Limiter {
             get => this.Implimentation.limiter;
             set
             {
                 limiter = value;
+            }
+        }
+        public Token AlternativeLimiter
+        {
+            get => this.Implimentation.alternativeLimiter;
+            set
+            {
+                alternativeLimiter = value;
             }
         }
     }
@@ -79,7 +88,6 @@ namespace YetAnotherScriptingLanguage
             skip,
             normal
         }
-        public virtual Token delimiter { get; set; }
         internal ConditionalProcess(string name) : base(name) {
             Limiter = new Token("END");
         }
@@ -108,7 +116,7 @@ namespace YetAnotherScriptingLanguage
         public IfProcess(string name = "IF") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("END");
+            Limiter = new Token("END");
         }
 
         public override Tuple<TokensList,TokensList,TokensList> BlockExtraction(TokensList tokens)
@@ -152,7 +160,7 @@ namespace YetAnotherScriptingLanguage
         public WhileProcess(string name = "WHILE") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("END");
+            Limiter = new Token("END");
         }
 
 
@@ -188,7 +196,7 @@ namespace YetAnotherScriptingLanguage
         public ForProcess(string name = "FOR") : base(name)
         {
             Type = type.procedure;
-            delimiter = new Token("END");
+            Limiter = new Token("END");
         }
 
         private TokensList StepValue(TokensList tokens,bool isForwardMoving=true)
@@ -274,7 +282,7 @@ namespace YetAnotherScriptingLanguage
 
         protected override string getName(TokensList data, bool isMethod = false)
         {
-            return data[0, new Token("TYPE") , new Token("DEFINE")].Trim()[1].Word;
+            return data[0, new Token("TYPE") , new Token("BEGIN")].Trim()[1].Word;
         }
 
         protected override void Process(TokensList expression)
@@ -327,6 +335,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
+            AlternativeLimiter = new Token("WITH");
         }
 
         public new List<variables.Variable> Process(TokensList data)
@@ -677,6 +686,7 @@ namespace YetAnotherScriptingLanguage
         {
             Type = type.procedure;
             Limiter = new Token("END_STATEMENT");
+            AlternativeLimiter = new Token("WITH");
         }
         public static object DefaultValue(variables.Variable.type t,string typeDetails="Native",Dictionary<string,Function> initList = null) {
             object defaultVal = null;

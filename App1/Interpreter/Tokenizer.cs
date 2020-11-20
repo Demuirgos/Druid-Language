@@ -293,64 +293,80 @@ namespace YetAnotherScriptingLanguage
             }
             return result;
         }
+        public TokensList Merge(TokensList toAppend)
+        {
+            foreach(var token in toAppend)
+            {
+                this.mylist.Add(token);
+            }
+            return this;
+        }
         public void Clear()
         {
             mylist.Clear();
         }
 
-        public TokensList this[int l,Token left, Token limit]
+        public TokensList this[int l,Token left, Token right=null, bool optional=false]
         {
             get
             {
-                var result = new TokensList();
-                int i = l;
-                for (; i < this.Count && this[i] != left; i++) ;
-                return this[i, limit];
-            }
-        }
-        public TokensList this[int l,Token t]
-        {
-            get
-            {
-                if (t.Word == "CURRENT")
+                if (right is null)
                 {
-                    return this[l, l];
+                    if (left.Word == "CURRENT")
+                    {
+                        return this[l, l];
+                    }
+                    else if (left.Word == "NEXT")
+                    {
+                        return this[l, l + 1];
+                    }
+                    else if (left.Word == "PREVIOUS")
+                    {
+                        int i = l;
+                        for (; i < this.Count && (this[i].Type != Token.type.Separator && this[i].Type != Token.type.Ender); i--) ;
+                        return this[i + 1, new Token("END_STATEMENT")];
+                    }
+                    var result = new TokensList();
+                    Dictionary<String, List<String>> opposites = new Dictionary<String, List<String>>();
+                    opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO", "DEFINE", "WITH", "CREATE" };
+                    opposites["ELSE"] = new List<string>() { "IF" };
+                    int balanced = 0;
+                    for (int i = l; i < this.Count; i++)
+                    {
+                        result.Add(this[i]);
+                        if (opposites.ContainsKey(left.IsKeyword))
+                        {
+                            if (opposites[left.IsKeyword].Contains(this[i].IsKeyword))
+                                balanced++;
+                            if (this[i] == left || (this[i].IsKeyword == "ELSE" && this[i + 1].IsKeyword == "IF"))
+                                balanced--;
+                            if (this[i] == left && balanced == 0)
+                                break;
+                        }
+                        else
+                        {
+                            if (this[i] == left) break;
+                        }
+                    }
+                    return result;
                 }
-                else if (t.Word == "NEXT")
-                {
-                    return this[l, l + 1];
-                }
-                else if (t.Word == "PREVIOUS")
+                else
                 {
                     int i = l;
-                    for (; i < this.Count && (this[i].Type != Token.type.Separator && this[i].Type != Token.type.Ender); i--) ;
-                    return this[i+1, new Token("END_STATEMENT")];
-                }
-                var result = new TokensList();
-                Dictionary<String, List<String>> opposites = new Dictionary<String, List<String>>();
-                opposites["END"] = new List<string>() { "BEGIN", "THEN", "DO", "DEFINE", "WITH", "CREATE" };
-                opposites["ELSE"] = new List<string>() { "IF" };
-                int balanced = 0;
-                for (int i = l; i<this.Count; i++)
-                {
-                    result.Add(this[i]);
-                    if (opposites.ContainsKey(t.IsKeyword))
+                    if (!optional)
                     {
-                        if (opposites[t.IsKeyword].Contains(this[i].IsKeyword)) 
-                            balanced++;
-                        if (this[i] == t || (this[i].IsKeyword == "ELSE" && this[i + 1].IsKeyword == "IF")) 
-                            balanced--;
-                        if (this[i] == t && balanced == 0) 
-                            break;
+                        for (; i < this.Count && this[i] != left; i++) ;
+                        return this[i, right];
                     }
                     else
                     {
-                        if (this[i] == t) break;
+                        for (; l < this.Count && (this[l] != left && this[l] != right); l++) ;
+                        return this[i, l];
                     }
                 }
-                return result;
             }
         }
+
         public TokensList this[int l,int r]
         {
             get {

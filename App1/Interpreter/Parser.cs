@@ -66,7 +66,7 @@ namespace YetAnotherScriptingLanguage
                 else if (expression[i].Type == Token.type.function)
                 {
                     Function foo = new Function(expression[i].IsKeyword);
-                    var Body = expression[i, foo.Limiter];
+                    var Body = expression[i, foo.Limiter,foo.AlternativeLimiter,optional:true];
                     i += Body.Count;
                     if (foo.Type == Function.type.function)
                     {
@@ -80,6 +80,15 @@ namespace YetAnotherScriptingLanguage
                     }
                     else if(foo.Type == Function.type.procedure)
                     {
+                        if(foo.Name == "VARIABLE")
+                        {
+                            if (Body[Body.Count - 1].IsKeyword == "WITH")
+                            {
+                                var Suffix = expression[i - 1, new Token("END")].Remove(0);
+                                Body = Body.Merge(Suffix);
+                                i += Suffix.Count;
+                            }
+                        }
                         v = foo[Body];
                         continue;
                     }
