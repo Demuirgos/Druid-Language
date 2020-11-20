@@ -274,7 +274,7 @@ namespace YetAnotherScriptingLanguage
 
         protected override string getName(TokensList data, bool isMethod = false)
         {
-            return data[0, new Token("TYPE") , new Token("BEGIN")].Trim()[1].Word;
+            return data[0, new Token("TYPE") , new Token("DEFINE")].Trim()[1].Word;
         }
 
         protected override void Process(TokensList expression)
