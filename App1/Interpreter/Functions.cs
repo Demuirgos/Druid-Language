@@ -191,6 +191,42 @@ namespace YetAnotherScriptingLanguage
         }
     }
 
+    class RepeatProcess : ConditionalProcess
+    {
+        public RepeatProcess(string name = "LOOP") : base(name)
+        {
+            Type = type.procedure;
+            Limiter = new Token("UNTIL");
+        }
+
+
+        public Tuple<TokensList, TokensList, TokensList> BlockToken(TokensList tokens)
+        {
+            var condition = tokens[0, new Token("UNTIL"), new Token("END_STATEMENT")].Remove().Remove(0);
+            var Block = tokens[0, new Token("LOOP"), new Token("UNTIL")].Remove().Remove(0).Trim(false);
+            return new Tuple<TokensList, TokensList, TokensList>(condition, Block, null);
+        }
+
+        protected override void Process(TokensList data)
+        {
+            var Blocks = BlockToken(data);
+            do
+            {
+                Parser.Process(Blocks.Item2);
+                if (Parser.ParserState == Parser.state.TemporalSuspension)
+                {
+                    Parser.ParserState = Parser.state.Normal;
+                    continue;
+                }
+                else if (Parser.ParserState == Parser.state.Suspended || Interpreter.ReturnValue.Count > 0)
+                {
+                    break;
+                }
+            } while (!this[Blocks.Item1]);
+            Parser.ParserState = Parser.state.Normal;
+        }
+    }
+
     class ForProcess : WhileProcess
     {
         public ForProcess(string name = "FOR") : base(name)
@@ -347,10 +383,10 @@ namespace YetAnotherScriptingLanguage
             var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array : variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword) ? variables.Variable.type.Record : variables.Variable.type.Invalid;
             if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
             {
-                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native");
                 foreach (var nameToken in names)
                 {
-                    var r = type == variables.Variable.type.Record ? defaultVal as variables.Record : new variables.Variable(defaultVal, type, nameToken.Word);
+                    object defaultVal = type == variables.Variable.type.Record ? new Record(typeToken.IsKeyword) : DefaultValue(type);
+                    var r = type == variables.Variable.type.Record ? defaultVal as Record : new variables.Variable(defaultVal, type, nameToken.Word);
                     r.Name = nameToken.Word;
                     result.Add(r);
                 }
@@ -371,7 +407,7 @@ namespace YetAnotherScriptingLanguage
                 List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
                 for (int i = 0; i < lenght; i++)
                 {
-                    defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(arrType), arrType));
+                    defaultVal.Add(new variables.Variable(DefaultValue(arrType), arrType));
                 }
                 foreach (var name in names)
                 {
@@ -726,33 +762,32 @@ namespace YetAnotherScriptingLanguage
             var names = data[1, new Token("OFTYPE")].Remove().Remove(new Token("NEXT_ARG"));
             var typeToken = data[0, new Token("OFTYPE"), new Token("END_STATEMENT")].Remove(0).Remove()[0];
             var type = typeToken.IsKeyword == "Decimal" ? variables.Variable.type.Decimal : typeToken.IsKeyword == "Boolean" ? variables.Variable.type.Boolean : typeToken.IsKeyword == "Word" ? variables.Variable.type.Word : typeToken.IsKeyword == "ARRAY" ? variables.Variable.type.Array: variables.Variable.CustomTypes.ContainsKey(typeToken.IsKeyword)? variables.Variable.type.Record : variables.Variable.type.Invalid;
-            Dictionary<string, Function> initBlock = null;
-            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
-            {
-                if(type == Variable.type.Record)
+            Func<bool,bool, Dictionary<string, Function>> initBlockExtraction = (bool isRecord,bool isInitBlock) => {
+                if (isRecord && isInitBlock)
                 {
-                    initBlock = new Dictionary<string, Function>();
-                    bool isInitList = data.HasToken(new Token("WITH"));
-                    if (isInitList)
+                    var initBlockTokens = data[0, new Token("WITH"), new Token("END")].Trim().Remove(0).Remove().Separate(new Token("NEXT_ARG"), new Token("END_STATEMENT"));
+                    var initBlock = new Dictionary<string, Function>();
+                    foreach (var Block in initBlockTokens)
                     {
-                        var initBlockTokens = data[0, new Token("WITH"), new Token("END")].Trim().Remove(0).Remove().Separate(new Token("NEXT_ARG"),new Token("END_STATEMENT"));
-                        foreach(var Block in initBlockTokens)
+                        for (int i = 0; i < Block.Count; i++)
                         {
-                            for(int i = 0; i< Block.Count; i++)
+                            if (Block[i].IsKeyword == "SET")
                             {
-                                if (Block[i].IsKeyword == "SET")
-                                {
-                                    initBlock.Add(Block[i - 1].IsKeyword, Parser.Process(Block[i + 1, new Token("END_STATEMENT")].Remove()));
-                                }
+                                initBlock.Add(Block[i - 1].IsKeyword, Parser.Process(Block[i + 1, new Token("END_STATEMENT")].Remove()));
                             }
                         }
                     }
+                    return initBlock;
                 }
-                object defaultVal = DefaultValue(type, type== variables.Variable.type.Record? typeToken.IsKeyword : "Native",initBlock);
+                return null;
+            };
+            if (type == variables.Variable.type.Word || type == variables.Variable.type.Boolean || type == variables.Variable.type.Decimal || type == variables.Variable.type.Record)
+            {
                 foreach (var nameToken in names)
                 {
                     if (!Interpreter.Keywords.ContainsKey(nameToken.Word))
                     {
+                        object defaultVal = DefaultValue(type, type == variables.Variable.type.Record? typeToken.IsKeyword : "Native", initBlockExtraction(type == Variable.type.Record, data.HasToken(new Token("WITH"))));
                         var v = type == variables.Variable.type.Record ? defaultVal as variables.Record : new variables.Variable(defaultVal, type, nameToken.Word);
                         if (!Interpreter.Peek[nameToken.Word])
                             Interpreter.Set[nameToken.Word] = v;
@@ -773,11 +808,12 @@ namespace YetAnotherScriptingLanguage
                     dimensionsLens.Add(Convert.ToInt32(len.Word));
                 }
                 var TypeStr = data[0, new Token("ASTYPE"), new Token("END_STATEMENT")][2];
-                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.type.Invalid;
+                var arrType = TypeStr.Word == "Decimal" ? variables.Variable.type.Decimal : TypeStr.Word == "Boolean" ? variables.Variable.type.Boolean : TypeStr.Word == "Word" ? variables.Variable.type.Word : variables.Variable.CustomTypes.ContainsKey(TypeStr.IsKeyword) ? variables.Variable.type.Record : variables.Variable.type.Invalid;
                 List<variables.Variable> defaultVal = new List<variables.Variable>(lenght);
                 for (int i = 0; i < lenght; i++)
                 {
-                    defaultVal.Add(new variables.Variable(VariableProcess.DefaultValue(arrType), arrType));
+                    var v = DefaultValue(arrType, TypeStr.Word);
+                    defaultVal.Add((v as variables.Variable).Type == Variable.type.Record?v as variables.Record:new variables.Variable(v,arrType));
                 }
                 foreach (var name in names)
                 {
@@ -1107,6 +1143,19 @@ namespace YetAnotherScriptingLanguage
                 {
                     var index = Convert.ToInt32(Arguments[2].Value.ToString());
                     var = ((List<variables.Variable>)((variables.Variable)Interpreter.Get[(string)Arguments[0].Value]).Value)[index];
+                }
+            }
+            else if(var.Type== Variable.type.Record && Arguments[1].Type == Variable.type.Record)
+            {
+                var lhs = var as Record; var rhs = Arguments[1] as Record;
+                if(lhs.TypeName == rhs.TypeName)
+                {
+                    lhs.Clone(rhs);
+                    return;
+                }
+                else
+                {
+                    throw new Exception("Argument Type Missmatch, cannot assign a value of " + lhs.TypeName + " to a variable of type " + rhs.TypeName);
                 }
             }
             if (var.Type != Arguments[1].Type)

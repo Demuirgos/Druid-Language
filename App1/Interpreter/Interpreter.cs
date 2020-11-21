@@ -127,6 +127,9 @@ namespace YetAnotherScriptingLanguage
                     case ("HOLDER"):
                         Interpreter.Functions.Add("HOLDER", new ThisHolderProcess());
                         break;
+                    case ("LOOP"):
+                        Interpreter.Functions.Add("LOOP", new RepeatProcess());
+                        break;
                 }
             }
             foreach (var maps in MathProcess.DualFunctions.Keys)
@@ -207,6 +210,11 @@ namespace YetAnotherScriptingLanguage
                         if (member.Type == Function.type.variable)
                         {
                             v = (variables.Variable)member;
+                            if (v.Type == variables.Variable.type.Array && (i + 1 < expression.Count && expression[i + 1].Type == Token.type.array))
+                            {
+                                v = variables.Array.getElement(member as variables.Array, expression[i + 1]);
+                                i++;
+                            }
                             continue;
                         }
                         else if (member.Type == Function.type.function || member.Type == Function.type.procedure)

@@ -84,6 +84,7 @@ name[index] to Access element at index in an array
 if(condition) Then instructions [Else instructions]? [End] for conditional branching
 For varName From leftLim To right [Lim By step]? Do instructions End for itr Looping
 While (condition) Do instructions End for conditional Looping
+Repeat instructions Until condition for do...while like loops
 Function name(param1 As type,...) [As Type]? Begin instructions End to create funcs
 funcName(param1,..) to invoke functions
 Type name Define 

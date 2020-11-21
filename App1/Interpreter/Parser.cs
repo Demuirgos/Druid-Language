@@ -89,6 +89,15 @@ namespace YetAnotherScriptingLanguage
                                 i += Suffix.Count;
                             }
                         }
+                        else if (foo.Name == "LOOP")
+                        {
+                            if (Body[Body.Count - 1].IsKeyword == "UNTIL")
+                            {
+                                var Suffix = expression[i - 1, new Token("END_STATEMENT")].Remove(0);
+                                Body = Body.Merge(Suffix);
+                                i += Suffix.Count;
+                            }
+                        }
                         v = foo[Body];
                         continue;
                     }

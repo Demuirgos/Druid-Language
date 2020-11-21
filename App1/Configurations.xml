@@ -22,6 +22,8 @@
         <keyword key="To"       map="TO"         type="Accessory" construct="ForBlock"      />
         <keyword key="From"     map="FROM"       type="Accessory" construct="ForBlock"      />
         <keyword key="Do"       map="DO"         type="Block"     construct="LoopBlock"     />
+        <keyword key="Repeat"   map="LOOP"       type="Keyword"   construct="RepeatBlock"   />
+        <keyword key="Until"    map="UNTIL"      type="Block"     construct="RepeatBlock"   />
         <keyword key="For"      map="FOR"        type="Keyword"   construct="ForBlock"      />
         <keyword key="By"       map="BY"         type="Accessory" construct="ForBlock"      />
         <keyword key="Print"    map="PRINT"      type="Function"  construct="IOConstruct"   />

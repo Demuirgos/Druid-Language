@@ -377,12 +377,27 @@ namespace YetAnotherScriptingLanguage
             public Record(Record clone, Dictionary<string, Function> parameters=null)
             {
                 typeName = clone.typeName;
-                foreach (var member in clone.Members) members.Add(member.Key, member.Value);
+                foreach (var member in clone.Members)
+                {
+                    if(member.Value is Record)
+                    {
+                        members.Add(member.Key, new Record(clone.typeName));
+                    }
+                    else if(member.Value is Variable)
+                    {
+                        members.Add(member.Key, new Variable(VariableProcess.DefaultValue((member.Value as Variable).Type), (member.Value as Variable).Type));
+                    }
+                    else
+                        members.Add(member.Key, member.Value);
+                }
                 this.Type = type.Record;
                 if(!(parameters is null))
                     foreach(var param in parameters)
                     {
-                        this.Members[param.Key] = param.Value;
+                        if (param.Value is Variable)
+                        {
+                            this.Members[param.Key] = param.Value;
+                        }
                     }
             }
 
@@ -392,11 +407,20 @@ namespace YetAnotherScriptingLanguage
                 this.Type = type.Record;
             }
 
+            public void Clone(Record rhs)
+            {
+                members.Clear();
+                foreach(var member in rhs.members)
+                {
+                    this.members.Add(member.Key,member.Value);
+                }
+            }
+
             Dictionary<String, Function> members = new Dictionary<string, Function>();
             public Dictionary<String, Function> Members => members;
             string typeName = null;
             public string TypeName => typeName;
-            public Function this[string name] => Members.ContainsKey(name)?Members[name]:throw new Exception("Member/Method Not Found");
+            public Function this[string name] => Members.ContainsKey(name)?Members[name] is null ? throw new Exception("Member/Method Not Initialized"): Members[name] : throw new Exception("Member/Method Not Found");
         }
     }
 }
