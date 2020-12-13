@@ -93,5 +93,4 @@ Type name Define
 	[New instructions  End]?
 End to define a new Type
 var->method(param1,...) | var->member to access record types members
-
 =======================================================================================
