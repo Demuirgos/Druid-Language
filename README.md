@@ -11,11 +11,6 @@
   <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/TypeDefs.png" width="720" alt="math expression evaluation">
 </p>
 
- ## "Math Evaluations : ": ...
-<p align="center">
-  <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/MathEvalTest.png" width="720" alt="math expression evaluation">
-</p>
-
  ## "If-Else Statements : ": ...
 <p align="center">
   <img src="https://github.com/DemuirGos/YetAnotherLanguageRuntime/blob/main/TestImages/IfElsetest.png" width="720" alt="if-else statements">
